@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
-    use HasFactory;
+    public function compraProducto()
+    {
+        return $this->hasMany(compraProducto::class);
+    }
 }
