@@ -7,5 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompraEntrada extends Model
 {
-    use HasFactory;
+    public function compra()
+    {
+        return $this->belongsTo(Compra::class);
+    }
+
+    public function entrada()
+    {
+        return $this->belongsTo(Entrada::class);
+    }
 }

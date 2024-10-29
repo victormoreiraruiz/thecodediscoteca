@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReservaDiscoteca extends Model
 {
-    use HasFactory;
+    public function reserva()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

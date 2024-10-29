@@ -15,6 +15,10 @@ return new class extends Migration
     {
         Schema::create('descuentos', function (Blueprint $table) {
             $table->id();
+            $table->string('codigo');
+            $table->string('descripcion');
+            $table->integer('porcentaje');
+            $table->boolean('activo');
             $table->timestamps();
         });
     }
