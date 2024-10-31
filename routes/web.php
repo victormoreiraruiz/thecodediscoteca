@@ -6,10 +6,19 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
+Route::get('/', function () {
+    return Inertia::render('Welcome'); // Welcome.jsx debe estar en resources/js/Pages/
+});
 
 Route::get('/home', function () {
     return Inertia::render('Home'); // 'Home' es el nombre del componente React
 })->name('home');
+
+Route::get('/politica-privacidad', function () {
+    return Inertia::render('PoliticaPrivacidad');
+})->name('politica.privacidad');
+
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
