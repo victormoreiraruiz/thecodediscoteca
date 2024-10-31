@@ -7,11 +7,8 @@ use Inertia\Inertia;
 
 
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
+Route::get('/home', function () {
+    return Inertia::render('Home'); // 'Home' es el nombre del componente React
 })->name('home');
 
 Route::get('/dashboard', function () {
