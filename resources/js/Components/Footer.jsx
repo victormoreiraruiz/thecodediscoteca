@@ -6,8 +6,8 @@ const Footer = () => {
     <footer>
       <img src="/imagenes/logosinfondo.png" alt="logo de la empresa" />
       <Link href="/politica-privacidad">POLÍTICA DE PRIVACIDAD</Link>
-      <a href="construccion.html">POLÍTICA DE DEVOLUCIONES</a>
-      <a href="construccion.html">POLÍTICA DE COOKIES</a>
+      <Link href="/politica-devoluciones">POLÍTICA DE DEVOLUCIONES</Link>
+      <Link href="/politica-cookies">POLÍTICA DE COOKIES</Link>
     </footer>
   );
 };
