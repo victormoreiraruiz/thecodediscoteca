@@ -34,6 +34,8 @@ Route::get('/contacto', function () {
     return Inertia::render('Contacto');
 })->name('contacto');
 
+Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');
+
 Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');

@@ -24,6 +24,14 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function miCuenta(): Response
+{
+    $user = auth()->user(); // Obtener el usuario autenticado
+
+    return Inertia::render('MiCuenta', [
+        'user' => $user,
+    ]);
+}
     /**
      * Update the user's profile information.
      */
