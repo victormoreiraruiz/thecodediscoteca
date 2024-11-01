@@ -18,7 +18,21 @@ Route::get('/politica-privacidad', function () {
     return Inertia::render('PoliticaPrivacidad');
 })->name('politica.privacidad');
 
+Route::get('/politica-cookies', function () {
+    return Inertia::render('PoliticaCookies');
+})->name('politica.cookies');
 
+Route::get('/politica-devoluciones', function () {
+    return Inertia::render('PoliticaDevoluciones');
+})->name('politica.devoluciones');
+
+Route::get('/nosotros', function () {
+    return Inertia::render('Nosotros');
+})->name('nosotros');
+
+Route::get('/contacto', function () {
+    return Inertia::render('Contacto');
+})->name('contacto');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

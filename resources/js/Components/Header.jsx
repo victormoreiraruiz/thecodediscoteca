@@ -1,5 +1,6 @@
 // Header.jsx
 import React from 'react';
+import { Link } from '@inertiajs/react';
 
 const Header = () => {
   return (
@@ -8,8 +9,8 @@ const Header = () => {
         <a href="construccion.html">GALERIA</a>
         <a href="construccion.html">EVENTOS</a>
         <a href="construccion.html">ENTRADAS</a>
-        <a href="nosotros.html">NOSOTROS</a>
-        <a href="contactanos.html">CONTACTANOS</a>
+        <Link href="/nosotros">NOSOTROS</Link>
+        <Link href="/contacto">CONTACTANOS</Link>
       </nav>
     </header>
   );
