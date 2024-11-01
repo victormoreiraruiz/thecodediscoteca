@@ -7,7 +7,7 @@ use Inertia\Inertia;
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome'); // Welcome.jsx debe estar en resources/js/Pages/
+    return Inertia::render('Index'); // Welcome.jsx debe estar en resources/js/Pages/
 });
 
 Route::get('/home', function () {
@@ -33,6 +33,10 @@ Route::get('/nosotros', function () {
 Route::get('/contacto', function () {
     return Inertia::render('Contacto');
 })->name('contacto');
+
+Route::get('/index', function () {
+    return Inertia::render('Index');
+})->name('index');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
