@@ -1,26 +1,21 @@
+// Navigation.jsx
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia'; // Importa Inertia del paquete correcto
 
 export default function Navigation() {
     const { auth } = usePage().props;
-
-    const handleLogout = (e) => {
-        e.preventDefault();
-        Inertia.post(route('logout')); // Asegúrate de que la ruta de logout esté definida en web.php
-    };
 
     return (
         <nav className="bg-neutral-900 p-4">
             <div className="container mx-auto flex justify-between items-center">
                 {auth.user ? (
-                    // Usuario autenticado: mostrar solo "Cerrar sesión"
-                    <button
-                        onClick={handleLogout}
+                    // Usuario autenticado: mostrar enlace a "Mi Cuenta"
+                    <Link
+                        href="/mi-cuenta"
                         className="text-lg md:text-xl text-white hover:text-gray-400"
                     >
-                        Cerrar sesión
-                    </button>
+                        Mi Cuenta
+                    </Link>
                 ) : (
                     // Usuario no autenticado: mostrar "Iniciar sesión" y "Registrarse"
                     <div className="flex space-x-4 font-serif">

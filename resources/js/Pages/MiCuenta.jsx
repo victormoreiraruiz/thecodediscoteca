@@ -4,6 +4,7 @@ import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
 import MiCuentaDatos from '../Components/MiCuentaDatos';
+import MiCuentaCambiarPass from '../Components/MiCuentaCambiarPass';
 import { usePage } from '@inertiajs/react';
 
 export default function MiCuenta() {
@@ -11,9 +12,12 @@ export default function MiCuenta() {
 
     return (
         <div>
-            <Navigation/>
+            <Navigation />
             <Header />
-            <MiCuentaDatos user={user} /> {/* Pasar el usuario como prop */}
+            <div className="container mx-auto p-4">
+                <MiCuentaDatos user={user} />
+                <MiCuentaCambiarPass /> 
+            </div>
             <Footer />
         </div>
     );
