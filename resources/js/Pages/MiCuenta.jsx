@@ -15,9 +15,8 @@ export default function MiCuenta() {
             <Navigation />
             <Header />
             <div className="container mx-auto p-4">
-                <MiCuentaDatos user={user} /> {/* Información del usuario */}
-                <h2 className="text-xl font-semibold mt-8">Cambiar Contraseña</h2>
-                <MiCuentaCambiarPass /> {/* Formulario de cambio de contraseña */}
+                <MiCuentaDatos user={user} />
+                <MiCuentaCambiarPass /> 
             </div>
             <Footer />
         </div>

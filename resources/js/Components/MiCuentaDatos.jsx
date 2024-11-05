@@ -34,7 +34,6 @@ const MiCuentaDatos = ({ user }) => {
                 <h2>Puntos:</h2>
                 <h2>{user.puntos_totales}</h2>
             </div>
-            <button className="btn-change-password">Cambiar Contraseña</button>
             <button className="btn-logout" onClick={handleLogout}>Salir de mi cuenta</button>
         </div>
     );
