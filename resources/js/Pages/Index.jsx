@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import EventosVideos from '../Components/EventosVideos';
+import IndexEventosImagenes from '../Components/IndexEventosImagenes';
 import ProximosEventos from '../Components/ProximosEventos';
 import Navigation from '../Components/Navigation';
 
@@ -10,7 +10,7 @@ export default function Welcome() {
         <div>
             <Navigation />
             <Header />
-            <EventosVideos />
+            <IndexEventosImagenes />
             <ProximosEventos />
             <Footer />
         </div>
