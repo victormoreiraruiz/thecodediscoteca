@@ -42,7 +42,7 @@ h2 {
   }
 
   .menu {
-    background-image: url("../img/logoconfondo.jpg");
+    background-image: url("../imagenes/logoconfondo.jpg");
     background-size: cover;
     background-position: center;
     height: 70vh;
@@ -568,15 +568,21 @@ h2 {
             box-shadow: 0 0 0 transparent, 0 0 0 transparent, inset 0.5em 0.5em 1em var(--sombra-ppal), inset -0.5em -0.5em 1em var(--sombra-sec);
   }
 
-  .lightbox .grande {
-    width: 80%;
-    height: 80vh;
-    background: lightblue;
-    color: var(--negro);
-    -webkit-transition: all 0.4s ease;
-    transition: all 0.4s ease;
-    border-radius: 1em;
-    background-color: var(--blanco);
-    -webkit-box-shadow: 1em 1em 2em var(--sombra-ppal), -1em -1em 2em var(--sombra-sec), inset 0 0 0 transparent, inset 0 0 0 transparent;
-            box-shadow: 1em 1em 2em var(--sombra-ppal), -1em -1em 2em var(--sombra-sec), inset 0 0 0 transparent, inset 0 0 0 transparent;
+  .grande {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Distribuye las imágenes a lo largo de todo el ancho */
+    align-items: center;
+    gap: 20px; /* Espacio entre las imágenes */
+    width: 100%;
+    padding: 0 20px; /* Margen en los lados izquierdo y derecho */
+    box-sizing: border-box; /* Incluye el padding en el ancho total */
   }
+
+  .grande img {
+    flex-grow: 1;
+    max-width: 100%;
+    height: auto;
+  }
+
+
