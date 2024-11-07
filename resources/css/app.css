@@ -244,10 +244,7 @@ h2 {
     height: auto;
   }
 
-  .fiestacartel:hover {
-    -webkit-transform: translate(10%);
-      transform: translate(10%);
-  }
+
 
   .fiestatexto {
     max-width: 30%;
@@ -557,5 +554,106 @@ h2 {
     flex-grow: 1;
     max-width: 100%;
     height: auto;
+  }
+
+ /* Icono del carrito en la esquina superior derecha */
+.carrito-icono {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Panel del carrito (sidebar) */
+  .carrito-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cerrar-carrito {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  .total {
+    margin-top: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .carrito-panel ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .carrito-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .carrito-item span {
+    flex: 1;
+    text-align: center;
+  }
+
+  .carrito-item input {
+    width: 60px;
+    text-align: center;
+    margin: 0 10px;
+  }
+
+  .eliminar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+  }
+
+  /* Contenedor para los botones de vaciar y finalizar */
+  .carrito-botones {
+    display: flex;
+    flex-direction: column; /* Coloca los botones en una columna */
+    gap: 10px; /* Espacio entre los botones */
+    align-items: center; /* Centra los botones horizontalmente */
+    margin-top: 20px;
+  }
+
+  .carrito-botones button {
+    padding: 10px;
+    width: 80%; /* Ajusta el ancho del botón para que esté centrado */
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
   }
 
