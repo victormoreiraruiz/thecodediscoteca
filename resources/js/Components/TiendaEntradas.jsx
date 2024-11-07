@@ -49,7 +49,6 @@ const TiendaEntradas = () => {
       {entradas.map(entrada => (
         <div key={entrada.nombre} className="entrada">
           <h3>{entrada.nombre}</h3>
-          <br></br>
           <div className="precio">Precio: {entrada.precio}€</div>
           <button className="reservar" onClick={() => agregarAlCarrito(entrada)}>
             COMPRAR

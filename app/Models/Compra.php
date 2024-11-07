@@ -22,8 +22,10 @@ class Compra extends Model
         return $this->hasMany(CompraProducto::class);
     }
 
-    public function compra()
-    {
-        return $this->belongsToMany(CompraEntrada::class);
-    }
+    public function entradas()
+{
+    return $this->belongsToMany(Entrada::class, 'compra_entradas')
+                ->withPivot('cantidad')
+                ->withTimestamps();
+}
 }
