@@ -319,32 +319,6 @@ h2 {
     margin-bottom: 15px;
   }
 
-  .reservar:hover {
-    -webkit-transform: perspective(150px) rotateX(45deg);
-      transform: perspective(150px) rotateX(45deg);
-  }
-
-
-  :root {
-    --negro: #393939;
-    --blanco: #860303;
-    --sombra-ppal: #e5cc70;
-    --sombra-sec: #e5cc70;
-    --borde-negro: #00000050;
-    --marcado: rgb(127, 195, 255);
-
-  }
-
-  /* Las adaptamos al modo oscuro */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --negro: #ececec;
-      --blanco: #860303;
-      --sombra-ppal: #e5cc70;
-      --sombra-sec: #e5cc70;
-      --borde-negro: #FFFFFF50;
-    }
-  }
 
 
   .carrousel {
@@ -584,5 +558,4 @@ h2 {
     max-width: 100%;
     height: auto;
   }
-
 
