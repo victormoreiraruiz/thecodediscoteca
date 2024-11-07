@@ -35,6 +35,11 @@ const TiendaEntradas = () => {
 
   const vaciarCarrito = () => {
     setCarrito([]);
+    setMostrarCarrito(false);
+  };
+
+  const calcularTotal = () => {
+    return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
   };
 
   const entradas = [
@@ -46,6 +51,7 @@ const TiendaEntradas = () => {
   return (
     <div className="tienda">
       <p>ENTRADAS</p>
+
       {entradas.map(entrada => (
         <div key={entrada.nombre} className="entrada">
           <h3>{entrada.nombre}</h3>
@@ -57,35 +63,46 @@ const TiendaEntradas = () => {
         </div>
       ))}
 
-      <button onClick={() => setMostrarCarrito(!mostrarCarrito)}>
-        {mostrarCarrito ? 'Cerrar Carrito' : 'Ver Carrito'}
-      </button>
+      {carrito.length > 0 && (
+        <div className="carrito-icono" onClick={() => setMostrarCarrito(!mostrarCarrito)}>
+          🛒 <span>Carrito ({carrito.length})</span>
+        </div>
+      )}
 
       {mostrarCarrito && (
-        <div className="carrito">
+        <div className="carrito-panel">
+          <button className="cerrar-carrito" onClick={() => setMostrarCarrito(false)}>✖</button>
           <h2>Carrito de Compras</h2>
           {carrito.length === 0 ? (
             <p>El carrito está vacío</p>
           ) : (
             <ul>
               {carrito.map(item => (
-                <li key={item.nombre}>
-                  {item.nombre} - {item.precio}€ x {item.cantidad}
+                <li key={item.nombre} className="carrito-item">
+                  <span>{item.nombre}</span>
                   <input
                     type="number"
                     min="1"
                     value={item.cantidad}
                     onChange={(e) => actualizarCantidad(item.nombre, parseInt(e.target.value))}
                   />
-                  <button onClick={() => eliminarDelCarrito(item.nombre)}>
-                    Eliminar
+                  <button className="eliminar" onClick={() => eliminarDelCarrito(item.nombre)}>
+                    🗑️
                   </button>
                 </li>
               ))}
             </ul>
           )}
-          <button onClick={vaciarCarrito}>Vaciar Carrito</button>
-          <button onClick={() => alert('Compra finalizada')}>Finalizar Compra</button>
+
+          <div className="total">
+            <h3>Total: {calcularTotal().toFixed(2)}€</h3>
+          </div>
+
+          {/* Contenedor para alinear los botones verticalmente */}
+          <div className="carrito-botones">
+            <button onClick={vaciarCarrito}>Vaciar Carrito</button>
+            <button onClick={() => alert('Compra finalizada')}>Finalizar Compra</button>
+          </div>
         </div>
       )}
     </div>
