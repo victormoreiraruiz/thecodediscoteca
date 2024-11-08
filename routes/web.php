@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CompraController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,8 @@ Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuent
 Route::get('/fiesta', function () {
     return Inertia::render('Fiesta');
 })->name('fiesta');
+
+Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');
 
 Route::get('/index', function () {
     return Inertia::render('Index');
