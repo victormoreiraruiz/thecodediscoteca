@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Compra;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CompraController extends Controller
 {
@@ -81,5 +82,31 @@ class CompraController extends Controller
     public function destroy(Compra $compra)
     {
         //
+    }
+
+    public function resumen(Request $request)
+    {
+        $user = $request->user();
+        $carrito = $request->input('carrito', []); // Recibir carrito desde el frontend
+
+        // Asegúrate de que cada elemento del carrito tiene los índices necesarios
+        $carrito = collect($carrito)->map(function ($item) {
+            return [
+                'nombre' => $item['nombre'] ?? 'Producto sin nombre',
+                'precio' => $item['precio'] ?? 0,
+                'cantidad' => $item['cantidad'] ?? 1,
+            ];
+        })->toArray();
+
+        // Calcular el total del carrito
+        $total = collect($carrito)->reduce(function ($sum, $item) {
+            return $sum + ($item['precio'] * $item['cantidad']);
+        }, 0);
+
+        return Inertia::render('ResumenCompra', [
+            'carrito' => $carrito,
+            'total' => $total,
+            'user' => $user ? ['nombre' => $user->name, 'correo' => $user->email] : null,
+        ]);
     }
 }
