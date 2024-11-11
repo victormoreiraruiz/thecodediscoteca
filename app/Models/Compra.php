@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Compra extends Model
 {
+    protected $fillable = [
+        'usuario_id', // Asegúrate de que este campo esté aquí
+        'total',
+        'descuento_aplicado_id',
+        'puntos_aplicados',
+        'fecha_compra'
+    ];
+
     public function usuario()
     {
         return $this->belongsTo(User::class);

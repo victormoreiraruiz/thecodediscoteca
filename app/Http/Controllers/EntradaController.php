@@ -82,4 +82,6 @@ class EntradaController extends Controller
     {
         //
     }
+
+
 }

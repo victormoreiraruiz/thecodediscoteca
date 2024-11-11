@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
 const ResumenCompra = () => {
-    const { carrito, total, user } = usePage().props;
+    const props = usePage().props;
+
+    const { carrito = [], total = 0, user = null } = props;
     const [nombre, setNombre] = useState(user ? user.nombre : '');
     const [correo, setCorreo] = useState(user ? user.correo : '');
+
+    useEffect(() => {
+        console.log("Carrito:", carrito);
+        console.log("Total:", total);
+    }, [carrito, total]);
 
     const handleConfirmarCompra = () => {
         Inertia.post('/checkout', { carrito, nombre, correo }, {
@@ -14,13 +21,11 @@ const ResumenCompra = () => {
 
     return (
         <div className="resumen-compra">
-            <h1>Resumen de Compra</h1>
+            <h2>Resumen de Compra</h2>
             <div className="productos">
                 {carrito.map((item, index) => (
                     <div key={index} className="producto">
-                        <span>{item.nombre}</span>
-                        <span>Cantidad: {item.cantidad}</span>
-                        <span>Precio: {(item.precio * item.cantidad).toFixed(2)}€</span>
+                        <h3>Entrada {item.tipo} x {item.cantidad} Precio: {(item.precio * item.cantidad).toFixed(2)}€</h3>
                     </div>
                 ))}
             </div>

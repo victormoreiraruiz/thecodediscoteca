@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompraController;
+use App\Http\Controllers\EventoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,13 +37,18 @@ Route::get('/contacto', function () {
     return Inertia::render('Contacto');
 })->name('contacto');
 
+Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntradas'])->name('eventos.entradas');
+
+
 Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');
 
 Route::get('/fiesta', function () {
     return Inertia::render('Fiesta');
 })->name('fiesta');
 
-Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');
+
+Route::get('/resumen-compra/{compraId}', [CompraController::class, 'resumen'])->name('compra.resumen');
+Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name('iniciar.compra');
 
 Route::get('/index', function () {
     return Inertia::render('Index');

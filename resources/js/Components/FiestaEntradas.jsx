@@ -6,11 +6,11 @@ const FiestaEntradas = () => {
     const [mostrarCarrito, setMostrarCarrito] = useState(false);
 
     const agregarAlCarrito = (entrada) => {
-        const entradaExistente = carrito.find(item => item.nombre === entrada.nombre);
+        const entradaExistente = carrito.find(item => item.tipo === entrada.tipo);
         if (entradaExistente) {
             setCarrito(
                 carrito.map(item =>
-                    item.nombre === entrada.nombre
+                    item.tipo === entrada.tipo
                         ? { ...item, cantidad: item.cantidad + 1 }
                         : item
                 )
@@ -20,14 +20,14 @@ const FiestaEntradas = () => {
         }
     };
 
-    const eliminarDelCarrito = (nombre) => {
-        setCarrito(carrito.filter(item => item.nombre !== nombre));
+    const eliminarDelCarrito = (tipo) => {
+        setCarrito(carrito.filter(item => item.tipo !== tipo));
     };
 
-    const actualizarCantidad = (nombre, cantidad) => {
+    const actualizarCantidad = (tipo, cantidad) => {
         setCarrito(
             carrito.map(item =>
-                item.nombre === nombre
+                item.tipo === tipo
                     ? { ...item, cantidad: cantidad }
                     : item
             )
@@ -44,17 +44,15 @@ const FiestaEntradas = () => {
     };
 
     const finalizarCompra = () => {
-        Inertia.visit('/resumen-compra', {
-            method: 'get',
-            data: { carrito },
-            preserveState: true
-        });
+        const total = calcularTotal();
+        console.log("Carrito a enviar:", carrito); // Verifica el contenido del carrito en la consola
+        Inertia.post('/iniciar-compra', { carrito, total });
     };
 
     const entradas = [
-        { nombre: 'Entrada General', precio: 10 },
-        { nombre: 'Entrada VIP', precio: 30 },
-        { nombre: 'Entrada Premium', precio: 50 },
+        { tipo: 'normal', precio: 10, id: 1 },
+        { tipo: 'vip', precio: 30, id: 2 },
+        { tipo: 'premium', precio: 50, id: 3 },
     ];
 
     return (
@@ -62,8 +60,8 @@ const FiestaEntradas = () => {
             <p>ENTRADAS</p>
 
             {entradas.map(entrada => (
-                <div key={entrada.nombre} className="entrada">
-                    <h3>{entrada.nombre}</h3>
+                <div key={entrada.tipo} className="entrada">
+                    <h3>{entrada.tipo}</h3>
                     <br />
                     <div className="precio">Precio: {entrada.precio}€</div>
                     <button className="reservar" onClick={() => agregarAlCarrito(entrada)}>
@@ -87,15 +85,15 @@ const FiestaEntradas = () => {
                     ) : (
                         <ul>
                             {carrito.map(item => (
-                                <li key={item.nombre} className="carrito-item">
-                                    <span>{item.nombre}</span>
+                                <li key={item.tipo} className="carrito-item">
+                                    <span>{item.tipo}</span>
                                     <input
                                         type="number"
                                         min="1"
                                         value={item.cantidad}
-                                        onChange={(e) => actualizarCantidad(item.nombre, parseInt(e.target.value))}
+                                        onChange={(e) => actualizarCantidad(item.tipo, parseInt(e.target.value))}
                                     />
-                                    <button className="eliminar" onClick={() => eliminarDelCarrito(item.nombre)}>
+                                    <button className="eliminar" onClick={() => eliminarDelCarrito(item.tipo)}>
                                         🗑️
                                     </button>
                                 </li>
