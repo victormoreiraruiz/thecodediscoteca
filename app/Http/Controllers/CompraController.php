@@ -8,105 +8,56 @@ use Inertia\Inertia;
 
 class CompraController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Compra $compra)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Compra $compra)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Compra $compra)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Compra $compra)
-    {
-        //
-    }
-
-    public function resumen(Request $request)
+    public function iniciarCompra(Request $request)
     {
         $user = $request->user();
-        $carrito = $request->input('carrito', []); // Recibir carrito desde el frontend
 
-        // Asegúrate de que cada elemento del carrito tiene los índices necesarios
-        $carrito = collect($carrito)->map(function ($item) {
-            return [
-                'nombre' => $item['nombre'] ?? 'Producto sin nombre',
-                'precio' => $item['precio'] ?? 0,
-                'cantidad' => $item['cantidad'] ?? 1,
-            ];
-        })->toArray();
-
-        // Calcular el total del carrito
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-
-        return Inertia::render('ResumenCompra', [
-            'carrito' => $carrito,
-            'total' => $total,
-            'user' => $user ? ['nombre' => $user->name, 'correo' => $user->email] : null,
+        // Crear la compra principal
+        $compra = Compra::create([
+            'usuario_id' => $user->id,
+            'total' => $request->input('total'),
+            'fecha_compra' => now(),
         ]);
+
+        // Procesar el carrito y guardar los elementos en la tabla pivote
+        $carrito = $request->input('carrito');
+        foreach ($carrito as $item) {
+            $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+        }
+
+        // Redirige al resumen de compra con el ID de la nueva compra
+        return redirect()->route('compra.resumen', ['compraId' => $compra->id]);
     }
+
+    public function resumen(Request $request, $compraId)
+{
+    $user = $request->user();
+
+    $compra = Compra::with(['entradas' => function ($query) {
+        $query->select('entradas.id', 'entradas.tipo', 'entradas.precio');
+    }])->findOrFail($compraId);
+
+    $carrito = $compra->entradas->map(function ($entrada) {
+        return [
+            'tipo' => $entrada->tipo,
+            'precio' => $entrada->precio,
+            'cantidad' => $entrada->pivot->cantidad,
+        ];
+    })->toArray();
+
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+
+    return Inertia::render('ResumenCompra', [
+        'carrito' => $carrito,
+        'total' => $total,
+        'user' => $user ? [
+            'nombre' => $user->name,
+            'correo' => $user->email,
+            'saldo' => $user->saldo, // Asegúrate de incluir el saldo
+        ] : null,
+    ]);
+}
+
 }
