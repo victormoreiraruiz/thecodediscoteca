@@ -24,14 +24,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function miCuenta(): Response
-{
-    $user = auth()->user(); // Obtener el usuario autenticado
 
-    return Inertia::render('MiCuenta', [
-        'user' => $user,
-    ]);
-}
     /**
      * Update the user's profile information.
      */
@@ -68,4 +61,28 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+    public function historialDeCompras(Request $request)
+{
+    $user = $request->user();
+
+    // Recupera las compras del usuario con los detalles de las entradas
+    $compras = $user->compras()->with('entradas')->get() ?? collect([]);
+
+    return Inertia::render('MiCuentaHistorial', [
+        'compras' => $compras,
+    ]);
 }
+
+public function miCuenta(Request $request)
+{
+    return Inertia::render('MiCuenta', [
+        'user' => $request->user(),
+        'compras' => $request->user()->compras()->with('entradas')->get()
+    ]);
+}
+
+
+}
+
