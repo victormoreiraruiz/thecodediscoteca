@@ -47,11 +47,12 @@ const FiestaEntradas = () => {
         return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
     };
 
+
     const finalizarCompra = () => {
-        const total = calcularTotal();
-        console.log("Carrito a enviar:", carrito); // Verifica el contenido del carrito en la consola
-        Inertia.post('/iniciar-compra', { carrito, total });
+        Inertia.post('/iniciar-compra', { carrito });
     };
+
+
 
     const entradas = [
         { tipo: 'normal', precio: 10, id: 1 },

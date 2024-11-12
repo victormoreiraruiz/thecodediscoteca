@@ -4,19 +4,20 @@ import { Inertia } from '@inertiajs/inertia';
 
 const ResumenCompra = () => {
     const props = usePage().props;
-    const { carrito = [], total = 0, user = null } = props;
+    const { carrito = [], total = 0, user = null, compraId } = props; // Recibe compraId aquí
     const [nombre, setNombre] = useState(user ? user.nombre : '');
     const [correo, setCorreo] = useState(user ? user.correo : '');
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
 
     const handleConfirmarCompra = () => {
         Inertia.post('/confirmar-compra', {
+            compraId, // Enviar compraId en la solicitud
             carrito,
             total,
             pagarConSaldo,
         }, {
             onSuccess: () => alert('¡Compra confirmada!'),
-            onError: (errors) => alert(errors.saldo || errors.error || 'Error al realizar la compra.')
+            onError: (errors) => alert(errors.saldo || errors.error || 'Error al realizar la compra.'),
         });
     };
 
