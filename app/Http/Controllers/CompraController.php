@@ -30,32 +30,34 @@ class CompraController extends Controller
     }
 
     public function resumen(Request $request, $compraId)
-    {
-        $user = $request->user();
+{
+    $user = $request->user();
 
-        // Recupera la compra específica con sus entradas y las cantidades desde la tabla pivote
-        $compra = Compra::with(['entradas' => function ($query) {
-            $query->select('entradas.id', 'entradas.tipo', 'entradas.precio');
-        }])->findOrFail($compraId);
+    $compra = Compra::with(['entradas' => function ($query) {
+        $query->select('entradas.id', 'entradas.tipo', 'entradas.precio');
+    }])->findOrFail($compraId);
 
-        // Construir el carrito para enviar al frontend
-        $carrito = $compra->entradas->map(function ($entrada) {
-            return [
-                'tipo' => $entrada->tipo,
-                'precio' => $entrada->precio,
-                'cantidad' => $entrada->pivot->cantidad,
-            ];
-        })->toArray();
+    $carrito = $compra->entradas->map(function ($entrada) {
+        return [
+            'tipo' => $entrada->tipo,
+            'precio' => $entrada->precio,
+            'cantidad' => $entrada->pivot->cantidad,
+        ];
+    })->toArray();
 
-        // Calcular el total del carrito
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
 
-        return Inertia::render('ResumenCompra', [
-            'carrito' => $carrito,
-            'total' => $total,
-            'user' => $user ? ['nombre' => $user->name, 'correo' => $user->email] : null,
-        ]);
-    }
+    return Inertia::render('ResumenCompra', [
+        'carrito' => $carrito,
+        'total' => $total,
+        'user' => $user ? [
+            'nombre' => $user->name,
+            'correo' => $user->email,
+            'saldo' => $user->saldo, // Asegúrate de incluir el saldo
+        ] : null,
+    ]);
+}
+
 }

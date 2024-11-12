@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 
+const empiezaMayus = (text) => {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
 const FiestaEntradas = () => {
     const [carrito, setCarrito] = useState([]);
     const [mostrarCarrito, setMostrarCarrito] = useState(false);
@@ -61,7 +65,7 @@ const FiestaEntradas = () => {
 
             {entradas.map(entrada => (
                 <div key={entrada.tipo} className="entrada">
-                    <h3>{entrada.tipo}</h3>
+                    <h3>Entrada {empiezaMayus(entrada.tipo)}</h3>
                     <br />
                     <div className="precio">Precio: {entrada.precio}€</div>
                     <button className="reservar" onClick={() => agregarAlCarrito(entrada)}>
