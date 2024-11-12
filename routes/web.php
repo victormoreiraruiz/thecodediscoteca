@@ -49,11 +49,13 @@ Route::get('/fiesta', function () {
 
 Route::get('/resumen-compra/{compraId}', [CompraController::class, 'resumen'])->name('compra.resumen');
 Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name('iniciar.compra');
+Route::post('/confirmar-compra', [CompraController::class, 'confirmarCompra'])->name('confirmar.compra');
+Route::get('/historial-compras', [ProfileController::class, 'historialDeCompras'])->name('historial.compras')->middleware('auth');
 
 Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
-Route::get('/historial-compras', [ProfileController::class, 'historialDeCompras'])->name('historial.compras')->middleware('auth');
+
 
 
 Route::get('/dashboard', function () {
@@ -69,3 +71,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

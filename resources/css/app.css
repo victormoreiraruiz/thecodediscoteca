@@ -656,3 +656,10 @@ h2 {
     cursor: pointer;
     text-align: center;
   }
+
+  .li-estilo-h3 {
+    font-size: 1.25em; /* Ajusta según el tamaño de h3 */
+    font-weight: bold;
+    color: #e5cc70;
+    margin: 0.5em 0;
+}

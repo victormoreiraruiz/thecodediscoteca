@@ -24,14 +24,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function miCuenta(): Response
-{
-    $user = auth()->user(); // Obtener el usuario autenticado
 
-    return Inertia::render('MiCuenta', [
-        'user' => $user,
-    ]);
-}
     /**
      * Update the user's profile information.
      */
@@ -81,6 +74,15 @@ class ProfileController extends Controller
         'compras' => $compras,
     ]);
 }
+
+public function miCuenta(Request $request)
+{
+    return Inertia::render('MiCuenta', [
+        'user' => $request->user(),
+        'compras' => $request->user()->compras()->with('entradas')->get()
+    ]);
+}
+
 
 }
 

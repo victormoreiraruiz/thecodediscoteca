@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia';
 
 const ResumenCompra = () => {
     const props = usePage().props;
@@ -8,22 +9,15 @@ const ResumenCompra = () => {
     const [correo, setCorreo] = useState(user ? user.correo : '');
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
 
-    const saldoSuficiente = user && user.saldo >= total;
-
-    useEffect(() => {
-        console.log("Saldo del usuario:", user ? user.saldo : "No disponible");
-        console.log("Total de la compra:", total);
-        console.log("Saldo suficiente:", saldoSuficiente);
-    }, [user, total, saldoSuficiente]);
-
     const handleConfirmarCompra = () => {
-        Inertia.post('/checkout', { carrito, nombre, correo, pagarConSaldo }, {
+        Inertia.post('/confirmar-compra', {
+            carrito,
+            total,
+            pagarConSaldo,
+        }, {
             onSuccess: () => alert('¡Compra confirmada!'),
+            onError: (errors) => alert(errors.saldo || errors.error || 'Error al realizar la compra.')
         });
-    };
-
-    const handlePayPalPayment = () => {
-        alert("Redirigiendo a PayPal...");
     };
 
     return (
@@ -71,22 +65,17 @@ const ResumenCompra = () => {
                         type="checkbox"
                         checked={pagarConSaldo}
                         onChange={(e) => setPagarConSaldo(e.target.checked)}
-                        disabled={!saldoSuficiente}
+                        disabled={user?.saldo < total}
                     />
                     Pagar con saldo
                 </label>
-                {!saldoSuficiente && (
+                {user?.saldo < total && (
                     <p style={{ color: 'red' }}>Saldo insuficiente para esta compra.</p>
                 )}
-                <button onClick={handlePayPalPayment} className="paypal-boton">
-                    Pagar con PayPal
+                <button onClick={handleConfirmarCompra} className="confirmar-compra-boton">
+                    Confirmar Compra
                 </button>
             </div>
-            <br></br>
-
-            <button onClick={handleConfirmarCompra} className="confirmar-compra-boton">
-                Confirmar Compra
-            </button>
         </div>
     );
 };
