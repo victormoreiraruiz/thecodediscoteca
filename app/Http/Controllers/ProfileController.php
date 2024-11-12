@@ -68,4 +68,19 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+    public function historialDeCompras(Request $request)
+{
+    $user = $request->user();
+
+    // Recupera las compras del usuario con los detalles de las entradas
+    $compras = $user->compras()->with('entradas')->get() ?? collect([]);
+
+    return Inertia::render('MiCuentaHistorial', [
+        'compras' => $compras,
+    ]);
 }
+
+}
+

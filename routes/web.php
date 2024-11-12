@@ -53,6 +53,8 @@ Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name
 Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
+Route::get('/historial-compras', [ProfileController::class, 'historialDeCompras'])->name('historial.compras')->middleware('auth');
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
