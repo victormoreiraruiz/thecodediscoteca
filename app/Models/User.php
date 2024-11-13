@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'saldo',     // Agrega el campo saldo
+        'puntos',    // Agrega el campo puntos
     ];
 
     /**

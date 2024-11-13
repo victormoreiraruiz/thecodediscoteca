@@ -63,6 +63,23 @@ h2 {
     margin-top: 10px;
   }
 
+  .menu2 {
+    display: flex;
+  }
+
+  .menu2 a {
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    padding: 15px;
+    padding: 0;
+    margin: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: xx-large;
+    margin-left: 40px;
+    margin-top: 10px;
+  }
   footer {
     background-color: #000000;
     color: #ffffff;
@@ -126,6 +143,8 @@ h2 {
   .amarillo {
     background-color: #e5cc70;
   }
+
+
 
   .rojo {
     background-color: #860303;
@@ -663,3 +682,145 @@ h2 {
     color: #e5cc70;
     margin: 0.5em 0;
 }
+.galeria-container {
+    text-align: center;
+    color: #fff;
+  }
+
+  .galeria-container h2 {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+    text-transform: uppercase;
+  }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+
+  .galeria-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .galeria-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .galeria-item span {
+    display: block;
+    margin-top: 5px;
+    color: #fff;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+    border-radius: 3px;
+    width: fit-content; /* Ajusta el ancho del span al contenido */
+  }
+
+
+  .informacion-container {
+    font-family: Arial, sans-serif;
+    color: #fff;
+    width: 100vw; /* Hace que el contenedor ocupe el ancho completo de la ventana */
+    overflow: hidden; /* Evita desbordamientos */
+  }
+
+  .header-section {
+    position: relative;
+    text-align: center;
+    width: 100%;
+  }
+
+  .header-image {
+    width: 100%;
+    height: auto; /* Mantiene la proporción de la imagen */
+    object-fit: cover; /* Asegura que la imagen cubra el ancho completo sin estirarse */
+  }
+  .intro-section {
+    background-color: #e5cc70;
+    padding: 40px; /* Aumenta el espacio alrededor del contenido */
+    text-align: center;
+    color: #333; /* Color del texto */
+
+    margin: 20px; /* Espacio alrededor de la sección */
+  }
+
+  .intro-section h3 {
+    font-size: 2em;
+    margin: 0;
+    margin-bottom: 20px; /* Espacio debajo del título */
+  }
+
+  .intro-section p {
+    font-size: 1.2em; /* Tamaño de fuente un poco mayor */
+    margin-top: 20px; /* Espacio encima del párrafo */
+    line-height: 1.8; /* Mayor separación entre líneas */
+  }
+
+  .reservation-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: #000;
+  }
+
+  .reservation-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .reservation-item.reverse {
+    flex-direction: row-reverse; /* Alterna la posición de la imagen y el texto */
+  }
+
+  .reservation-image {
+    width: 50%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .reservation-content {
+    width: 50%;
+    color: #fff;
+    text-align: left;
+  }
+
+  .reservation-content h4 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #bbb;
+  }
+
+  .reservation-content p {
+    font-size: 1em;
+    margin-bottom: 20px;
+    color: #bbb;
+    line-height: 1.6;
+  }
+
+  .reserve-button {
+    background-color: #f4d35e;
+    color: #000;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-left: 220px; /* Desplaza el botón hacia la derecha */
+  }
+
+  .reserve-button:hover {
+    background-color: #e5c04d;
+  }
+
