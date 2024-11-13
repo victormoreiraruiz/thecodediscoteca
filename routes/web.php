@@ -42,9 +42,9 @@ Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntrad
 
 Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');
 
-Route::get('/fiesta', function () {
-    return Inertia::render('Fiesta');
-})->name('fiesta');
+Route::get('/fiesta', function () {return Inertia::render('Fiesta');})->name('fiesta');
+
+Route::get('/galeria', function () {return Inertia::render('Galeria');})->name('galeria');
 
 Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');
 Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name('iniciar.compra');
