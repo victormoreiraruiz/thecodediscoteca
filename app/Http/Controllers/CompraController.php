@@ -36,11 +36,12 @@ class CompraController extends Controller
                 'nombre' => $user->name,
                 'correo' => $user->email,
                 'saldo' => $user->saldo,
+                'puntos_totales' => $user->puntos_totales, // Cambiado de "puntos" a "puntos_totales"
             ] : null,
         ]);
     }
 
-    // Crea la compra en la base de datos al confirmar
+    // Crea la compra en la base de datos al confirmar y asigna puntos
     public function confirmarCompra(Request $request)
     {
         $user = $request->user();
@@ -73,15 +74,19 @@ class CompraController extends Controller
             // Si el usuario paga con saldo, resta el saldo
             if ($pagarConSaldo) {
                 $user->saldo -= $total;
-                $user->save();
             }
+
+            // Calcula los puntos ganados (10% del total) y los suma al usuario
+            $puntosGanados = $total * 0.10; // 10% del total gastado
+            $user->puntos_totales += $puntosGanados; // Cambiado de "puntos" a "puntos_totales"
+            $user->save();
 
             DB::commit();
 
             // Limpia el carrito de la sesión después de confirmar la compra
             session()->forget('carrito');
 
-            return redirect()->route('index')->with('success', 'Compra realizada con éxito.');
+            return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
 
         } catch (\Exception $e) {
             DB::rollBack();
