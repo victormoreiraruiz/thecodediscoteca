@@ -45,7 +45,7 @@ Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuent
 Route::get('/fiesta', function () {return Inertia::render('Fiesta');})->name('fiesta');
 
 Route::get('/galeria', function () {return Inertia::render('Galeria');})->name('galeria');
-
+Route::get('/eventos', function () {return Inertia::render('Eventos');})->name('eventos');
 Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');
 Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name('iniciar.compra');
 Route::post('/confirmar-compra', [CompraController::class, 'confirmarCompra'])->name('confirmar.compra');

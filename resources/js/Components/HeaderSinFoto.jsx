@@ -2,10 +2,10 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 
-const Header = () => {
+const HeaderSinFoto = () => {
   return (
     <header>
-      <nav className="menu">
+      <nav className="menu2">
         <Link href="/">INICIO</Link>
         <Link href="/galeria">GALERIA</Link>
         <Link href="/eventos">EVENTOS</Link>
@@ -16,4 +16,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default HeaderSinFoto;
