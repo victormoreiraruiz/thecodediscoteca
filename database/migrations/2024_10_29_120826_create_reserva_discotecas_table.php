@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('reserva_discotecas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('sala_id')->constrained('salas')->onDelete('cascade'); // Clave foránea a 'salas'
             $table->date('fecha_reserva');
             $table->time('inicio_reserva');
             $table->time('final_reserva');
-            $table->enum('disponibilidad',['disponible','reservada']);
+            $table->enum('disponibilidad', ['disponible', 'reservada']);
             $table->timestamps();
         });
     }
