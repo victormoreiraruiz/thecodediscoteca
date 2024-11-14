@@ -44,3 +44,4 @@ public function obtenerFechasOcupadas($id)
     return response()->json(['message' => 'Reserva creada exitosamente'], 201);
 }
 
+}
