@@ -23,5 +23,26 @@ public function obtenerFechasOcupadas($id)
     
         return response()->json($fechasOcupadas);
     }
+
+    public function crearReserva(Request $request, $id)
+{
+    $validatedData = $request->validate([
+        'fecha_reserva' => 'required|date',
+        'descripcion' => 'required|string',
+        'asistentes' => 'required|integer|min:1',
+    ]);
+
+    ReservaDiscoteca::create([
+        'usuario_id' => auth()->id(), // Asumiendo que el usuario está autenticado
+        'sala_id' => $id,
+        'fecha_reserva' => $validatedData['fecha_reserva'],
+        'disponibilidad' => 'reservada',
+        'asistentes' => $validatedData['asistentes'],
+        'descripcion' => $validatedData['descripcion'],
+    ]);
+
+    return response()->json(['message' => 'Reserva creada exitosamente'], 201);
+}
+
     
 }

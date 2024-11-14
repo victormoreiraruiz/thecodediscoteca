@@ -884,17 +884,14 @@ h2 {
     background-color: #e5c04d;
   }
 
-  .green {
-    background-color: #28a745 !important; /* Verde para disponible */
-    color: white;
+  .booked-date {
+    background-color: red !important;
+    color: white !important;
   }
-  
-  .red {
-    background-color: #dc3545 !important; /* Rojo para reservada */
-    color: white;
-  }
-  
+
   .calendar-container {
-    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0; /* Reduce el espacio vertical alrededor del calendario */
   }
-  

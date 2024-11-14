@@ -6,15 +6,14 @@ import axios from 'axios';
 const EventosSalaConferencias = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bookedDates, setBookedDates] = useState([]); // Guarda fechas ocupadas
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [bookedDates, setBookedDates] = useState([]);
 
-  // Cargar las fechas ocupadas al montar el componente
   useEffect(() => {
     const fetchBookedDates = async () => {
       try {
         const response = await axios.get('/api/salas/1/reservas'); // Cambia '1' por el id de la sala actual
-        setBookedDates(response.data); // Asume que response.data es un array de fechas ocupadas
+        setBookedDates(response.data);
       } catch (error) {
         console.error('Error al cargar las fechas de reservas:', error);
       }
@@ -24,19 +23,44 @@ const EventosSalaConferencias = () => {
   }, []);
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
+    setSelectedDate(date); // Establece la fecha seleccionada
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Motivo: ${motivo}\nNúmero de personas: ${numeroPersonas}\nFecha de reserva: ${selectedDate}`);
-  };
-
-  const isDateDisabled = (date) => {
-    // Verifica si la fecha está en las fechas ocupadas
+  const isDateBooked = (date) => {
     return bookedDates.some(
       (bookedDate) => new Date(bookedDate).toDateString() === date.toDateString()
     );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedDate) {
+      alert('Por favor, selecciona una fecha disponible en el calendario.');
+      return;
+    }
+
+    // Ajustar la fecha a la zona horaria local
+    const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0];
+
+    try {
+      await axios.post('/api/salas/1/reservar', {
+        fecha_reserva: adjustedDate, // Enviar la fecha ajustada
+        descripcion: motivo,
+        asistentes: numeroPersonas,
+      });
+
+      alert('Reserva creada exitosamente');
+      setMotivo('');
+      setNumeroPersonas(30);
+      setSelectedDate(null);
+      fetchBookedDates(); // Recargar fechas ocupadas
+    } catch (error) {
+      console.error('Error al crear la reserva:', error);
+      alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -53,11 +77,13 @@ const EventosSalaConferencias = () => {
       </div>
 
       {/* Calendario */}
-      <Calendar
-        onChange={handleDateChange}
-        value={selectedDate}
-        tileDisabled={({ date }) => isDateDisabled(date)} // Desactiva las fechas ocupadas
-      />
+      <div className="calendar-container">
+        <Calendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
+        />
+      </div>
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="event-form">
