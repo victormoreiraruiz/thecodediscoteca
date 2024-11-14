@@ -3,6 +3,8 @@
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SalaController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -48,6 +50,9 @@ Route::get('/eventos', function () {return Inertia::render('Eventos');})->name('
 
 Route::get('/salacelebraciones', function () {return Inertia::render('SalaCelebraciones');})->name('sala-celebraciones');
 Route::get('/salaconferencias', function () {return Inertia::render('SalaConferencias');})->name('sala-conferencias');
+Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
+Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
+
 Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 
 

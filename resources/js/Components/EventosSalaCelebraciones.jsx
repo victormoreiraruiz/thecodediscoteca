@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const EventosSalaCelebraciones = () => {
   const [motivo, setMotivo] = useState('');
-  const [numeroPersonas, setNumeroPersonas] = useState(30);
+  const [numeroPersonas, setNumeroPersonas] = useState(40);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -44,8 +44,8 @@ const EventosSalaCelebraciones = () => {
             className="event-select"
           >
             {[...Array(5)].map((_, index) => (
-              <option key={index} value={(index + 1) * 30}>
-                {(index + 1) * 30}
+              <option key={index} value={(index + 1) * 40}>
+                {(index + 1) * 40}
               </option>
             ))}
           </select>

@@ -883,3 +883,15 @@ h2 {
   .event-submit-button:hover {
     background-color: #e5c04d;
   }
+
+  .booked-date {
+    background-color: red !important;
+    color: white !important;
+  }
+
+  .calendar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0; /* Reduce el espacio vertical alrededor del calendario */
+  }

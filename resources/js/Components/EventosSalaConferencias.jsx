@@ -1,12 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import axios from 'axios';
 
 const EventosSalaConferencias = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [bookedDates, setBookedDates] = useState([]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      try {
+        const response = await axios.get('/api/salas/1/reservas'); // Cambia '1' por el id de la sala actual
+        setBookedDates(response.data);
+      } catch (error) {
+        console.error('Error al cargar las fechas de reservas:', error);
+      }
+    };
+
+    fetchBookedDates();
+  }, []);
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date); // Establece la fecha seleccionada
+  };
+
+  const isDateBooked = (date) => {
+    return bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === date.toDateString()
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Motivo: ${motivo}\nNúmero de personas: ${numeroPersonas}`);
+
+    if (!selectedDate) {
+      alert('Por favor, selecciona una fecha disponible en el calendario.');
+      return;
+    }
+
+    // Ajustar la fecha a la zona horaria local
+    const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0];
+
+    try {
+      await axios.post('/api/salas/1/reservar', {
+        fecha_reserva: adjustedDate, // Enviar la fecha ajustada
+        descripcion: motivo,
+        asistentes: numeroPersonas,
+      });
+
+      alert('Reserva creada exitosamente');
+      setMotivo('');
+      setNumeroPersonas(30);
+      setSelectedDate(null);
+      fetchBookedDates(); // Recargar fechas ocupadas
+    } catch (error) {
+      console.error('Error al crear la reserva:', error);
+      alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -14,13 +68,21 @@ const EventosSalaConferencias = () => {
       <h2>Sala de Conferencias</h2>
       <br />
 
-      {/* Contenedor para imagen y descripción */}
       <div className="info-container">
         <img src="/imagenes/salaconferencias.jpg" alt="Sala de Conferencias" className="reservation-image" />
         <h3 className="reservation-description">
           El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
           Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
         </h3>
+      </div>
+
+      {/* Calendario */}
+      <div className="calendar-container">
+        <Calendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
+        />
       </div>
 
       {/* Formulario */}
@@ -43,7 +105,7 @@ const EventosSalaConferencias = () => {
             onChange={(e) => setNumeroPersonas(Number(e.target.value))}
             className="event-select"
           >
-            {[...Array(6)].map((_, index) => (
+            {[...Array(5)].map((_, index) => (
               <option key={index} value={(index + 1) * 50}>
                 {(index + 1) * 50}
               </option>
