@@ -64,25 +64,32 @@ class ProfileController extends Controller
 
 
     public function historialDeCompras(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
+    
+        // Recupera las compras del usuario con los detalles de las entradas
+        $compras = $user->compras()->with('entradas')->get() ?? collect([]);
+    
+        // Recupera las reservas del usuario con la información de la sala
+        $reservas = $user->reservas()->with('sala')->get() ?? collect([]);
+    
+        return Inertia::render('MiCuentaHistorial', [
+            'compras' => $compras,
+            'reservas' => $reservas,
+        ]);
+    }
 
-    // Recupera las compras del usuario con los detalles de las entradas
-    $compras = $user->compras()->with('entradas')->get() ?? collect([]);
-
-    return Inertia::render('MiCuentaHistorial', [
-        'compras' => $compras,
-    ]);
-}
-
-public function miCuenta(Request $request)
-{
-    return Inertia::render('MiCuenta', [
-        'user' => $request->user(),
-        'compras' => $request->user()->compras()->with('entradas')->get()
-    ]);
-}
-
+    public function miCuenta(Request $request)
+    {
+        $user = $request->user();
+    
+        return Inertia::render('MiCuenta', [
+            'user' => $user,
+            'compras' => $user->compras()->with('entradas')->get(),
+            'reservas' => $user->reservas()->with('sala')->get(),
+        ]);
+    }
+    
 
 }
 

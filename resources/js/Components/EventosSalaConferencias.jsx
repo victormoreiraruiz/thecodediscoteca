@@ -9,21 +9,21 @@ const EventosSalaConferencias = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
 
-  useEffect(() => {
-    const fetchBookedDates = async () => {
-      try {
-        const response = await axios.get('/api/salas/1/reservas'); // Cambia '1' por el id de la sala actual
-        setBookedDates(response.data);
-      } catch (error) {
-        console.error('Error al cargar las fechas de reservas:', error);
-      }
-    };
+  const fetchBookedDates = async () => {
+    try {
+      const response = await axios.get('/api/salas/1/reservas');
+      setBookedDates(response.data);
+    } catch (error) {
+      console.error('Error al cargar las fechas de reservas:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchBookedDates();
   }, []);
 
   const handleDateChange = (date) => {
-    setSelectedDate(date); // Establece la fecha seleccionada
+    setSelectedDate(date);
   };
 
   const isDateBooked = (date) => {
@@ -40,14 +40,22 @@ const EventosSalaConferencias = () => {
       return;
     }
 
-    // Ajustar la fecha a la zona horaria local
+    const isAlreadyBooked = bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === selectedDate.toDateString()
+    );
+
+    if (isAlreadyBooked) {
+      alert('Esta fecha ya está reservada. Por favor, selecciona otra fecha.');
+      return;
+    }
+
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
       .split('T')[0];
 
     try {
       await axios.post('/api/salas/1/reservar', {
-        fecha_reserva: adjustedDate, // Enviar la fecha ajustada
+        fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,
       });
@@ -56,7 +64,7 @@ const EventosSalaConferencias = () => {
       setMotivo('');
       setNumeroPersonas(30);
       setSelectedDate(null);
-      fetchBookedDates(); // Recargar fechas ocupadas
+      fetchBookedDates();
     } catch (error) {
       console.error('Error al crear la reserva:', error);
       alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
@@ -66,8 +74,6 @@ const EventosSalaConferencias = () => {
   return (
     <div>
       <h2>Sala de Conferencias</h2>
-      <br />
-
       <div className="info-container">
         <img src="/imagenes/salaconferencias.jpg" alt="Sala de Conferencias" className="reservation-image" />
         <h3 className="reservation-description">
@@ -76,16 +82,15 @@ const EventosSalaConferencias = () => {
         </h3>
       </div>
 
-      {/* Calendario */}
       <div className="calendar-container">
         <Calendar
           onChange={handleDateChange}
           value={selectedDate}
+          minDate={new Date()}
           tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
         />
       </div>
 
-      {/* Formulario */}
       <form onSubmit={handleSubmit} className="event-form">
         <label>
           ¿Para qué desea la sala?
@@ -106,8 +111,8 @@ const EventosSalaConferencias = () => {
             className="event-select"
           >
             {[...Array(5)].map((_, index) => (
-              <option key={index} value={(index + 1) * 50}>
-                {(index + 1) * 50}
+              <option key={index} value={(index + 1) * 40}>
+                {(index + 1) * 40}
               </option>
             ))}
           </select>

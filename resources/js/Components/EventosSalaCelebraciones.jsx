@@ -1,20 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import axios from 'axios';
 
 const EventosSalaCelebraciones = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(40);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [bookedDates, setBookedDates] = useState([]);
 
-  const handleSubmit = (e) => {
+  const fetchBookedDates = async () => {
+    try {
+      const response = await axios.get('/api/salas/2/reservas');
+      setBookedDates(response.data);
+    } catch (error) {
+      console.error('Error al cargar las fechas de reservas:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookedDates();
+  }, []);
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  const isDateBooked = (date) => {
+    return bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === date.toDateString()
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Motivo: ${motivo}\nNúmero de personas: ${numeroPersonas}`);
+
+    if (!selectedDate) {
+      alert('Por favor, selecciona una fecha disponible en el calendario.');
+      return;
+    }
+
+    const isAlreadyBooked = bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === selectedDate.toDateString()
+    );
+
+    if (isAlreadyBooked) {
+      alert('Esta fecha ya está reservada. Por favor, selecciona otra fecha.');
+      return;
+    }
+
+    const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0];
+
+    try {
+      await axios.post('/api/salas/2/reservar', {
+        fecha_reserva: adjustedDate,
+        descripcion: motivo,
+        asistentes: numeroPersonas,
+      });
+
+      alert('Reserva creada exitosamente');
+      setMotivo('');
+      setNumeroPersonas(40);
+      setSelectedDate(null);
+      fetchBookedDates();
+    } catch (error) {
+      console.error('Error al crear la reserva:', error);
+      alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
+    }
   };
 
   return (
     <div>
       <h2>Sala de Celebraciones</h2>
-      <br />
-
-      {/* Contenedor para imagen y descripción */}
       <div className="info-container">
         <img src="/imagenes/salacelebraciones.jpeg" alt="Sala de Celebraciones" className="reservation-image" />
         <h3 className="reservation-description">
@@ -23,7 +82,15 @@ const EventosSalaCelebraciones = () => {
         </h3>
       </div>
 
-      {/* Formulario */}
+      <div className="calendar-container">
+        <Calendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          minDate={new Date()}
+          tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
+        />
+      </div>
+
       <form onSubmit={handleSubmit} className="event-form">
         <label>
           ¿Para qué desea la sala?

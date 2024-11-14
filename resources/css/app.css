@@ -895,3 +895,21 @@ h2 {
     align-items: center;
     margin: 10px 0; /* Reduce el espacio vertical alrededor del calendario */
   }
+
+  .historial h2 {
+    margin-bottom: 10px;
+}
+
+.compra h3, .reserva h3 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.compra-detalles, .reserva-detalles {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.li-estilo-h3 {
+    margin-left: 20px;
+}
