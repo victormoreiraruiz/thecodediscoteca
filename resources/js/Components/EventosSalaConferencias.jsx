@@ -16,7 +16,7 @@ const EventosSalaConferencias = () => {
 
       {/* Contenedor para imagen y descripción */}
       <div className="info-container">
-        <img src="/imagenes/salaconferencias.jpeg" alt="Sala de Conferencias" className="reservation-image" />
+        <img src="/imagenes/salaconferencias.jpg" alt="Sala de Conferencias" className="reservation-image" />
         <h3 className="reservation-description">
           El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
           Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.

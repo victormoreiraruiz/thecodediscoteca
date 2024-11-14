@@ -7,8 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReservaDiscoteca extends Model
 {
-    public function reserva()
+    use HasFactory;
+
+    protected $fillable = [
+        'usuario_id',
+        'sala_id',
+        'fecha_reserva',
+        'inicio_reserva',
+        'final_reserva',
+        'disponibilidad',
+    ];
+
+    public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function sala()
+    {
+        return $this->belongsTo(Sala::class, 'sala_id');
     }
 }
