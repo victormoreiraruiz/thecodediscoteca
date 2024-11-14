@@ -50,12 +50,11 @@ Route::get('/eventos', function () {return Inertia::render('Eventos');})->name('
 
 Route::get('/salacelebraciones', function () {return Inertia::render('SalaCelebraciones');})->name('sala-celebraciones');
 Route::get('/salaconferencias', function () {return Inertia::render('SalaConferencias');})->name('sala-conferencias');
+Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
 Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 
 
-
-Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 
 
 Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');

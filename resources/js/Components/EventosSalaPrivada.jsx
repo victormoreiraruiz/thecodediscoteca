@@ -75,8 +75,6 @@ const EventosSalaPrivada = () => {
     <div>
       <h2>Sala Privada</h2>
       <div className="info-container">
-        <img src="/imagenes/salaprivada.jpg" alt="Sala de Privada" className="reservation-image" />
-
 
         <img src="/imagenes/salaprivada.jpg" alt="Sala Privada" className="reservation-image" />
 
