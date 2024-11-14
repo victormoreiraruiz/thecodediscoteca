@@ -41,7 +41,6 @@ class CompraController extends Controller
         ]);
     }
 
-    // Crea la compra en la base de datos al confirmar y asigna puntos
     public function confirmarCompra(Request $request)
     {
         $user = $request->user();
@@ -50,11 +49,14 @@ class CompraController extends Controller
             return $sum + ($item['precio'] * $item['cantidad']);
         }, 0);
         $pagarConSaldo = $request->input('pagarConSaldo');
-
+    
+        // Registra en el log para diagnosticar posibles problemas
+        \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
+    
         if ($pagarConSaldo && $user->saldo < $total) {
             return redirect()->back()->withErrors(['saldo' => 'Saldo insuficiente para realizar la compra.']);
         }
-
+    
         DB::beginTransaction();
         try {
             // Crea la compra real solo en este punto
@@ -63,34 +65,36 @@ class CompraController extends Controller
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
-
+    
             // Asocia cada entrada del carrito a la compra
             foreach ($carrito as $item) {
                 if (isset($item['id']) && isset($item['cantidad'])) {
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
                 }
             }
-
+    
             // Si el usuario paga con saldo, resta el saldo
             if ($pagarConSaldo) {
                 $user->saldo -= $total;
             }
-
+    
             // Calcula los puntos ganados (10% del total) y los suma al usuario
             $puntosGanados = $total * 0.10; // 10% del total gastado
-            $user->puntos_totales += $puntosGanados; // Cambiado de "puntos" a "puntos_totales"
+            $user->puntos_totales += $puntosGanados;
             $user->save();
-
+    
             DB::commit();
-
+    
             // Limpia el carrito de la sesión después de confirmar la compra
             session()->forget('carrito');
-
+    
             return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
-
+    
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
     }
+    
 }

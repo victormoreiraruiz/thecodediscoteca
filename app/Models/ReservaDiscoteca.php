@@ -16,6 +16,7 @@ class ReservaDiscoteca extends Model
         'disponibilidad',
         'asistentes',
         'descripcion',
+
     ];
 
     public function usuario()

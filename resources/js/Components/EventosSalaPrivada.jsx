@@ -17,6 +17,7 @@ const EventosSalaPrivada = () => {
       {/* Contenedor para imagen y descripción */}
       <div className="info-container">
         <img src="/imagenes/salaprivada.jpg" alt="Sala de Privada" className="reservation-image" />
+
         <h3 className="reservation-description">
           El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
           Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
@@ -43,9 +44,11 @@ const EventosSalaPrivada = () => {
             onChange={(e) => setNumeroPersonas(Number(e.target.value))}
             className="event-select"
           >
+
             {[...Array(6)].map((_, index) => (
               <option key={index} value={(index + 1) * 50}>
                 {(index + 1) * 50}
+
               </option>
             ))}
           </select>
