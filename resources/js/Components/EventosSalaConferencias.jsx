@@ -9,17 +9,18 @@ const EventosSalaConferencias = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
 
-  useEffect(() => {
-    const fetchBookedDates = async () => {
-      try {
-        const response = await axios.get('/api/salas/1/reservas'); // Cambia '1' por el id de la sala actual
-        setBookedDates(response.data);
-      } catch (error) {
-        console.error('Error al cargar las fechas de reservas:', error);
-      }
-    };
+  // Definir fetchBookedDates como una función para obtener las fechas ocupadas
+  const fetchBookedDates = async () => {
+    try {
+      const response = await axios.get('/api/salas/1/reservas'); // Cambia '1' por el id de la sala actual
+      setBookedDates(response.data);
+    } catch (error) {
+      console.error('Error al cargar las fechas de reservas:', error);
+    }
+  };
 
-    fetchBookedDates();
+  useEffect(() => {
+    fetchBookedDates(); // Llama a fetchBookedDates al cargar el componente
   }, []);
 
   const handleDateChange = (date) => {
@@ -40,14 +41,14 @@ const EventosSalaConferencias = () => {
       return;
     }
 
-    // Ajustar la fecha a la zona horaria local
+    // Ajustar la fecha a la zona horaria local para evitar desfases
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
       .split('T')[0];
 
     try {
       await axios.post('/api/salas/1/reservar', {
-        fecha_reserva: adjustedDate, // Enviar la fecha ajustada
+        fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,
       });
@@ -56,7 +57,7 @@ const EventosSalaConferencias = () => {
       setMotivo('');
       setNumeroPersonas(30);
       setSelectedDate(null);
-      fetchBookedDates(); // Recargar fechas ocupadas
+      fetchBookedDates(); // Recargar fechas reservadas después de crear la reserva
     } catch (error) {
       console.error('Error al crear la reserva:', error);
       alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
@@ -81,6 +82,7 @@ const EventosSalaConferencias = () => {
         <Calendar
           onChange={handleDateChange}
           value={selectedDate}
+          minDate={new Date()} // Evita seleccionar fechas pasadas
           tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
         />
       </div>
@@ -106,8 +108,8 @@ const EventosSalaConferencias = () => {
             className="event-select"
           >
             {[...Array(5)].map((_, index) => (
-              <option key={index} value={(index + 1) * 50}>
-                {(index + 1) * 50}
+              <option key={index} value={(index + 1) * 40}>
+                {(index + 1) * 40}
               </option>
             ))}
           </select>

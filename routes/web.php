@@ -53,6 +53,8 @@ Route::get('/salaconferencias', function () {return Inertia::render('SalaConfere
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
 Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 
+
+
 Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 
 
