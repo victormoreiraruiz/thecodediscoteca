@@ -11,7 +11,7 @@ const EventosSalaCelebraciones = () => {
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/1/reservas'); // Carga las reservas de la sala de celebraciones (id: 1)
+      const response = await axios.get('/api/salas/2/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
@@ -40,12 +40,21 @@ const EventosSalaCelebraciones = () => {
       return;
     }
 
+    const isAlreadyBooked = bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === selectedDate.toDateString()
+    );
+
+    if (isAlreadyBooked) {
+      alert('Esta fecha ya está reservada. Por favor, selecciona otra fecha.');
+      return;
+    }
+
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
       .split('T')[0];
 
     try {
-      await axios.post('/api/salas/1/reservar', {
+      await axios.post('/api/salas/2/reservar', {
         fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,
@@ -55,7 +64,7 @@ const EventosSalaCelebraciones = () => {
       setMotivo('');
       setNumeroPersonas(40);
       setSelectedDate(null);
-      fetchBookedDates(); // Recargar fechas reservadas después de crear la reserva
+      fetchBookedDates();
     } catch (error) {
       console.error('Error al crear la reserva:', error);
       alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
@@ -65,8 +74,6 @@ const EventosSalaCelebraciones = () => {
   return (
     <div>
       <h2>Sala de Celebraciones</h2>
-      <br />
-
       <div className="info-container">
         <img src="/imagenes/salacelebraciones.jpeg" alt="Sala de Celebraciones" className="reservation-image" />
         <h3 className="reservation-description">
@@ -75,7 +82,6 @@ const EventosSalaCelebraciones = () => {
         </h3>
       </div>
 
-      {/* Calendario */}
       <div className="calendar-container">
         <Calendar
           onChange={handleDateChange}
@@ -85,7 +91,6 @@ const EventosSalaCelebraciones = () => {
         />
       </div>
 
-      {/* Formulario */}
       <form onSubmit={handleSubmit} className="event-form">
         <label>
           ¿Para qué desea la sala?

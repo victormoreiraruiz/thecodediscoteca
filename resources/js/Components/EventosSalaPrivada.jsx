@@ -11,7 +11,7 @@ const EventosSalaPrivada = () => {
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/3/reservas'); // Carga las reservas de la sala privada (id: 3)
+      const response = await axios.get('/api/salas/3/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
@@ -40,6 +40,15 @@ const EventosSalaPrivada = () => {
       return;
     }
 
+    const isAlreadyBooked = bookedDates.some(
+      (bookedDate) => new Date(bookedDate).toDateString() === selectedDate.toDateString()
+    );
+
+    if (isAlreadyBooked) {
+      alert('Esta fecha ya está reservada. Por favor, selecciona otra fecha.');
+      return;
+    }
+
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
       .split('T')[0];
@@ -55,7 +64,7 @@ const EventosSalaPrivada = () => {
       setMotivo('');
       setNumeroPersonas(30);
       setSelectedDate(null);
-      fetchBookedDates(); // Recargar fechas reservadas después de crear la reserva
+      fetchBookedDates();
     } catch (error) {
       console.error('Error al crear la reserva:', error);
       alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
@@ -65,8 +74,6 @@ const EventosSalaPrivada = () => {
   return (
     <div>
       <h2>Sala Privada</h2>
-      <br />
-
       <div className="info-container">
         <img src="/imagenes/salaprivada.jpg" alt="Sala de Privada" className="reservation-image" />
 
@@ -79,7 +86,6 @@ const EventosSalaPrivada = () => {
         </h3>
       </div>
 
-      {/* Calendario */}
       <div className="calendar-container">
         <Calendar
           onChange={handleDateChange}
@@ -89,7 +95,6 @@ const EventosSalaPrivada = () => {
         />
       </div>
 
-      {/* Formulario */}
       <form onSubmit={handleSubmit} className="event-form">
         <label>
           ¿Para qué desea la sala?
