@@ -13,8 +13,6 @@ class ReservaDiscoteca extends Model
         'usuario_id',
         'sala_id', // Relaciona la reserva con la sala
         'fecha_reserva',
-        'inicio_reserva',
-        'final_reserva',
         'disponibilidad',
         'asistentes',
         'descripcion',

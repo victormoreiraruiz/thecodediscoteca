@@ -883,3 +883,18 @@ h2 {
   .event-submit-button:hover {
     background-color: #e5c04d;
   }
+
+  .green {
+    background-color: #28a745 !important; /* Verde para disponible */
+    color: white;
+  }
+  
+  .red {
+    background-color: #dc3545 !important; /* Rojo para reservada */
+    color: white;
+  }
+  
+  .calendar-container {
+    margin: 20px 0;
+  }
+  
