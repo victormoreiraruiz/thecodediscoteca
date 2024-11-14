@@ -1,14 +1,58 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const EventosSalaPrivada = () => {
+  const [motivo, setMotivo] = useState('');
+  const [numeroPersonas, setNumeroPersonas] = useState(30);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Motivo: ${motivo}\nNúmero de personas: ${numeroPersonas}`);
+  };
+
   return (
     <div>
-      <h2>Nuestra Sala Privada</h2>
-      <h3>
-        Con una capacidad de hasta mil personas, equipada con la última tecnología en imagen,
-        sonido e iluminación, nuestra sala privada es la ideal para desfiles, cocteles, entregas de premio… y cualquier evento privado que pueda imaginar.
-      </h3>
-      {/* Agrega aquí más contenido o componentes según necesites */}
+      <h2>Sala de Privada</h2>
+      <br />
+
+      {/* Contenedor para imagen y descripción */}
+      <div className="info-container">
+        <img src="/imagenes/salaprivada.jpg" alt="Sala de Privada" className="reservation-image" />
+        <h3 className="reservation-description">
+          El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
+          Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
+        </h3>
+      </div>
+
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="event-form">
+        <label>
+          ¿Para qué desea la sala?
+          <textarea
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Describa el evento o motivo"
+            required
+            className="event-textarea"
+          />
+        </label>
+
+        <label>
+          Número de personas:
+          <select
+            value={numeroPersonas}
+            onChange={(e) => setNumeroPersonas(Number(e.target.value))}
+            className="event-select"
+          >
+            {[...Array(6)].map((_, index) => (
+              <option key={index} value={(index + 1) * 50}>
+                {(index + 1) * 50}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button type="submit" className="event-submit-button">RESERVAR</button>
+      </form>
     </div>
   );
 };

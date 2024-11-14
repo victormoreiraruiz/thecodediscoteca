@@ -20,6 +20,8 @@ return new class extends Migration
             $table->time('inicio_reserva');
             $table->time('final_reserva');
             $table->enum('disponibilidad',['disponible','reservada']);
+            $table->integer('asistentes');
+            $table->text('descripcion');
             $table->timestamps();
         });
     }
