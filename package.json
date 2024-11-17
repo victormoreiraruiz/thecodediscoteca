@@ -23,6 +23,7 @@
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
         "bootstrap": "^5.3.3",
+        "js-cookie": "^3.0.5",
         "konva": "^9.3.16",
         "react-calendar": "^5.1.0",
         "react-konva": "^18.2.10",
