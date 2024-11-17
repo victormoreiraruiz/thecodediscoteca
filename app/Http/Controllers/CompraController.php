@@ -6,6 +6,8 @@ use App\Models\Compra;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mesa;
+
 
 class CompraController extends Controller
 {
@@ -50,7 +52,6 @@ class CompraController extends Controller
         }, 0);
         $pagarConSaldo = $request->input('pagarConSaldo');
     
-        // Registra en el log para diagnosticar posibles problemas
         \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
     
         if ($pagarConSaldo && $user->saldo < $total) {
@@ -59,33 +60,31 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // Crea la compra real solo en este punto
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // Asocia cada entrada del carrito a la compra
             foreach ($carrito as $item) {
-                if (isset($item['id']) && isset($item['cantidad'])) {
+                if ($item['tipo'] === 'entrada' && isset($item['id']) && isset($item['cantidad'])) {
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+                } elseif ($item['tipo'] === 'mesa' && isset($item['id'])) {
+                    $compra->mesas()->attach($item['id'], ['cantidad' => 1]); // Usualmente una mesa por reserva
+                    Mesa::where('id', $item['id'])->update(['reservada' => true]); // Marca la mesa como reservada
                 }
             }
     
-            // Si el usuario paga con saldo, resta el saldo
             if ($pagarConSaldo) {
                 $user->saldo -= $total;
             }
     
-            // Calcula los puntos ganados (10% del total) y los suma al usuario
-            $puntosGanados = $total * 0.10; // 10% del total gastado
+            $puntosGanados = $total * 0.10;
             $user->puntos_totales += $puntosGanados;
             $user->save();
     
             DB::commit();
     
-            // Limpia el carrito de la sesión después de confirmar la compra
             session()->forget('carrito');
     
             return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
@@ -96,5 +95,34 @@ class CompraController extends Controller
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
     }
+
+    public function reservarMesa(Request $request)
+{
+    $validatedData = $request->validate([
+        'mesa_id' => 'required|exists:mesas,id',
+        'cantidad' => 'required|integer|min:1',
+    ]);
+
+    $mesa = Mesa::findOrFail($validatedData['mesa_id']);
+
+    if ($mesa->reservada) {
+        return response()->json(['error' => 'Esta mesa ya está reservada.'], 400);
+    }
+
+    // Crear la compra
+    $compra = Compra::create([
+        'usuario_id' => auth()->id(),
+        'total' => $mesa->precio * $validatedData['cantidad'],
+        'fecha_compra' => now(),
+    ]);
+
+    // Asociar la mesa con la compra
+    $compra->mesas()->attach($mesa->id, ['cantidad' => $validatedData['cantidad']]);
+
+    // Marcar la mesa como reservada
+    $mesa->update(['reservada' => true]);
+
+    return response()->json(['message' => 'Mesa reservada exitosamente.']);
+}
     
 }

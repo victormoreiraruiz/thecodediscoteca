@@ -16,4 +16,10 @@ class Evento extends Model
     return $this->hasMany(Entrada::class);
 }
 
+public function mesas()
+{
+    return $this->hasMany(Mesa::class);
+}
+
+
 }
