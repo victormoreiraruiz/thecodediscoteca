@@ -44,57 +44,58 @@ class CompraController extends Controller
     }
 
     public function confirmarCompra(Request $request)
-    {
-        $user = $request->user();
-        $carrito = session('carrito', []); // Usa el carrito de la sesión
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-        $pagarConSaldo = $request->input('pagarConSaldo');
-    
-        \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
-    
-        if ($pagarConSaldo && $user->saldo < $total) {
-            return redirect()->back()->withErrors(['saldo' => 'Saldo insuficiente para realizar la compra.']);
-        }
-    
-        DB::beginTransaction();
-        try {
-            $compra = Compra::create([
-                'usuario_id' => $user->id,
-                'total' => $total,
-                'fecha_compra' => now(),
-            ]);
-    
-            foreach ($carrito as $item) {
-                if ($item['tipo'] === 'entrada' && isset($item['id']) && isset($item['cantidad'])) {
-                    $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
-                } elseif ($item['tipo'] === 'mesa' && isset($item['id'])) {
-                    $compra->mesas()->attach($item['id'], ['cantidad' => 1]); // Usualmente una mesa por reserva
-                    Mesa::where('id', $item['id'])->update(['reservada' => true]); // Marca la mesa como reservada
-                }
-            }
-    
-            if ($pagarConSaldo) {
-                $user->saldo -= $total;
-            }
-    
-            $puntosGanados = $total * 0.10;
-            $user->puntos_totales += $puntosGanados;
-            $user->save();
-    
-            DB::commit();
-    
-            session()->forget('carrito');
-    
-            return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
-    
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
-        }
+{
+    $user = $request->user();
+    $carrito = session('carrito', []); // Usa el carrito de la sesión
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+    $pagarConSaldo = $request->input('pagarConSaldo');
+
+    \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
+
+    if ($pagarConSaldo && $user->saldo < $total) {
+        return redirect()->back()->withErrors(['saldo' => 'Saldo insuficiente para realizar la compra.']);
     }
+
+    DB::beginTransaction();
+    try {
+        $compra = Compra::create([
+            'usuario_id' => $user->id,
+            'total' => $total,
+            'fecha_compra' => now(),
+        ]);
+
+        foreach ($carrito as $item) {
+            if ($item['tipo'] === 'entrada' && isset($item['id']) && isset($item['cantidad'])) {
+                $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+            } elseif ($item['tipo'] === 'mesa' && isset($item['id'])) {
+                $compra->mesas()->attach($item['id'], ['cantidad' => 1]); // Usualmente una mesa por reserva
+                Mesa::where('id', $item['id'])->update(['reservada' => true]); // Marca la mesa como reservada
+            }
+        }
+
+        if ($pagarConSaldo) {
+            $user->saldo -= $total;
+        }
+
+        $puntosGanados = $total * 0.10;
+        $user->puntos_totales += $puntosGanados;
+        $user->save();
+
+        DB::commit();
+
+        session()->forget('carrito');
+
+        return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
+        return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
+    }
+}
+
 
     public function reservarMesa(Request $request)
 {

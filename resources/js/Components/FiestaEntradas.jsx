@@ -28,7 +28,9 @@ const FiestaEntradas = () => {
   };
 
   const agregarMesaAlCarrito = (mesa) => {
-    const mesaEnCarrito = carrito.find((item) => item.id === mesa.id && item.tipo === "mesa");
+    const mesaEnCarrito = carrito.find(
+      (item) => item.id === mesa.id && item.tipo === "mesa"
+    );
     if (mesaEnCarrito) {
       alert("Esta mesa ya está en el carrito.");
       return;
@@ -59,7 +61,7 @@ const FiestaEntradas = () => {
     { tipo: "premium", precio: 50, id: 3 },
   ];
 
-  const reservado = { tipo: "mesa", precio: 150, id: 4, capacidad: 5 };
+  const reservado = { tipo: "reservado", precio: 150, id: 4, capacidad: 5 };
 
   const confirmarReservaMesa = () => {
     if (!mesaSeleccionada) {
@@ -68,9 +70,9 @@ const FiestaEntradas = () => {
     }
 
     agregarMesaAlCarrito({ ...mesaSeleccionada, precio: reservado.precio });
-    alert(`Has reservado ${mesaSeleccionada.nombre}.`);
+    alert(`Has añadido ${mesaSeleccionada.nombre} al carrito.`);
     setMesaSeleccionada(null);
-    setMostrarMapa(false); // Oculta el mapa tras confirmar la reserva
+    setMostrarMapa(false);
   };
 
   return (
@@ -81,8 +83,8 @@ const FiestaEntradas = () => {
       {entradas.map((entrada) => (
         <div key={entrada.id} className="entrada">
           <h3>Entrada {empiezaMayus(entrada.tipo)}</h3>
-          <br></br>
           <div className="precio">Precio: {entrada.precio}€</div>
+          <br></br>
           <button className="reservar" onClick={() => agregarAlCarrito(entrada)}>
             Comprar
           </button>
@@ -93,8 +95,8 @@ const FiestaEntradas = () => {
       <p>RESERVADOS</p>
       <div className="entrada">
         <h3>Reservado para {reservado.capacidad} personas</h3>
-        <br></br>
         <div className="precio">Precio: {reservado.precio}€</div>
+        <br></br>
         <button className="reservar" onClick={() => setMostrarMapa(true)}>
           Reservar
         </button>
@@ -104,7 +106,7 @@ const FiestaEntradas = () => {
       {mostrarMapa && (
         <div className="entrada">
           <h3>Selecciona tu mesa en el mapa:</h3>
-          <MapaPersonalizado onMesaReservada={(mesa) => setMesaSeleccionada(mesa)} />
+          <MapaPersonalizado onMesaSeleccionada={(mesa) => setMesaSeleccionada(mesa)} />
           {mesaSeleccionada && (
             <div className="confirmacion">
               <p>Mesa Seleccionada: {mesaSeleccionada.nombre}</p>
