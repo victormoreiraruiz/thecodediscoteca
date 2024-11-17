@@ -53,7 +53,7 @@ const MapaPersonalizado = ({ onMesaSeleccionada }) => {
       return;
     }
 
-    alert(`Has seleccionado la ${mesa.nombre}.`);
+
     onMesaSeleccionada(mesa); // Notifica al componente padre sobre la selección
   };
 

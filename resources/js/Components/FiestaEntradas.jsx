@@ -70,7 +70,6 @@ const FiestaEntradas = () => {
     }
 
     agregarMesaAlCarrito({ ...mesaSeleccionada, precio: reservado.precio });
-    alert(`Has añadido ${mesaSeleccionada.nombre} al carrito.`);
     setMesaSeleccionada(null);
     setMostrarMapa(false);
   };
@@ -141,7 +140,7 @@ const FiestaEntradas = () => {
               {carrito.map((item) => (
                 <li key={`${item.tipo}-${item.id}`} className="carrito-item">
                   <span>
-                    {item.tipo === "mesa" ? `Mesa ${item.nombre}` : `Entrada ${item.tipo}`} -{" "}
+                    {item.tipo === "mesa" ? ` ${item.nombre}` : `Entrada ${item.tipo}`} -{" "}
                     {item.precio}€
                   </span>
                   <button
