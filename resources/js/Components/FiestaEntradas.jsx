@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Inertia } from "@inertiajs/inertia";
+import Cookies from "js-cookie";
 import MapaPersonalizado from "./MapaPersonalizado";
 
 const empiezaMayus = (text) => text.charAt(0).toUpperCase() + text.slice(1);
@@ -9,6 +10,19 @@ const FiestaEntradas = () => {
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [mostrarMapa, setMostrarMapa] = useState(false);
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
+
+  // Leer carrito desde las cookies al cargar
+  useEffect(() => {
+    const carritoGuardado = Cookies.get("carrito");
+    if (carritoGuardado) {
+      setCarrito(JSON.parse(carritoGuardado));
+    }
+  }, []);
+
+  // Guardar carrito en las cookies cada vez que se actualice
+  useEffect(() => {
+    Cookies.set("carrito", JSON.stringify(carrito), { expires: 7 });
+  }, [carrito]);
 
   const agregarAlCarrito = (entrada) => {
     const entradaExistente = carrito.find(
