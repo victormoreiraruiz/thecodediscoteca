@@ -3,23 +3,34 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 
-const EventosSalaCelebraciones = () => {
+const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(40);
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
+  const [precio, setPrecio] = useState(700); // Estado para el precio de la sala
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/2/reservas');
+      const response = await axios.get('/api/salas/1/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
     }
   };
 
+  const fetchSalaDetails = async () => {
+    try {
+      const response = await axios.get('/api/salas/1'); // Supone que hay una ruta para obtener los detalles de la sala
+      setPrecio(response.data.precio);
+    } catch (error) {
+      console.error('Error al obtener detalles de la sala:', error);
+    }
+  };
+
   useEffect(() => {
     fetchBookedDates();
+    fetchSalaDetails();
   }, []);
 
   const handleDateChange = (date) => {
@@ -54,32 +65,37 @@ const EventosSalaCelebraciones = () => {
       .split('T')[0];
 
     try {
-      await axios.post('/api/salas/2/reservar', {
+      const response = await axios.post('/api/salas/1/reservar', {
         fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,
       });
 
-      alert('Reserva creada exitosamente');
+      alert(response.data.message); // Muestra el mensaje de éxito
       setMotivo('');
-      setNumeroPersonas(40);
+      setNumeroPersonas(30);
       setSelectedDate(null);
       fetchBookedDates();
     } catch (error) {
-      console.error('Error al crear la reserva:', error);
-      alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
+      if (error.response && error.response.status === 403) {
+        alert(error.response.data.error); // Muestra el mensaje de error si no tiene saldo suficiente
+      } else {
+        console.error('Error al crear la reserva:', error);
+        alert('Hubo un problema al intentar crear la reserva. Inténtalo de nuevo.');
+      }
     }
   };
 
   return (
     <div>
-      <h2>Sala de Celebraciones</h2>
+      <h2>Sala Privada</h2>
       <div className="info-container">
-        <img src="/imagenes/salacelebraciones.jpeg" alt="Sala de Celebraciones" className="reservation-image" />
+        <img src="/imagenes/salaprivada.jpg" alt="Sala Privada" className="reservation-image" />
         <h3 className="reservation-description">
           El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
           Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
         </h3>
+        <h3 className="reservation-price">Precio: {precio}€</h3>
       </div>
 
       <div className="calendar-container">
@@ -124,4 +140,4 @@ const EventosSalaCelebraciones = () => {
   );
 };
 
-export default EventosSalaCelebraciones;
+export default EventosSalaPrivada;
