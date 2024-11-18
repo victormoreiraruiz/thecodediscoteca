@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ReservaController;
+use App\Models\User;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -76,7 +77,19 @@ Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
 
+Route::get('/confirmar-email/{token}', function ($token) {
+    $user = User::where('confirmation_token', $token)->first();
 
+    if (!$user) {
+        return redirect('/')->with('error', 'Token de confirmación inválido.');
+    }
+
+    $user->confirmation_token = null;
+    $user->email_verified_at = now();
+    $user->save();
+
+    return redirect('/login')->with('success', 'Correo confirmado. Ahora puedes iniciar sesión.');
+})->name('confirmar.email');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
