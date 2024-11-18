@@ -22,7 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'saldo',     // Agrega el campo saldo
-        'puntos_totales',    // Agrega el campo puntos
+        'puntos_totales',
+        'confirmation_token',    // Agrega el campo puntos
     ];
 
     /**
