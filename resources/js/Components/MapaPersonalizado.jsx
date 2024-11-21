@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import MapaPersonalizado from './MapaPersonalizado'; // Importa tu componente del mapa
@@ -140,3 +141,4 @@ const FiestaEntradas = () => {
 };
 
 export default FiestaEntradas;
+

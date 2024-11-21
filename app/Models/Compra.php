@@ -36,4 +36,11 @@ class Compra extends Model
                 ->withPivot('cantidad')
                 ->withTimestamps();
 }
+
+public function mesas()
+{
+    return $this->belongsToMany(Mesa::class, 'compra_mesas')
+                ->withPivot('cantidad')
+                ->withTimestamps();
+}
 }

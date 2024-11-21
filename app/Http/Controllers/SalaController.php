@@ -32,8 +32,21 @@ public function obtenerFechasOcupadas($id)
         'asistentes' => 'required|integer|min:1',
     ]);
 
+    $usuario = auth()->user(); // Usuario autenticado
+    $sala = Sala::findOrFail($id); // Encuentra la sala
+
+    // Verifica si el usuario tiene saldo suficiente
+    if ($usuario->saldo < $sala->precio) {
+        return response()->json(['error' => 'Saldo insuficiente para realizar la reserva.'], 403);
+    }
+
+    // Descuenta el precio de la sala del saldo del usuario
+    $usuario->saldo -= $sala->precio;
+    $usuario->save();
+
+    // Crea la reserva
     ReservaDiscoteca::create([
-        'usuario_id' => auth()->id(), // Asumiendo que el usuario está autenticado
+        'usuario_id' => $usuario->id,
         'sala_id' => $id,
         'fecha_reserva' => $validatedData['fecha_reserva'],
         'disponibilidad' => 'reservada',
@@ -41,7 +54,32 @@ public function obtenerFechasOcupadas($id)
         'descripcion' => $validatedData['descripcion'],
     ]);
 
-    return response()->json(['message' => 'Reserva creada exitosamente'], 201);
+    return response()->json(['message' => 'Reserva creada exitosamente.'], 201);
 }
+
+
+public function cancelarReserva($id)
+{
+    $reserva = ReservaDiscoteca::findOrFail($id);
+    $usuario = $reserva->usuario;
+    $sala = $reserva->sala;
+
+    // Verifica si se puede cancelar (más de un día en el futuro)
+    $hoy = now();
+    if ($reserva->fecha_reserva <= $hoy->addDay()->toDateString()) {
+        return response()->json(['error' => 'No se puede cancelar una reserva con menos de 1 día de anticipación.'], 403);
+    }
+
+    // Devuelve el precio de la sala al saldo del usuario
+    $usuario->saldo += $sala->precio;
+    $usuario->save();
+
+    // Elimina la reserva
+    $reserva->delete();
+
+    return response()->json(['message' => 'Reserva cancelada con éxito.']);
+}
+
+
 
 }

@@ -913,3 +913,40 @@ h2 {
 .li-estilo-h3 {
     margin-left: 20px;
 }
+
+.order-label {
+  display: block;
+  margin: 10px 0;
+}
+
+.order-select {
+  margin-left: 10px;
+  padding: 5px;
+  font-size: 16px;
+}
+
+.reserva {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.reserva-pasada {
+  background-color: #860303;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #860303;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.cancel-button:hover {
+  background-color: #a50505;
+}
+

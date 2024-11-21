@@ -4,6 +4,9 @@ use App\Http\Controllers\CompraController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
+use App\Http\Controllers\MesaController;
+use App\Http\Controllers\ReservaController;
+use App\Models\User;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +56,14 @@ Route::get('/salaconferencias', function () {return Inertia::render('SalaConfere
 Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
 Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
+Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva']);
+
+
+
+Route::get('/api/mesas', [MesaController::class, 'index']);
+
+
+
 
 
 
@@ -66,6 +77,7 @@ Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
 
+
 Route::get('/api/mesas', function () {
     return response()->json([
         ['id' => 1, 'reservada' => false],
@@ -76,6 +88,9 @@ Route::get('/api/mesas', function () {
 });
 
 
+    return redirect('/login')->with('success', 'Correo confirmado. Ahora puedes iniciar sesión.');
+})->name('confirmar.email');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -85,6 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/account/change-password', [PasswordController::class, 'update'])->name('password.update');
+    Route::post('/reservar-mesa', [ReservaController::class, 'reservarMesa']);
 
 });
 
