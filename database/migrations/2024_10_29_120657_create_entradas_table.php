@@ -16,8 +16,11 @@ return new class extends Migration
         Schema::create('entradas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('evento_id')->constrained('eventos')->onDelete('cascade'); // Relación con evento
-            $table->enum('tipo', ['normal', 'vip', 'premium']); // Tipo de entrada
+            $table->enum('tipo', ['normal', 'vip', 'premium', 'mesa']); // Tipo de entrada
             $table->decimal('precio', 10, 2); // Precio de la entrada
+            $table->boolean('reservar')->default(false); // Indica si requiere reserva
+            $table->string('ubicacion')->nullable(); // Ubicación (solo para mesas, opcional)
+            $table->boolean('reservada')->default(false); // Estado de reserva (solo para mesas)
             $table->timestamps();
         });
     }

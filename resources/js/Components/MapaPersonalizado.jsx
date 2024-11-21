@@ -8,8 +8,7 @@ const empiezaMayus = (text) => {
 
 const FiestaEntradas = () => {
     const [carrito, setCarrito] = useState([]);
-    const [mostrarCarrito, setMostrarCarrito] = useState(false);
-    const [mostrarMapa, setMostrarMapa] = useState(false); // Estado para controlar la visualización del mapa
+    const [mostrarMapa, setMostrarMapa] = useState(false); // Estado para mostrar/ocultar el mapa
 
     const agregarAlCarrito = (entrada) => {
         const entradaExistente = carrito.find(item => item.tipo === entrada.tipo);
@@ -79,10 +78,27 @@ const FiestaEntradas = () => {
                 <h3>Entrada {empiezaMayus(reservada.tipo)}</h3>
                 <br />
                 <div className="precio">Precio: {reservada.precio}€</div>
-                <button className="reservar" onClick={() => setMostrarMapa(true)}>
-                    RESERVAR
+                <button className="reservar" onClick={() => setMostrarMapa(!mostrarMapa)}>
+                    {mostrarMapa ? "OCULTAR MAPA" : "RESERVAR"}
                 </button>
             </div>
+
+            {/* Mostrar el mapa debajo si el estado lo permite */}
+            {mostrarMapa && (
+                <div style={{ marginTop: '20px' }}>
+                    <MapaPersonalizado
+                        onMesaSeleccionada={(mesa) =>
+                            alert(`Has seleccionado la ${mesa.nombre}`)
+                        }
+                    />
+                </div>
+            )}
+
+            {carrito.length > 0 && (
+                <div className="carrito-icono" onClick={() => setMostrarMapa(!mostrarMapa)}>
+                    🛒 <span>Carrito ({carrito.length})</span>
+                </div>
+            )}
 
             {mostrarCarrito && (
                 <div className="carrito-panel">
@@ -116,55 +132,6 @@ const FiestaEntradas = () => {
                     <div className="carrito-botones">
                         <button onClick={() => setCarrito([])}>Vaciar Carrito</button>
                         <button onClick={finalizarCompra}>Finalizar Compra</button>
-                    </div>
-                </div>
-            )}
-
-            {/* Mostrar mapa en un modal */}
-            {mostrarMapa && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1000,
-                    }}
-                >
-                    <div
-                        style={{
-                            position: 'relative',
-                            backgroundColor: 'white',
-                            padding: '20px',
-                            borderRadius: '10px',
-                            width: '620px',
-                            height: '650px',
-                        }}
-                    >
-                        <button
-                            style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                                background: 'red',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '30px',
-                                height: '30px',
-                                cursor: 'pointer',
-                                textAlign: 'center',
-                            }}
-                            onClick={() => setMostrarMapa(false)}
-                        >
-                            ✖
-                        </button>
-                        <MapaPersonalizado onMesaSeleccionada={(mesa) => console.log(`Mesa seleccionada: ${mesa.nombre}`)} />
                     </div>
                 </div>
             )}

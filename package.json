@@ -23,7 +23,9 @@
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
         "bootstrap": "^5.3.3",
+        "konva": "^9.3.16",
         "react-calendar": "^5.1.0",
+        "react-konva": "^18.2.10",
         "react-router-dom": "^6.28.0"
     }
 }

@@ -66,6 +66,14 @@ Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
 
+Route::get('/api/mesas', function () {
+    return response()->json([
+        ['id' => 1, 'reservada' => false],
+        ['id' => 2, 'reservada' => true],
+        ['id' => 3, 'reservada' => false],
+        ['id' => 4, 'reservada' => true],
+    ]);
+});
 
 
 Route::get('/dashboard', function () {
