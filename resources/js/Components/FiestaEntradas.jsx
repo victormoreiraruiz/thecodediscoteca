@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import MapaPersonalizado from './MapaPersonalizado'; // Importa tu componente del mapa
 
 const empiezaMayus = (text) => {
     return text.charAt(0).toUpperCase() + text.slice(1);
@@ -9,7 +8,6 @@ const empiezaMayus = (text) => {
 const FiestaEntradas = () => {
     const [carrito, setCarrito] = useState([]);
     const [mostrarCarrito, setMostrarCarrito] = useState(false);
-    const [mostrarMapa, setMostrarMapa] = useState(false); // Estado para controlar la visualización del mapa
 
     const agregarAlCarrito = (entrada) => {
         const entradaExistente = carrito.find(item => item.tipo === entrada.tipo);
@@ -40,23 +38,27 @@ const FiestaEntradas = () => {
         );
     };
 
+    const vaciarCarrito = () => {
+        setCarrito([]);
+        setMostrarCarrito(false);
+    };
+
     const calcularTotal = () => {
         return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
     };
+
 
     const finalizarCompra = () => {
         Inertia.post('/iniciar-compra', { carrito });
     };
 
-    // Entradas disponibles para compra
+
+
     const entradas = [
         { tipo: 'normal', precio: 10, id: 1 },
         { tipo: 'vip', precio: 30, id: 2 },
         { tipo: 'premium', precio: 50, id: 3 },
     ];
-
-    // Entrada reservada
-    const reservada = { tipo: 'mesa', precio: 150 };
 
     return (
         <div className="tienda">
@@ -73,16 +75,11 @@ const FiestaEntradas = () => {
                 </div>
             ))}
 
-            <p>RESERVADOS</p>
-
-            <div className="entrada">
-                <h3>Entrada {empiezaMayus(reservada.tipo)}</h3>
-                <br />
-                <div className="precio">Precio: {reservada.precio}€</div>
-                <button className="reservar" onClick={() => setMostrarMapa(true)}>
-                    RESERVAR
-                </button>
-            </div>
+            {carrito.length > 0 && (
+                <div className="carrito-icono" onClick={() => setMostrarCarrito(!mostrarCarrito)}>
+                    🛒 <span>Carrito ({carrito.length})</span>
+                </div>
+            )}
 
             {mostrarCarrito && (
                 <div className="carrito-panel">
@@ -114,57 +111,8 @@ const FiestaEntradas = () => {
                     </div>
 
                     <div className="carrito-botones">
-                        <button onClick={() => setCarrito([])}>Vaciar Carrito</button>
+                        <button onClick={vaciarCarrito}>Vaciar Carrito</button>
                         <button onClick={finalizarCompra}>Finalizar Compra</button>
-                    </div>
-                </div>
-            )}
-
-            {/* Mostrar mapa en un modal */}
-            {mostrarMapa && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1000,
-                    }}
-                >
-                    <div
-                        style={{
-                            position: 'relative',
-                            backgroundColor: 'white',
-                            padding: '20px',
-                            borderRadius: '10px',
-                            width: '620px',
-                            height: '650px',
-                        }}
-                    >
-                        <button
-                            style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                                background: 'red',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '30px',
-                                height: '30px',
-                                cursor: 'pointer',
-                                textAlign: 'center',
-                            }}
-                            onClick={() => setMostrarMapa(false)}
-                        >
-                            ✖
-                        </button>
-                        <MapaPersonalizado onMesaSeleccionada={(mesa) => console.log(`Mesa seleccionada: ${mesa.nombre}`)} />
                     </div>
                 </div>
             )}

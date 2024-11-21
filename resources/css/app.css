@@ -913,3 +913,139 @@ h2 {
 .li-estilo-h3 {
     margin-left: 20px;
 }
+.register-form label {
+  color: black;
+}
+.account-info {
+  margin-bottom: 1rem;
+}
+
+.btn-logout {
+  background-color: #e3342f;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: #cc1f1a;
+}
+
+/* Contenedor principal */
+.mi-cuenta-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Lista de campos (lado izquierdo) */
+.mi-cuenta-campos {
+  width: 25%;
+  padding: 20px;
+  border-right: 2px solid #333;
+}
+
+.mi-cuenta-titulo {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.mi-cuenta-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mi-cuenta-item {
+  margin-bottom: 1rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.mi-cuenta-item:hover {
+  color: #e5cc70;
+}
+
+/* Botón de cierre de sesión */
+.mi-cuenta-boton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #e3342f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mi-cuenta-boton:hover {
+  background-color: #cc1f1a;
+}
+
+/* Información seleccionada (centro) */
+.mi-cuenta-detalles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.mi-cuenta-detalle-titulo {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #e5cc70;
+}
+
+.mi-cuenta-detalle-info {
+  font-size: 1.5rem;
+  color: #e5cc70;
+}
+
+.mi-cuenta-mensaje {
+  font-size: 1.2rem;
+  color: #888;
+}
+.mi-cuenta-acciones {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Espacio entre los botones */
+}
+
+.mi-cuenta-acciones {
+  position: absolute; /* Permite posicionar elementos en relación al contenedor */
+  top: 20px; /* Distancia desde la parte superior */
+  right: 20px; /* Distancia desde la parte derecha */
+  display: flex;
+  gap: 15px; /* Espacio entre botones */
+}
+
+.mi-cuenta-boton-logout,
+.mi-cuenta-boton-password {
+  padding: 12px 30px; /* Espacio interno */
+  background-color: #e5cc70;
+  border: none;
+  color: black;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px; /* Tamaño de texto */
+  font-weight: bold; /* Texto en negrita */
+  min-width: 150px; /* Ancho mínimo */
+  text-align: center;
+  transition: background-color 0.3s ease; /* Transición para hover */
+}
+
+.mi-cuenta-boton-logout:hover,
+.mi-cuenta-boton-password:hover {
+  background-color: #d4b75f; /* Color más oscuro al hacer hover */
+}
+
+
