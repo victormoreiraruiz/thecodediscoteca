@@ -89,4 +89,23 @@ class ProfileController extends Controller
         'reservas' => $user->reservas()->with('sala')->get(),
     ]);
 }
+
+public function añadirSaldo(Request $request): RedirectResponse
+{
+    $request->validate([
+        'saldo' => 'required|numeric|min:0.01', // Aceptar valores decimales y validar el mínimo
+    ]);
+
+    $user = $request->user();
+
+    // Aumentar el saldo
+    $user->saldo = round($user->saldo + $request->input('saldo'), 2);
+    $user->save();
+
+    return Redirect::route('mi-cuenta')->with('success', 'Saldo añadido correctamente.');
+}
+
+
+
+
 }

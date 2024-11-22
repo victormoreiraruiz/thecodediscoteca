@@ -1049,3 +1049,39 @@ h2 {
 }
 
 
+.añadir-saldo-container {
+  max-width: 500px;
+  margin: 50px auto;
+  text-align: center;
+  color: #333;
+}
+
+.añadir-saldo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.añadir-saldo-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.añadir-saldo-boton {
+  padding: 12px 30px;
+  background-color: #e5cc70;
+  border: none;
+  color: black;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.añadir-saldo-boton:hover {
+  background-color: #d4ba60;
+}

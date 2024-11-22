@@ -20,10 +20,9 @@ const ResumenCompra = () => {
         });
     };
 
-    // Cargar el SDK de PayPal cuando el componente se monta
     useEffect(() => {
         const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=AYd5L69B51NLRWuwIDbxKLgC4eQy84SSb_7OSQwBxOBo_gRYowPqkBX5aNtjGxPqsa8Q4Y3ApHXEE2DK&currency=EUR`;
+        script.src = `https://www.paypal.com/sdk/js?client-id=AYd5L69B51NLRWuwIDbxKLgC4eQy84SSb_7OSQwBxOBo_gRYowPqkBX5aNtjGxPqsa8Q4Y3ApHXEE2DK&currency=EUR&disable-funding=card`;
         script.async = true;
         script.onload = () => {
             if (window.paypal) {
@@ -32,9 +31,9 @@ const ResumenCompra = () => {
                         return actions.order.create({
                             purchase_units: [{
                                 amount: {
-                                    value: total.toFixed(2) // Total de la compra
-                                }
-                            }]
+                                    value: total.toFixed(2),
+                                },
+                            }],
                         });
                     },
                     onApprove: (data, actions) => {
@@ -46,7 +45,7 @@ const ResumenCompra = () => {
                     onError: (err) => {
                         console.error('Error en el pago de PayPal:', err);
                         alert('Hubo un error al procesar el pago con PayPal.');
-                    }
+                    },
                 }).render('#paypal-button-container');
             }
         };
@@ -114,8 +113,9 @@ const ResumenCompra = () => {
                 </button>
             </div>
 
-            <div id="paypal-button-container" style={{ marginTop: '20px' }}>
-                {/* Aquí aparecerá el botón de PayPal */}
+            {/* Contenedor del botón PayPal */}
+            <div id="paypal-button-container" style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {/* Botón de PayPal */}
             </div>
         </div>
     );

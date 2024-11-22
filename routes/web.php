@@ -43,6 +43,15 @@ Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntrad
 
 
 Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');
+Route::get('/añadir-saldo', function () {
+    return Inertia::render('AñadirSaldo'); // Renderiza el componente AñadirSaldo
+})->name('añadir-saldo');
+
+// Ruta POST para procesar el saldo
+Route::post('/añadir-saldo', [ProfileController::class, 'añadirSaldo']);
+
+
+
 
 Route::get('/fiesta', function () {return Inertia::render('Fiesta');})->name('fiesta');
 Route::get('/galeria', function () {return Inertia::render('Galeria');})->name('galeria');

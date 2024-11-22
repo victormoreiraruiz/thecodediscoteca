@@ -22,6 +22,8 @@
     },
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
+        "@stripe/react-stripe-js": "^3.0.0",
+        "@stripe/stripe-js": "^5.2.0",
         "bootstrap": "^5.3.3",
         "konva": "^9.3.16",
         "react-calendar": "^5.1.0",

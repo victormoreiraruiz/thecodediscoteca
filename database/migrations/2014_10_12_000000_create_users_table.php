@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('rol', ['admin', 'cliente'])->default('cliente');
+            $table->enum('rol', ['admin', 'cliente', 'camarero'])->default('cliente');
             $table->integer('puntos_totales')->default(0);
-            $table->integer('saldo')->default(0);
+            $table->decimal('saldo', 10, 2)->default(0);
             $table->enum('membresia', ['base', 'plata','oro','diamante'])->default('base');
             $table->rememberToken();
             $table->timestamps();

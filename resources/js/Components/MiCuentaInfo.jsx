@@ -6,6 +6,7 @@ const MiCuentaInfo = () => {
     const { user, compras = [], reservas = [] } = usePage().props; // Props globales
     const [selectedOption, setSelectedOption] = useState(null); // Estado para la opción seleccionada
     const [expandedItems, setExpandedItems] = useState({ compras: null, reservas: null }); // Estado del acordeón
+    const [sortOption, setSortOption] = useState('fecha'); // Estado para la ordenación
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
@@ -17,14 +18,24 @@ const MiCuentaInfo = () => {
         }));
     };
 
+    // Ordenar reservas según la opción seleccionada
+    const sortedReservas = reservas.slice().sort((a, b) => {
+        if (sortOption === 'fecha') {
+            return new Date(a.fecha_reserva) - new Date(b.fecha_reserva); // Proximidad
+        } else if (sortOption === 'creacion') {
+            return new Date(b.created_at) - new Date(a.created_at); // Creación (descendente)
+        }
+        return 0;
+    });
+
     // Función para cancelar una reserva
     const handleCancelReservation = async (reserva) => {
         const fechaReserva = new Date(reserva.fecha_reserva);
         const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); // Asegura que solo compares fechas
+        hoy.setHours(0, 0, 0, 0);
 
         if (fechaReserva <= hoy) {
-            alert('No se puede cancelar una reserva para el mismo día.');
+            alert('No se puede cancelar una reserva para el mismo día o días pasados.');
             return;
         }
 
@@ -35,7 +46,7 @@ const MiCuentaInfo = () => {
         try {
             const response = await axios.delete(`/api/reservas/${reserva.id}`);
             alert(response.data.message || 'Reserva cancelada con éxito.');
-            location.reload(); // Refresca la página para actualizar los datos
+            location.reload();
         } catch (error) {
             console.error('Error al cancelar la reserva:', error);
             alert('Hubo un problema al cancelar la reserva. Inténtalo nuevamente.');
@@ -84,34 +95,61 @@ const MiCuentaInfo = () => {
         {
             label: 'Mis Reservas',
             detail: reservas.length > 0 ? (
-                reservas.map((reserva, index) => (
-                    <div key={index}>
-                        <div
-                            style={{ cursor: 'pointer', color: '#e5cc70', marginBottom: '10px' }}
-                            onClick={() => toggleExpand('reservas', index)}
+                <>
+                    <div style={{ marginBottom: '10px' }}>
+                        <label htmlFor="sort" style={{ color: 'white', marginRight: '10px' }}>Ordenar por:</label>
+                        <select
+                            id="sort"
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value)}
+                            style={{ padding: '5px', borderRadius: '5px' }}
                         >
-                            Reserva para el {new Date(reserva.fecha_reserva).toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
-                        </div>
-                        {expandedItems.reservas === index && (
-                            <div style={{ marginLeft: '20px' }}>
-                                <h3>Descripción: {reserva.descripcion}</h3>
-                                <button
-                                    style={{
-                                        marginTop: '10px',
-                                        color: '#e5cc70',
-                                        background: 'none',
-                                        border: '1px solid #e5cc70',
-                                        padding: '8px 16px',
-                                        cursor: 'pointer',
-                                    }}
-                                    onClick={() => handleCancelReservation(reserva)}
-                                >
-                                    Cancelar Reserva
-                                </button>
-                            </div>
-                        )}
+                            <option value="fecha">Proximidad</option>
+                            <option value="creacion">Creación</option>
+                        </select>
                     </div>
-                ))
+                    {sortedReservas.map((reserva, index) => {
+                        const fechaReserva = new Date(reserva.fecha_reserva);
+                        const hoy = new Date();
+                        hoy.setHours(0, 0, 0, 0);
+                        const esPasada = fechaReserva < hoy;
+
+                        return (
+                            <div key={index}>
+                                <div
+                                    style={{
+                                        cursor: 'pointer',
+                                        color: esPasada ? 'red' : '#e5cc70',
+                                        marginBottom: '10px',
+                                    }}
+                                    onClick={() => toggleExpand('reservas', index)}
+                                >
+                                    Reserva para el {fechaReserva.toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
+                                </div>
+                                {expandedItems.reservas === index && (
+                                    <div style={{ marginLeft: '20px' }}>
+                                        <h3>Descripción: {reserva.descripcion}</h3>
+                                        {!esPasada && (
+                                            <button
+                                                style={{
+                                                    marginTop: '10px',
+                                                    color: '#e5cc70',
+                                                    background: 'none',
+                                                    border: '1px solid #e5cc70',
+                                                    padding: '8px 16px',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onClick={() => handleCancelReservation(reserva)}
+                                            >
+                                                Cancelar Reserva
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </>
             ) : (
                 <p>No tienes reservas registradas.</p>
             ),
@@ -124,9 +162,14 @@ const MiCuentaInfo = () => {
     const handleLogout = () => {
         Inertia.post('/logout', {}, {
             onFinish: () => {
-                Inertia.visit('/'); // Redirigir a la página de inicio tras cerrar sesión
+                Inertia.visit('/');
             },
         });
+    };
+
+    // Función para redirigir a la página "Añadir Saldo"
+    const handleAddSaldo = () => {
+        Inertia.visit('/añadir-saldo');
     };
 
     return (
@@ -145,6 +188,14 @@ const MiCuentaInfo = () => {
                         </li>
                     ))}
                 </ul>
+
+                {/* Botón "Añadir Saldo" */}
+                <button
+                    className="mi-cuenta-boton-password"
+                    onClick={handleAddSaldo}
+                >
+                    Añadir Saldo
+                </button>
             </div>
 
             {/* Detalle seleccionado en el centro */}
@@ -157,20 +208,16 @@ const MiCuentaInfo = () => {
             </div>
 
             {/* Botones de acción debajo */}
-            
-<div className="mi-cuenta-container" style={{ position: 'relative' }}>
-    {/* Resto del contenido */}
-    <div className="mi-cuenta-acciones">
-        <button
-            className="mi-cuenta-boton-logout"
-            onClick={handleLogout}
-        >
-            Salir
-        </button>
-    </div>
-</div>
-
-
+            <div className="mi-cuenta-container" style={{ position: 'relative' }}>
+                <div className="mi-cuenta-acciones">
+                    <button
+                        className="mi-cuenta-boton-logout"
+                        onClick={handleLogout}
+                    >
+                        Salir
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

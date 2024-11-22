@@ -91,7 +91,7 @@ const FiestaEntradas = () => {
                         <ul>
                             {carrito.map(item => (
                                 <li key={item.tipo} className="carrito-item">
-                                    <span>{item.tipo}</span>
+                                    <span>Entrada {item.tipo}</span>
                                     <input
                                         type="number"
                                         min="1"
