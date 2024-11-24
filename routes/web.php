@@ -4,11 +4,12 @@ use App\Http\Controllers\CompraController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
+use App\Http\Controllers\EntradaController;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\Auth\PasswordController;
 
 
 Route::get('/', function () {
@@ -40,6 +41,13 @@ Route::get('/contacto', function () {
 })->name('contacto');
 
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntradas'])->name('eventos.entradas');
+Route::get('/api/conciertos', [EventoController::class, 'obtenerConciertos']);
+Route::get('/api/eventos/{eventoId}/entradas', [EntradaController::class, 'obtenerEntradasPorConcierto']);
+Route::post('/api/conciertos/{eventoId}/comprar-entradas', [CompraController::class, 'comprarEntradasConcierto']);
+Route::get('/conciertos/{id}', [EventoController::class, 'mostrarConcierto'])->name('conciertos.mostrar');
+Route::get('/conciertos', [EventoController::class, 'listarConciertos'])->name('conciertos.index');
+
+
 
 
 Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');

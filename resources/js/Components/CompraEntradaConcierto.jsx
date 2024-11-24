@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
 
 const empiezaMayus = (text) => {
@@ -57,8 +56,16 @@ const ComprarEntradasConcierto = ({ eventoId }) => {
         return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
     };
 
-    const finalizarCompra = () => {
-        Inertia.post('/iniciar-compra', { carrito });
+    const finalizarCompra = async () => {
+        try {
+            const response = await axios.post(`/api/conciertos/${eventoId}/comprar-entradas`, { carrito });
+            alert('Compra realizada con éxito');
+            setCarrito([]); // Vacía el carrito después de la compra
+            setMostrarCarrito(false); // Oculta el carrito
+        } catch (error) {
+            console.error('Error al finalizar la compra:', error);
+            alert('Hubo un problema al procesar la compra. Por favor, inténtalo de nuevo.');
+        }
     };
 
     return (
@@ -66,7 +73,7 @@ const ComprarEntradasConcierto = ({ eventoId }) => {
             <h1>Comprar Entradas para el Concierto</h1>
 
             {entradas.map(entrada => (
-                <div key={entrada.tipo} className="entrada">
+                <div key={entrada.id} className="entrada">
                     <h3>Entrada {empiezaMayus(entrada.tipo)}</h3>
                     <p>Precio: {entrada.precio}€</p>
                     <button onClick={() => agregarAlCarrito(entrada)}>Agregar al Carrito</button>
@@ -74,12 +81,18 @@ const ComprarEntradasConcierto = ({ eventoId }) => {
             ))}
 
             {carrito.length > 0 && (
-                <div>
+                <div className="carrito">
                     <h2>Carrito</h2>
                     <ul>
                         {carrito.map(item => (
                             <li key={item.tipo}>
-                                Entrada {item.tipo}: {item.cantidad} x {item.precio}€
+                                Entrada {empiezaMayus(item.tipo)}: {item.cantidad} x {item.precio}€
+                                <input
+                                    type="number"
+                                    value={item.cantidad}
+                                    min="1"
+                                    onChange={(e) => actualizarCantidad(item.tipo, parseInt(e.target.value))}
+                                />
                                 <button onClick={() => eliminarDelCarrito(item.tipo)}>Eliminar</button>
                             </li>
                         ))}

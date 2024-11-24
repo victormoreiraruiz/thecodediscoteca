@@ -83,5 +83,11 @@ class EntradaController extends Controller
         //
     }
 
+    public function obtenerEntradasPorConcierto($eventoId)
+{
+    $entradas = Entrada::where('evento_id', $eventoId)->get();
+    return response()->json($entradas);
+}
+
 
 }

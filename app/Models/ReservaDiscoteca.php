@@ -16,6 +16,8 @@ class ReservaDiscoteca extends Model
         'disponibilidad',
         'asistentes',
         'descripcion',
+        'tipo_reserva',
+        'precio_entrada'
 
     ];
 

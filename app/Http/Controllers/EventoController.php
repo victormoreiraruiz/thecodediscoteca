@@ -99,4 +99,30 @@ class EventoController extends Controller
             'entradas' => $entradas
         ]);
     }
+
+ 
+    public function mostrarConcierto($id)
+{
+    $concierto = Evento::with(['sala', 'entradas'])->findOrFail($id);
+
+    return inertia('Concierto', [
+        'concierto' => $concierto,
+    ]);
+}
+
+public function listarConciertos()
+{
+    $conciertos = Evento::whereHas('reservas', function ($query) {
+        $query->where('tipo_reserva', 'concierto');
+    })
+    ->with(['sala', 'entradas']) // Incluye sala y entradas relacionadas
+    ->get();
+
+    return inertia('Conciertos', [
+        'conciertos' => $conciertos,
+    ]);
+}
+
+
+
 }

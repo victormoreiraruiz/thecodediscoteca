@@ -6,6 +6,8 @@ import axios from 'axios';
 const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
+  const [tipoReserva, setTipoReserva] = useState('privada'); // Estado para el tipo de reserva
+  const [precioEntrada, setPrecioEntrada] = useState(''); // Estado para el precio de la entrada
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
 
@@ -49,6 +51,11 @@ const EventosSalaPrivada = () => {
       return;
     }
 
+    if (tipoReserva === 'concierto' && !precioEntrada) {
+      alert('Por favor, introduce un precio para las entradas del concierto.');
+      return;
+    }
+
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
       .split('T')[0];
@@ -58,11 +65,15 @@ const EventosSalaPrivada = () => {
         fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,
+        tipo_reserva: tipoReserva,
+        precio_entrada: tipoReserva === 'concierto' ? precioEntrada : null,
       });
 
       alert('Reserva creada exitosamente');
       setMotivo('');
       setNumeroPersonas(30);
+      setTipoReserva('privada');
+      setPrecioEntrada('');
       setSelectedDate(null);
       fetchBookedDates();
     } catch (error) {
@@ -75,9 +86,7 @@ const EventosSalaPrivada = () => {
     <div>
       <h2>Sala Privada</h2>
       <div className="info-container">
-
         <img src="/imagenes/salaprivada.jpg" alt="Sala Privada" className="reservation-image" />
-
         <h3 className="reservation-description">
           El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
           Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
@@ -89,11 +98,53 @@ const EventosSalaPrivada = () => {
           onChange={handleDateChange}
           value={selectedDate}
           minDate={new Date()}
-          tileClassName={({ date }) => isDateBooked(date) ? 'booked-date' : null}
+          tileClassName={({ date }) => (isDateBooked(date) ? 'booked-date' : null)}
         />
       </div>
 
       <form onSubmit={handleSubmit} className="event-form">
+        <label>
+          Número de personas:
+          <select
+            value={numeroPersonas}
+            onChange={(e) => setNumeroPersonas(Number(e.target.value))}
+            className="event-select"
+          >
+            {[...Array(6)].map((_, index) => (
+              <option key={index} value={(index + 1) * 50}>
+                {(index + 1) * 50}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Tipo de reserva:
+          <select
+            value={tipoReserva}
+            onChange={(e) => setTipoReserva(e.target.value)}
+            required
+          >
+            <option value="privada">Privada</option>
+            <option value="concierto">Concierto</option>
+          </select>
+        </label>
+
+        {tipoReserva === 'concierto' && (
+          <label>
+            Precio de entrada (€):
+            <input
+              type="number"
+              value={precioEntrada}
+              onChange={(e) => setPrecioEntrada(e.target.value)}
+              placeholder="Precio por entrada"
+              min="0"
+              step="0.01"
+              required
+            />
+          </label>
+        )}
+
         <label>
           ¿Para qué desea la sala?
           <textarea
@@ -103,23 +154,6 @@ const EventosSalaPrivada = () => {
             required
             className="event-textarea"
           />
-        </label>
-
-        <label>
-          Número de personas:
-          <select
-            value={numeroPersonas}
-            onChange={(e) => setNumeroPersonas(Number(e.target.value))}
-            className="event-select"
-          >
-
-            {[...Array(6)].map((_, index) => (
-              <option key={index} value={(index + 1) * 50}>
-                {(index + 1) * 50}
-
-              </option>
-            ))}
-          </select>
         </label>
 
         <button type="submit" className="event-submit-button">RESERVAR</button>

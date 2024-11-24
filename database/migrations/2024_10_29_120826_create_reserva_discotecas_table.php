@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('disponibilidad',['disponible','reservada']);
             $table->integer('asistentes');
             $table->text('descripcion');
+            $table->enum('tipo_reserva', ['privada', 'concierto'])->default('privada');
+            $table->decimal('precio_entrada', 8, 2)->nullable(); // Solo aplicable a conciertos
             $table->timestamps();
         });
     }
