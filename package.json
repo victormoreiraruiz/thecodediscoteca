@@ -19,5 +19,15 @@
         "react-dom": "^18.2.0",
         "tailwindcss": "^3.2.1",
         "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@inertiajs/inertia": "^0.11.1",
+        "@stripe/react-stripe-js": "^3.0.0",
+        "@stripe/stripe-js": "^5.2.0",
+        "bootstrap": "^5.3.3",
+        "konva": "^9.3.16",
+        "react-calendar": "^5.1.0",
+        "react-konva": "^18.2.10",
+        "react-router-dom": "^6.28.0"
     }
 }

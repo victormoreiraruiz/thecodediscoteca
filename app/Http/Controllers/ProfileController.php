@@ -24,6 +24,7 @@ class ProfileController extends Controller
         ]);
     }
 
+
     /**
      * Update the user's profile information.
      */
@@ -60,4 +61,51 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+    public function historialDeCompras(Request $request)
+    {
+        $user = $request->user();
+
+        // Recupera las compras del usuario con los detalles de las entradas
+        $compras = $user->compras()->with('entradas')->get() ?? collect([]);
+
+        // Recupera las reservas del usuario con la información de la sala
+        $reservas = $user->reservas()->with('sala')->get() ?? collect([]);
+
+        return Inertia::render('MiCuentaInfo', [
+            'compras' => $compras,
+            'reservas' => $reservas,
+        ]);
+    }
+
+    public function miCuenta(Request $request)
+{
+    $user = $request->user();
+
+    return Inertia::render('MiCuenta', [
+        'user' => $user,
+        'compras' => $user->compras()->with('entradas')->get(),
+        'reservas' => $user->reservas()->with('sala')->get(),
+    ]);
+}
+
+public function añadirSaldo(Request $request): RedirectResponse
+{
+    $request->validate([
+        'saldo' => 'required|numeric|min:0.01', // Aceptar valores decimales y validar el mínimo
+    ]);
+
+    $user = $request->user();
+
+    // Aumentar el saldo
+    $user->saldo = round($user->saldo + $request->input('saldo'), 2);
+    $user->save();
+
+    return Redirect::route('mi-cuenta')->with('success', 'Saldo añadido correctamente.');
+}
+
+
+
+
 }

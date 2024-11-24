@@ -7,9 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Compra extends Model
 {
+    protected $fillable = [
+        'usuario_id', // Asegúrate de que este campo esté aquí
+        'total',
+        'descuento_aplicado_id',
+        'puntos_aplicados',
+        'fecha_compra'
+    ];
+
     public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function descuento()
@@ -22,8 +30,10 @@ class Compra extends Model
         return $this->hasMany(CompraProducto::class);
     }
 
-    public function compra()
-    {
-        return $this->belongsToMany(CompraEntrada::class);
-    }
+    public function entradas()
+{
+    return $this->belongsToMany(Entrada::class, 'compra_entradas')
+                ->withPivot('cantidad')
+                ->withTimestamps();
+}
 }

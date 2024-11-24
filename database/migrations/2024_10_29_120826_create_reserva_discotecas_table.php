@@ -15,11 +15,14 @@ return new class extends Migration
     {
         Schema::create('reserva_discotecas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('sala_id')->constrained('salas')->onDelete('cascade');
             $table->date('fecha_reserva');
-            $table->time('inicio_reserva');
-            $table->time('final_reserva');
             $table->enum('disponibilidad',['disponible','reservada']);
+            $table->integer('asistentes');
+            $table->text('descripcion');
+            $table->enum('tipo_reserva', ['privada', 'concierto'])->default('privada');
+            $table->decimal('precio_entrada', 8, 2)->nullable(); // Solo aplicable a conciertos
             $table->timestamps();
         });
     }

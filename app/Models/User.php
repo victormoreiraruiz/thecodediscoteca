@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'saldo',     // Agrega el campo saldo
+        'puntos_totales',    // Agrega el campo puntos
     ];
 
     /**
@@ -42,15 +44,20 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function compra()
+    public function compras()
     {
-        return $this->hasMany(Compra::class);
+        return $this->hasMany(Compra::class, 'usuario_id');
     }
 
-    public function reserva()
-    {
-        return $this->hasMany(ReservaDiscoteca::class);
-    }
+
+    public function reservasDiscoteca()
+{
+    return $this->hasMany(ReservaDiscoteca::class);
+}
+    public function reservas()
+{
+    return $this->hasMany(ReservaDiscoteca::class, 'usuario_id');
+}
 
     public function sube_foto()
     {

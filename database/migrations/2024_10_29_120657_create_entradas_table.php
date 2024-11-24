@@ -15,11 +15,9 @@ return new class extends Migration
     {
         Schema::create('entradas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre_evento');
-            $table->decimal('precio',10,2);
-            $table->date('fecha_evento');
-            $table->time('inicio_evento');
-            $table->time('final_evento');
+            $table->foreignId('evento_id')->constrained('eventos')->onDelete('cascade'); // Relación con evento
+            $table->enum('tipo', ['normal', 'vip', 'premium', 'mesa']); // Tipo de entrada
+            $table->decimal('precio', 10, 2); // Precio de la entrada
             $table->timestamps();
         });
     }

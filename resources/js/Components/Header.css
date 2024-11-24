@@ -1,0 +1,37 @@
+/* Header.css */
+
+/* Elimina el fondo predeterminado y el color de Bootstrap */
+.custom-navbar {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  /* Estilos para el menú */
+  .custom-navbar .nav-link {
+    color: #333; /* Ajusta el color a lo que prefieras */
+    text-transform: uppercase;
+    padding: 10px 15px;
+    font-weight: bold;
+  }
+
+  .custom-navbar .nav-link:hover {
+    color: #007bff; /* Color al hacer hover */
+    text-decoration: none;
+  }
+
+  /* Estilos para el botón de hamburguesa */
+  .navbar-toggler {
+    border: none;
+  }
+
+  /* Color y estilo del ícono de hamburguesa */
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+  }
+
+  /* Ajustes para pantalla móvil */
+  @media (max-width: 991px) {
+    .custom-navbar .nav-link {
+      color: #333; /* Color para enlaces en el menú colapsado */
+    }
+  }

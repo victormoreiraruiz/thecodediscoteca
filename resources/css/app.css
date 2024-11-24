@@ -42,7 +42,7 @@ h2 {
   }
 
   .menu {
-    background-image: url("../img/logoconfondo.jpg");
+    background-image: url("../imagenes/logoconfondo.jpg");
     background-size: cover;
     background-position: center;
     height: 70vh;
@@ -63,6 +63,23 @@ h2 {
     margin-top: 10px;
   }
 
+  .menu2 {
+    display: flex;
+  }
+
+  .menu2 a {
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    padding: 15px;
+    padding: 0;
+    margin: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: xx-large;
+    margin-left: 40px;
+    margin-top: 10px;
+  }
   footer {
     background-color: #000000;
     color: #ffffff;
@@ -126,6 +143,8 @@ h2 {
   .amarillo {
     background-color: #e5cc70;
   }
+
+
 
   .rojo {
     background-color: #860303;
@@ -244,10 +263,7 @@ h2 {
     height: auto;
   }
 
-  .fiestacartel:hover {
-    -webkit-transform: translate(10%);
-      transform: translate(10%);
-  }
+
 
   .fiestatexto {
     max-width: 30%;
@@ -319,32 +335,6 @@ h2 {
     margin-bottom: 15px;
   }
 
-  .reservar:hover {
-    -webkit-transform: perspective(150px) rotateX(45deg);
-      transform: perspective(150px) rotateX(45deg);
-  }
-
-
-  :root {
-    --negro: #393939;
-    --blanco: #860303;
-    --sombra-ppal: #e5cc70;
-    --sombra-sec: #e5cc70;
-    --borde-negro: #00000050;
-    --marcado: rgb(127, 195, 255);
-
-  }
-
-  /* Las adaptamos al modo oscuro */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --negro: #ececec;
-      --blanco: #860303;
-      --sombra-ppal: #e5cc70;
-      --sombra-sec: #e5cc70;
-      --borde-negro: #FFFFFF50;
-    }
-  }
 
 
   .carrousel {
@@ -568,15 +558,573 @@ h2 {
             box-shadow: 0 0 0 transparent, 0 0 0 transparent, inset 0.5em 0.5em 1em var(--sombra-ppal), inset -0.5em -0.5em 1em var(--sombra-sec);
   }
 
-  .lightbox .grande {
-    width: 80%;
-    height: 80vh;
-    background: lightblue;
-    color: var(--negro);
-    -webkit-transition: all 0.4s ease;
-    transition: all 0.4s ease;
-    border-radius: 1em;
-    background-color: var(--blanco);
-    -webkit-box-shadow: 1em 1em 2em var(--sombra-ppal), -1em -1em 2em var(--sombra-sec), inset 0 0 0 transparent, inset 0 0 0 transparent;
-            box-shadow: 1em 1em 2em var(--sombra-ppal), -1em -1em 2em var(--sombra-sec), inset 0 0 0 transparent, inset 0 0 0 transparent;
+  .grande {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Distribuye las imágenes a lo largo de todo el ancho */
+    align-items: center;
+    gap: 20px; /* Espacio entre las imágenes */
+    width: 100%;
+    padding: 0 20px; /* Margen en los lados izquierdo y derecho */
+    box-sizing: border-box; /* Incluye el padding en el ancho total */
   }
+
+  .grande img {
+    flex-grow: 1;
+    max-width: 100%;
+    height: auto;
+  }
+
+ /* Icono del carrito en la esquina superior derecha */
+.carrito-icono {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Panel del carrito (sidebar) */
+  .carrito-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cerrar-carrito {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  .total {
+    margin-top: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .carrito-panel ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .carrito-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .carrito-item span {
+    flex: 1;
+    text-align: center;
+  }
+
+  .carrito-item input {
+    width: 60px;
+    text-align: center;
+    margin: 0 10px;
+  }
+
+  .eliminar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+  }
+
+  /* Contenedor para los botones de vaciar y finalizar */
+  .carrito-botones {
+    display: flex;
+    flex-direction: column; /* Coloca los botones en una columna */
+    gap: 10px; /* Espacio entre los botones */
+    align-items: center; /* Centra los botones horizontalmente */
+    margin-top: 20px;
+  }
+
+  .carrito-botones button {
+    padding: 10px;
+    width: 80%; /* Ajusta el ancho del botón para que esté centrado */
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .li-estilo-h3 {
+    font-size: 1.25em; /* Ajusta según el tamaño de h3 */
+    font-weight: bold;
+    color: #e5cc70;
+    margin: 0.5em 0;
+}
+.galeria-container {
+    text-align: center;
+    color: #fff;
+  }
+
+  .galeria-container h2 {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+    text-transform: uppercase;
+  }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+
+  .galeria-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .galeria-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .galeria-item span {
+    display: block;
+    margin-top: 5px;
+    color: #fff;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+    border-radius: 3px;
+    width: fit-content; /* Ajusta el ancho del span al contenido */
+  }
+
+
+  .informacion-container {
+    font-family: Arial, sans-serif;
+    color: #fff;
+    width: 100vw; /* Hace que el contenedor ocupe el ancho completo de la ventana */
+    overflow: hidden; /* Evita desbordamientos */
+  }
+
+  .header-section {
+    position: relative;
+    text-align: center;
+    width: 100%;
+  }
+
+  .header-image {
+    width: 100%;
+    height: auto; /* Mantiene la proporción de la imagen */
+    object-fit: cover; /* Asegura que la imagen cubra el ancho completo sin estirarse */
+  }
+  .intro-section {
+    background-color: #e5cc70;
+    padding: 40px; /* Aumenta el espacio alrededor del contenido */
+    text-align: center;
+    color: #333; /* Color del texto */
+
+    margin: 20px; /* Espacio alrededor de la sección */
+  }
+
+  .intro-section h3 {
+    font-size: 2em;
+    margin: 0;
+    margin-bottom: 20px; /* Espacio debajo del título */
+  }
+
+  .intro-section p {
+    font-size: 1.2em; /* Tamaño de fuente un poco mayor */
+    margin-top: 20px; /* Espacio encima del párrafo */
+    line-height: 1.8; /* Mayor separación entre líneas */
+  }
+
+  .reservation-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: #000;
+  }
+
+  .reservation-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .reservation-item.reverse {
+    flex-direction: row-reverse; /* Alterna la posición de la imagen y el texto */
+  }
+
+  .reservation-image {
+    width: 50%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .reservation-content {
+    width: 50%;
+    color: #fff;
+    text-align: left;
+  }
+
+  .reservation-content h4 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #bbb;
+  }
+
+  .reservation-content p {
+    font-size: 1em;
+    margin-bottom: 20px;
+    color: #bbb;
+    line-height: 1.6;
+  }
+
+  .reserve-button {
+    background-color: #f4d35e;
+    color: #000;
+    padding: 15px; /* Aumenta el tamaño del botón */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-left: 220px; /* Desplaza el botón hacia la derecha */
+    white-space: nowrap;
+  }
+
+  .reserve-button:hover {
+    background-color: #e5c04d;
+  }
+
+  .info-container {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espacio entre la imagen y el texto */
+    margin-bottom: 20px;
+  }
+
+  .reservation-image {
+    width: 50%; /* Ajusta el tamaño de la imagen */
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .reservation-description {
+    width: 50%; /* Ajusta el ancho de la descripción */
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: #f4d35e; /* Cambia el color del texto */
+  }
+
+  .event-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .event-textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    resize: vertical;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .event-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .event-submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f4d35e;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .event-submit-button:hover {
+    background-color: #e5c04d;
+  }
+
+  .booked-date {
+    background-color: red !important;
+    color: white !important;
+  }
+
+  .calendar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0; /* Reduce el espacio vertical alrededor del calendario */
+  }
+
+  .historial h2 {
+    margin-bottom: 10px;
+}
+
+.compra h3, .reserva h3 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.compra-detalles, .reserva-detalles {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.li-estilo-h3 {
+    margin-left: 20px;
+}
+.register-form label {
+  color: black;
+}
+.account-info {
+  margin-bottom: 1rem;
+}
+
+.btn-logout {
+  background-color: #e3342f;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: #cc1f1a;
+}
+
+/* Contenedor principal */
+.mi-cuenta-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Lista de campos (lado izquierdo) */
+.mi-cuenta-campos {
+  width: 25%;
+  padding: 20px;
+  border-right: 2px solid #333;
+}
+
+.mi-cuenta-titulo {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.mi-cuenta-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mi-cuenta-item {
+  margin-bottom: 1rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.mi-cuenta-item:hover {
+  color: #e5cc70;
+}
+
+/* Botón de cierre de sesión */
+.mi-cuenta-boton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #e3342f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mi-cuenta-boton:hover {
+  background-color: #cc1f1a;
+}
+
+/* Información seleccionada (centro) */
+.mi-cuenta-detalles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.mi-cuenta-detalle-titulo {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #e5cc70;
+}
+
+.mi-cuenta-detalle-info {
+  font-size: 1.5rem;
+  color: #e5cc70;
+}
+
+.mi-cuenta-mensaje {
+  font-size: 1.2rem;
+  color: #888;
+}
+.mi-cuenta-acciones {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Espacio entre los botones */
+}
+
+.mi-cuenta-acciones {
+  position: absolute; /* Permite posicionar elementos en relación al contenedor */
+  top: 20px; /* Distancia desde la parte superior */
+  right: 20px; /* Distancia desde la parte derecha */
+  display: flex;
+  gap: 15px; /* Espacio entre botones */
+}
+
+.mi-cuenta-boton-logout,
+.mi-cuenta-boton-password {
+  padding: 12px 30px; /* Espacio interno */
+  background-color: #e5cc70;
+  border: none;
+  color: black;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px; /* Tamaño de texto */
+  font-weight: bold; /* Texto en negrita */
+  min-width: 150px; /* Ancho mínimo */
+  text-align: center;
+  transition: background-color 0.3s ease; /* Transición para hover */
+}
+
+.mi-cuenta-boton-logout:hover,
+.mi-cuenta-boton-password:hover {
+  background-color: #d4b75f; /* Color más oscuro al hacer hover */
+}
+
+
+.añadir-saldo-container {
+  max-width: 500px;
+  margin: 50px auto;
+  text-align: center;
+  color: #333;
+}
+
+.añadir-saldo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.añadir-saldo-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.añadir-saldo-boton {
+  padding: 12px 30px;
+  background-color: #e5cc70;
+  border: none;
+  color: black;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.añadir-saldo-boton:hover {
+  background-color: #d4ba60;
+}
+
+.concerts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.concert-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.concert-card:hover {
+  transform: translateY(-5px);
+}
+
+.concert-cartel {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.ver-mas {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.ver-mas:hover {
+  background-color: #0056b3;
+}

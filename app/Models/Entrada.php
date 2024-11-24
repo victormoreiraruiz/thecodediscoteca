@@ -6,9 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Entrada extends Model
+
+
 {
-    public function compra_entrada()
-    {
-        return $this->hasMany(CompraEntrada::class);
-    }
+    protected $fillable = ['evento_id', 'tipo', 'precio'];
+    public function evento()
+{
+    return $this->belongsTo(Evento::class);
+}
+
+public function compras()
+{
+    return $this->belongsToMany(Compra::class, 'compra_entradas')
+                ->withPivot('cantidad')
+                ->withTimestamps();
+}
 }
