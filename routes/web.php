@@ -74,7 +74,10 @@ Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])-
 
 
 
-
+Route::post('/guardar-carrito', function (Request $request) {
+    session(['carrito' => $request->input('carrito')]); // Guarda el carrito en la sesión
+    return response()->json(['message' => 'Carrito guardado en la sesión.']);
+});
 
 Route::get('/resumen-compra', [CompraController::class, 'resumen'])->name('compra.resumen');
 Route::post('/iniciar-compra', [CompraController::class, 'iniciarCompra'])->name('iniciar.compra');

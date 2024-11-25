@@ -23,12 +23,12 @@ class CompraController extends Controller
     public function resumen(Request $request)
     {
         $user = $request->user();
-
-        $carrito = session('carrito', []); // Obtiene el carrito de la sesión
+    
+        $carrito = session('carrito', []); // Obtiene el carrito desde la sesión
         $total = collect($carrito)->reduce(function ($sum, $item) {
             return $sum + ($item['precio'] * $item['cantidad']);
         }, 0);
-
+    
         return Inertia::render('ResumenCompra', [
             'carrito' => $carrito,
             'total' => $total,
@@ -36,10 +36,11 @@ class CompraController extends Controller
                 'nombre' => $user->name,
                 'correo' => $user->email,
                 'saldo' => $user->saldo,
-                'puntos_totales' => $user->puntos_totales, // Cambiado de "puntos" a "puntos_totales"
+                'puntos_totales' => $user->puntos_totales,
             ] : null,
         ]);
     }
+    
 
     public function confirmarCompra(Request $request)
     {
