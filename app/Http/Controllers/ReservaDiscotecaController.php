@@ -1,85 +1,55 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Models;
 
-use App\Models\ReservaDiscoteca;
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class ReservaDiscotecaController extends Controller
+class ReservaDiscoteca extends Model
 {
+    use HasFactory;
+
+    protected $fillable = [
+        'usuario_id',
+        'sala_id',
+        'fecha_reserva',
+        'disponibilidad',
+        'asistentes',
+        'descripcion',
+        'tipo_reserva',
+        'precio_entrada',
+    ];
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Relación con el modelo Usuario (quién creó la reserva).
      */
-    public function index()
+    public function usuario()
     {
-        //
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Relación con el modelo Sala.
      */
-    public function create()
+    public function sala()
     {
-        //
+        return $this->belongsTo(Sala::class, 'sala_id');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Relación con el modelo Evento, si la reserva está asociada a un concierto.
      */
-    public function store(Request $request)
+    public function evento()
     {
-        //
+        return $this->hasOne(Evento::class, 'sala_id', 'sala_id')
+                    ->whereColumn('fecha_evento', 'fecha_reserva');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ReservaDiscoteca  $reservaDiscoteca
-     * @return \Illuminate\Http\Response
+     * Comprueba si la reserva es de tipo concierto.
      */
-    public function show(ReservaDiscoteca $reservaDiscoteca)
+    public function esConcierto()
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ReservaDiscoteca  $reservaDiscoteca
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ReservaDiscoteca $reservaDiscoteca)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ReservaDiscoteca  $reservaDiscoteca
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, ReservaDiscoteca $reservaDiscoteca)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ReservaDiscoteca  $reservaDiscoteca
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ReservaDiscoteca $reservaDiscoteca)
-    {
-        //
+        return $this->tipo_reserva === 'concierto';
     }
 }

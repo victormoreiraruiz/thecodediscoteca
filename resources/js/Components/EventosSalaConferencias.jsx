@@ -11,7 +11,7 @@ const EventosSalaConferencias = () => {
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/1/reservas');
+      const response = await axios.get('/api/salas/3/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
@@ -54,7 +54,7 @@ const EventosSalaConferencias = () => {
       .split('T')[0];
 
     try {
-      await axios.post('/api/salas/1/reservar', {
+      await axios.post('/api/salas/3/reservar', {
         fecha_reserva: adjustedDate,
         descripcion: motivo,
         asistentes: numeroPersonas,

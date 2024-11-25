@@ -7,13 +7,17 @@ const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
   const [tipoReserva, setTipoReserva] = useState('privada'); // Estado para el tipo de reserva
-  const [precioEntrada, setPrecioEntrada] = useState(''); // Estado para el precio de la entrada
+  const [precioEntrada, setPrecioEntrada] = useState(''); // Precio para entradas de concierto
+  const [nombreConcierto, setNombreConcierto] = useState(''); // Nombre del concierto
+  const [horaInicio, setHoraInicio] = useState(''); // Hora de inicio del concierto
+  const [horaFin, setHoraFin] = useState(''); // Hora de fin del concierto
+  const [cartel, setCartel] = useState(null); // Archivo del cartel
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/3/reservas');
+      const response = await axios.get('/api/salas/1/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
@@ -34,6 +38,10 @@ const EventosSalaPrivada = () => {
     );
   };
 
+  const handleCartelChange = (e) => {
+    setCartel(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,17 +50,11 @@ const EventosSalaPrivada = () => {
       return;
     }
 
-    const isAlreadyBooked = bookedDates.some(
-      (bookedDate) => new Date(bookedDate).toDateString() === selectedDate.toDateString()
-    );
-
-    if (isAlreadyBooked) {
-      alert('Esta fecha ya está reservada. Por favor, selecciona otra fecha.');
-      return;
-    }
-
-    if (tipoReserva === 'concierto' && !precioEntrada) {
-      alert('Por favor, introduce un precio para las entradas del concierto.');
+    if (
+      tipoReserva === 'concierto' &&
+      (!precioEntrada || !nombreConcierto || !horaInicio || !horaFin)
+    ) {
+      alert('Por favor, completa todos los campos obligatorios para el concierto.');
       return;
     }
 
@@ -60,13 +62,22 @@ const EventosSalaPrivada = () => {
       .toISOString()
       .split('T')[0];
 
+    const formData = new FormData();
+    formData.append('fecha_reserva', adjustedDate);
+    formData.append('descripcion', motivo);
+    formData.append('asistentes', numeroPersonas);
+    formData.append('tipo_reserva', tipoReserva);
+    formData.append('precio_entrada', tipoReserva === 'concierto' ? precioEntrada : null);
+    formData.append('nombre_concierto', tipoReserva === 'concierto' ? nombreConcierto : '');
+    formData.append('hora_inicio', tipoReserva === 'concierto' ? horaInicio : '');
+    formData.append('hora_fin', tipoReserva === 'concierto' ? horaFin : '');
+    if (cartel) {
+      formData.append('cartel', cartel);
+    }
+
     try {
-      await axios.post('/api/salas/3/reservar', {
-        fecha_reserva: adjustedDate,
-        descripcion: motivo,
-        asistentes: numeroPersonas,
-        tipo_reserva: tipoReserva,
-        precio_entrada: tipoReserva === 'concierto' ? precioEntrada : null,
+      await axios.post('/api/salas/1/reservar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       alert('Reserva creada exitosamente');
@@ -74,6 +85,10 @@ const EventosSalaPrivada = () => {
       setNumeroPersonas(30);
       setTipoReserva('privada');
       setPrecioEntrada('');
+      setNombreConcierto('');
+      setHoraInicio('');
+      setHoraFin('');
+      setCartel(null);
       setSelectedDate(null);
       fetchBookedDates();
     } catch (error) {
@@ -131,18 +146,56 @@ const EventosSalaPrivada = () => {
         </label>
 
         {tipoReserva === 'concierto' && (
-          <label>
-            Precio de entrada (€):
-            <input
-              type="number"
-              value={precioEntrada}
-              onChange={(e) => setPrecioEntrada(e.target.value)}
-              placeholder="Precio por entrada"
-              min="0"
-              step="0.01"
-              required
-            />
-          </label>
+          <>
+            <label>
+              Nombre del concierto:
+              <input
+                type="text"
+                value={nombreConcierto}
+                onChange={(e) => setNombreConcierto(e.target.value)}
+                placeholder="Nombre del concierto"
+                required
+              />
+            </label>
+
+            <label>
+              Hora de inicio:
+              <input
+                type="time"
+                value={horaInicio}
+                onChange={(e) => setHoraInicio(e.target.value)}
+                required
+              />
+            </label>
+
+            <label>
+              Hora de fin:
+              <input
+                type="time"
+                value={horaFin}
+                onChange={(e) => setHoraFin(e.target.value)}
+                required
+              />
+            </label>
+
+            <label>
+              Cartel del concierto:
+              <input type="file" onChange={handleCartelChange} accept="image/*" required />
+            </label>
+
+            <label>
+              Precio de entrada (€):
+              <input
+                type="number"
+                value={precioEntrada}
+                onChange={(e) => setPrecioEntrada(e.target.value)}
+                placeholder="Precio por entrada"
+                min="0"
+                step="0.01"
+                required
+              />
+            </label>
+          </>
         )}
 
         <label>

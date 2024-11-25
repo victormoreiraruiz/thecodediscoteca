@@ -23,12 +23,12 @@ class CompraController extends Controller
     public function resumen(Request $request)
     {
         $user = $request->user();
-
-        $carrito = session('carrito', []); // Obtiene el carrito de la sesión
+    
+        $carrito = session('carrito', []); // Obtiene el carrito desde la sesión
         $total = collect($carrito)->reduce(function ($sum, $item) {
             return $sum + ($item['precio'] * $item['cantidad']);
         }, 0);
-
+    
         return Inertia::render('ResumenCompra', [
             'carrito' => $carrito,
             'total' => $total,
@@ -36,10 +36,11 @@ class CompraController extends Controller
                 'nombre' => $user->name,
                 'correo' => $user->email,
                 'saldo' => $user->saldo,
-                'puntos_totales' => $user->puntos_totales, // Cambiado de "puntos" a "puntos_totales"
+                'puntos_totales' => $user->puntos_totales,
             ] : null,
         ]);
     }
+    
 
     public function confirmarCompra(Request $request)
     {
@@ -97,43 +98,68 @@ class CompraController extends Controller
         }
     }
     public function comprarEntradasConcierto(Request $request, $eventoId)
-{
-    $user = $request->user();
-    $carrito = $request->input('carrito', []); // Recibe el carrito desde el frontend
-    $total = collect($carrito)->reduce(function ($sum, $item) {
-        return $sum + ($item['precio'] * $item['cantidad']);
-    }, 0);
-
-    DB::beginTransaction();
-    try {
-        // Crea el registro de la compra
-        $compra = Compra::create([
-            'usuario_id' => $user->id,
-            'total' => $total,
-            'fecha_compra' => now(),
-        ]);
-
-        // Asocia las entradas compradas a la compra
-        foreach ($carrito as $item) {
-            $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
-                ->where('id', $item['id'])
-                ->first();
-
-            if (!$entrada) {
-                throw new \Exception("La entrada no es válida para el concierto seleccionado.");
+    {
+        $user = $request->user();
+        $carrito = $request->input('carrito', []);
+        $total = collect($carrito)->reduce(function ($sum, $item) {
+            return $sum + ($item['precio'] * $item['cantidad']);
+        }, 0);
+    
+        DB::beginTransaction();
+        try {
+            // Verifica si el usuario tiene saldo suficiente
+            if ($user->saldo < $total) {
+                return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
             }
-
-            $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+    
+            // Crea el registro de la compra
+            $compra = Compra::create([
+                'usuario_id' => $user->id,
+                'total' => $total,
+                'fecha_compra' => now(),
+            ]);
+    
+            // Asocia las entradas compradas a la compra
+            foreach ($carrito as $item) {
+                $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
+                    ->where('id', $item['id'])
+                    ->first();
+    
+                if (!$entrada) {
+                    throw new \Exception("La entrada no es válida para el concierto seleccionado.");
+                }
+    
+                $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+            }
+    
+            // Resta el saldo del usuario comprador
+            $user->saldo -= $total;
+            $user->save();
+    
+            // Incrementa los ingresos del usuario creador de la reserva
+            $reserva = \App\Models\ReservaDiscoteca::where('sala_id', $entrada->evento->sala_id)
+                ->where('fecha_reserva', $entrada->evento->fecha_evento)
+                ->first();
+    
+            if ($reserva) {
+                $creador = $reserva->usuario; // Usuario que creó la reserva
+                $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) use ($reserva) {
+                    return $sum + ($item['cantidad'] * $reserva->precio_entrada);
+                }, 0);
+                $creador->ingresos += $ingresoTotal;
+                $creador->save();
+            }
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Compra realizada con éxito.', 'compra_id' => $compra->id], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al comprar entradas de concierto:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'No se pudo completar la compra.'], 500);
         }
-
-        DB::commit();
-
-        return response()->json(['message' => 'Compra de entradas realizada con éxito.', 'compra_id' => $compra->id], 201);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Error al comprar entradas de concierto:', ['error' => $e->getMessage()]);
-        return response()->json(['error' => 'No se pudo completar la compra.'], 500);
     }
-}
+    
 
+    
 }
