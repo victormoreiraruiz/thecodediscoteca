@@ -105,6 +105,40 @@ public function añadirSaldo(Request $request): RedirectResponse
     return Redirect::route('mi-cuenta')->with('success', 'Saldo añadido correctamente.');
 }
 
+public function obtenerIngresos(Request $request)
+{
+    $user = $request->user();
+
+    // Asegúrate de cargar todas las relaciones necesarias
+    $reservas = \App\Models\ReservaDiscoteca::with('evento.entradas.compras')
+        ->where('usuario_id', $user->id)
+        ->where('tipo_reserva', 'concierto')
+        ->get();
+
+    $ingresos = $reservas->map(function ($reserva) {
+        $evento = $reserva->evento;
+
+        if (!$evento) {
+            return null; // Ignorar reservas sin evento asociado
+        }
+
+        $totalIngresos = $evento->entradas->reduce(function ($carry, $entrada) {
+            return $carry + $entrada->compras->sum(function ($compra) use ($entrada) {
+                return $compra->pivot->cantidad * $entrada->precio;
+            });
+        }, 0);
+
+        return [
+            'id' => $evento->id,
+            'nombre_evento' => $evento->nombre_evento,
+            'fecha_evento' => $evento->fecha_evento,
+            'total_ingresos' => $totalIngresos,
+        ];
+    })->filter();
+
+    // Retornar una respuesta JSON limpia
+    return response()->json($ingresos->values());
+}
 
 
 

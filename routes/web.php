@@ -97,6 +97,8 @@ Route::get('/api/mesas', function () {
     ]);
 });
 
+Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->name('mi-cuenta.ingresos');
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -107,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/account/change-password', [PasswordController::class, 'update'])->name('password.update');
+    Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->middleware('auth');
 
 });
 

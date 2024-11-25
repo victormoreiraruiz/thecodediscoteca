@@ -17,7 +17,7 @@ const EventosSalaPrivada = () => {
 
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get('/api/salas/3/reservas');
+      const response = await axios.get('/api/salas/1/reservas');
       setBookedDates(response.data);
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
@@ -76,7 +76,7 @@ const EventosSalaPrivada = () => {
     }
 
     try {
-      await axios.post('/api/salas/3/reservar', formData, {
+      await axios.post('/api/salas/1/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
