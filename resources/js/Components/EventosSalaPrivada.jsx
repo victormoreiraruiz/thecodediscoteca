@@ -148,7 +148,7 @@ const EventosSalaPrivada = () => {
         {tipoReserva === 'concierto' && (
           <>
             <label>
-              Nombre del concierto:
+              <h3>Nombre del concierto:</h3>
               <input
                 type="text"
                 value={nombreConcierto}
@@ -159,7 +159,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              Hora de inicio:
+              <h3>Hora de inicio:</h3>
               <input
                 type="time"
                 value={horaInicio}
@@ -169,7 +169,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              Hora de fin:
+              <h3>Hora de fin:</h3>
               <input
                 type="time"
                 value={horaFin}
@@ -179,12 +179,13 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              Cartel del concierto:
+              <h3>Cartel del concierto:</h3>
               <input type="file" onChange={handleCartelChange} accept="image/*" required />
             </label>
 
             <label>
-              Precio de entrada (€):
+              <h3>Precio de entrada (€):</h3>
+              
               <input
                 type="number"
                 value={precioEntrada}
@@ -199,7 +200,8 @@ const EventosSalaPrivada = () => {
         )}
 
         <label>
-          ¿Para qué desea la sala?
+          <h3>Describa en que consite el evento:</h3>
+          
           <textarea
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
