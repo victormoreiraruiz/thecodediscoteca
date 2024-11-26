@@ -91,7 +91,7 @@ const FiestaEntradas = () => {
                         <ul>
                             {carrito.map(item => (
                                 <li key={item.tipo} className="carrito-item">
-                                    <span>{item.tipo}</span>
+                                    <span>Entrada {item.tipo}</span>
                                     <input
                                         type="number"
                                         min="1"
@@ -99,7 +99,7 @@ const FiestaEntradas = () => {
                                         onChange={(e) => actualizarCantidad(item.tipo, parseInt(e.target.value))}
                                     />
                                     <button className="eliminar" onClick={() => eliminarDelCarrito(item.tipo)}>
-                                        🗑️
+                                    ❌
                                     </button>
                                 </li>
                             ))}
