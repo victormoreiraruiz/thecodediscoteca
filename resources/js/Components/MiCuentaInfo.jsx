@@ -59,11 +59,11 @@ const MiCuentaInfo = () => {
     };
 
     const userItems = [
-        { label: 'Nombre', detail: user.name },
-        { label: 'Email', detail: user.email },
-        { label: 'Saldo', detail: `${user.saldo} €` },
-        { label: 'Puntos', detail: user.puntos_totales },
-        { label: 'Ingresos', detail: `${user.ingresos} €` }, // Nuevo campo
+        { label: 'Nombre', detail:"Su nombre es " + user.name + "." },
+        { label: 'Email', detail: "Su email es " +  user.email + "."},
+        { label: 'Saldo', detail: "Su saldo actual es de " +`${user.saldo} €` },
+        { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + "puntos." },
+        { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos} €` }, // Nuevo campo
     ];
     
 
@@ -107,7 +107,7 @@ const MiCuentaInfo = () => {
             ),
         },
         {
-            label: 'Mis Reservas',
+            label: 'Mis Eventos',
             detail: reservas.length > 0 ? (
                 <div>
                     <label htmlFor="sort" style={{ color: 'white', marginRight: '10px' }}>Ordenar por:</label>
@@ -151,20 +151,6 @@ const MiCuentaInfo = () => {
                 </div>
             ) : (
                 <p>No tienes reservas registradas.</p>
-            ),
-        },
-        {
-            label: 'Mis Ingresos',
-            detail: ingresos.length > 0 ? (
-                ingresos.map((evento) => (
-                    <div key={evento.id}>
-                        <h3>{evento.nombre_evento}</h3>
-                        <p>Fecha: {evento.fecha_evento}</p>
-                        <p>Ingresos totales: {evento.entradas[0]?.total_ingresos || 0}€</p>
-                    </div>
-                ))
-            ) : (
-                <p>No has generado ingresos aún.</p>
             ),
         },
     ];
