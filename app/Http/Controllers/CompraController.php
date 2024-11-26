@@ -6,6 +6,8 @@ use App\Models\Compra;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
+use Illuminate\Support\Facades\Storage;
 
 class CompraController extends Controller
 {
@@ -42,16 +44,16 @@ class CompraController extends Controller
     }
     
 
+    
     public function confirmarCompra(Request $request)
     {
         $user = $request->user();
-        $carrito = session('carrito', []); // Usa el carrito de la sesión
+        $carrito = session('carrito', []);
         $total = collect($carrito)->reduce(function ($sum, $item) {
             return $sum + ($item['precio'] * $item['cantidad']);
         }, 0);
         $pagarConSaldo = $request->input('pagarConSaldo');
     
-        // Registra en el log para diagnosticar posibles problemas
         \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
     
         if ($pagarConSaldo && $user->saldo < $total) {
@@ -67,36 +69,59 @@ class CompraController extends Controller
                 'fecha_compra' => now(),
             ]);
     
-            // Asocia cada entrada del carrito a la compra
+            // Generar un QR por cada entrada comprada
             foreach ($carrito as $item) {
                 if (isset($item['id']) && isset($item['cantidad'])) {
+                    // Asocia la entrada a la compra
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+    
+                    // Generar un QR por cada unidad de la entrada comprada
+                    for ($i = 1; $i <= $item['cantidad']; $i++) {
+                        $this->generarQr($compra, $item['id'], $i);
+                    }
                 }
             }
     
-            // Si el usuario paga con saldo, resta el saldo
             if ($pagarConSaldo) {
                 $user->saldo -= $total;
             }
     
-            // Calcula los puntos ganados (10% del total) y los suma al usuario
             $puntosGanados = $total * 0.10; // 10% del total gastado
             $user->puntos_totales += $puntosGanados;
             $user->save();
     
             DB::commit();
     
-            // Limpia el carrito de la sesión después de confirmar la compra
             session()->forget('carrito');
     
             return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
-    
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
     }
+    
+    private function generarQr($compra, $entradaId, $indice)
+    {
+        try {
+            $qrData = "Compra ID: {$compra->id}\nEntrada ID: {$entradaId}\nNúmero: {$indice}\nUsuario ID: {$compra->usuario_id}\nTotal Compra: {$compra->total}";
+            $qrPath = "qrcodes/compra_{$compra->id}_entrada_{$entradaId}_n{$indice}.png";
+    
+            // Asegúrate de que la carpeta de destino exista
+            if (!Storage::exists('public/qrcodes')) {
+                Storage::makeDirectory('public/qrcodes');
+            }
+    
+            // Genera y guarda el QR
+            QrCode::format('png')->size(300)->generate($qrData, storage_path("app/public/{$qrPath}"));
+    
+            \Log::info("QR generado y guardado en: {$qrPath}");
+        } catch (\Exception $e) {
+            \Log::error('Error al generar el QR:', ['error' => $e->getMessage()]);
+        }
+    }
+    
     public function comprarEntradasConcierto(Request $request, $eventoId)
     {
         $user = $request->user();
