@@ -5,6 +5,7 @@ use App\Http\Controllers\EventoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\AdminController;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -111,6 +112,10 @@ Route::get('/api/mesas', function () {
     ]);
 });
 
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+});
+
 Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->name('mi-cuenta.ingresos');
 
 
@@ -126,6 +131,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->middleware('auth');
 
 });
+
+
 
 require __DIR__.'/auth.php';
 
