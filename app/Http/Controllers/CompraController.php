@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
 use Illuminate\Support\Facades\Storage;
 
+
 class CompraController extends Controller
 {
     // Solo almacena el carrito en la sesión y redirige al resumen
@@ -144,7 +145,7 @@ class CompraController extends Controller
                 'fecha_compra' => now(),
             ]);
     
-            // Asocia las entradas compradas a la compra
+            // Asocia las entradas compradas a la compra y genera los QR
             foreach ($carrito as $item) {
                 $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
                     ->where('id', $item['id'])
@@ -155,6 +156,11 @@ class CompraController extends Controller
                 }
     
                 $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+    
+                // Generar un QR por cada unidad de la entrada comprada
+                for ($i = 1; $i <= $item['cantidad']; $i++) {
+                    $this->generarQr($compra, $entrada->id, $i);
+                }
             }
     
             // Resta el saldo del usuario comprador

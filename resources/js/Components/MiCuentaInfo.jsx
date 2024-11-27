@@ -59,13 +59,12 @@ const MiCuentaInfo = () => {
     };
 
     const userItems = [
-        { label: 'Nombre', detail:"Su nombre es " + user.name + "." },
-        { label: 'Email', detail: "Su email es " +  user.email + "."},
-        { label: 'Saldo', detail: "Su saldo actual es de " +`${user.saldo} €` },
-        { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + "puntos." },
+        { label: 'Nombre', detail: "Su nombre es " + user.name + "." },
+        { label: 'Email', detail: "Su email es " + user.email + "." },
+        { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
+        { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos} €` }, // Nuevo campo
     ];
-    
 
     const sortedReservas = reservas.slice().sort((a, b) => {
         if (sortOption === 'fecha') {
@@ -95,6 +94,16 @@ const MiCuentaInfo = () => {
                                     {compra.entradas.map((entrada, i) => (
                                         <li key={i}>
                                             {entrada.tipo.charAt(0).toUpperCase() + entrada.tipo.slice(1)} x {entrada.pivot.cantidad}
+                                            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                                {Array.from({ length: entrada.pivot.cantidad }).map((_, qrIndex) => (
+                                                    <img
+                                                        key={qrIndex}
+                                                        src={`/storage/qrcodes/compra_${compra.id}_entrada_${entrada.id}_n${qrIndex + 1}.png`}
+                                                        alt={`QR Entrada ${entrada.id} - ${qrIndex + 1}`}
+                                                        style={{ width: '150px', height: '150px' }}
+                                                    />
+                                                ))}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
