@@ -36,17 +36,24 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
-
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            // Agregamos un rol predeterminado si no está en el formulario de registro
+            'role' => 'cliente', // Cambia a 'admin' si quieres crear administradores manualmente
         ]);
-
+    
         event(new Registered($user));
-
+    
         Auth::login($user);
-
-        return redirect('/');
+    
+        // Redirigir según el rol del usuario
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.index'); // Ruta del panel de administrador
+        }
+    
+        return redirect('/index'); // Ruta del panel de usuario
     }
 }

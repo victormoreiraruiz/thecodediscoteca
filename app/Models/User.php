@@ -63,4 +63,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Foto::class);
     }
+
+    public function esAdmin()
+{
+    return $this->rol === 'admin';
+}
+
+public function noEsAdmin()
+{
+    return $this->rol !== 'admin';
+}
 }

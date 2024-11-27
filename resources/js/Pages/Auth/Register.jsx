@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -7,16 +7,20 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
+        over_18: false,
     });
+
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         return () => {
-            reset('password', 'password_confirmation');
+            setData('password', '');
+            setData('password_confirmation', '');
         };
     }, []);
 
@@ -24,10 +28,45 @@ export default function Register() {
         setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!data.name.trim()) {
+            newErrors.name = 'El nombre es obligatorio.';
+        }
+
+        if (!data.email.trim()) {
+            newErrors.email = 'El correo electrónico es obligatorio.';
+        } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+            newErrors.email = 'El correo electrónico no es válido.';
+        }
+
+        if (!data.password.trim()) {
+            newErrors.password = 'La contraseña es obligatoria.';
+        } else if (data.password.length < 8) {
+            newErrors.password = 'La contraseña debe tener al menos 8 caracteres.';
+        }
+
+        if (data.password !== data.password_confirmation) {
+            newErrors.password_confirmation = 'Las contraseñas no coinciden.';
+        }
+
+        if (!data.over_18) {
+            newErrors.over_18 = 'Debes confirmar que eres mayor de 18 años.';
+        }
+
+        setErrors(newErrors);
+
+        // Devuelve `true` si no hay errores
+        return Object.keys(newErrors).length === 0;
+    };
+
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('register'));
+        if (validateForm()) {
+            post(route('register'));
+        }
     };
 
     return (
@@ -49,6 +88,7 @@ export default function Register() {
                         className="register-form w-full md:w-1/2 bg-[#860303] text-black p-8 rounded-lg shadow-lg"
                     >
                         <h2 className="text-2xl font-bold text-center mb-6">REGISTRO</h2>
+
                         <div>
                             <InputLabel htmlFor="name" value="Nombre" className="text-black" />
                             <TextInput
@@ -59,13 +99,12 @@ export default function Register() {
                                 autoComplete="name"
                                 isFocused={true}
                                 onChange={handleOnChange}
-                                required
                             />
-                            <InputError message={errors.name} className="mt-2" />
+                            {errors.name && <InputError message={errors.name} className="mt-2" />}
                         </div>
 
                         <div className="mt-4">
-                            <InputLabel htmlFor="email" value="Email" className="text-black" />
+                            <InputLabel htmlFor="email" value="Correo electrónico" className="text-black" />
                             <TextInput
                                 id="email"
                                 type="email"
@@ -74,9 +113,8 @@ export default function Register() {
                                 className="mt-1 block w-full"
                                 autoComplete="username"
                                 onChange={handleOnChange}
-                                required
                             />
-                            <InputError message={errors.email} className="mt-2" />
+                            {errors.email && <InputError message={errors.email} className="mt-2" />}
                         </div>
 
                         <div className="mt-4">
@@ -89,13 +127,12 @@ export default function Register() {
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 onChange={handleOnChange}
-                                required
                             />
-                            <InputError message={errors.password} className="mt-2" />
+                            {errors.password && <InputError message={errors.password} className="mt-2" />}
                         </div>
 
                         <div className="mt-4">
-                            <InputLabel htmlFor="password_confirmation" value="Confirmar Contraseña" className="text-black" />
+                            <InputLabel htmlFor="password_confirmation" value="Confirmar contraseña" className="text-black" />
                             <TextInput
                                 id="password_confirmation"
                                 type="password"
@@ -104,9 +141,26 @@ export default function Register() {
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 onChange={handleOnChange}
-                                required
                             />
-                            <InputError message={errors.password_confirmation} className="mt-2" />
+                            {errors.password_confirmation && (
+                                <InputError message={errors.password_confirmation} className="mt-2" />
+                            )}
+                        </div>
+
+                        {/* Checkbox para mayor de 18 */}
+                        <div className="mt-4 flex items-center">
+                            <input
+                                id="over_18"
+                                name="over_18"
+                                type="checkbox"
+                                checked={data.over_18}
+                                onChange={handleOnChange}
+                                className="mr-2"
+                            />
+                            <label htmlFor="over_18" className="text-black">
+                                Confirmo que soy mayor de 18 años
+                            </label>
+                            {errors.over_18 && <InputError message={errors.over_18} className="mt-2" />}
                         </div>
 
                         <div className="flex items-center justify-between mt-4">
