@@ -6,6 +6,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\EntradaController;
 
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -47,7 +49,19 @@ Route::post('/api/conciertos/{eventoId}/comprar-entradas', [CompraController::cl
 Route::get('/conciertos/{id}', [EventoController::class, 'mostrarConcierto'])->name('conciertos.mostrar');
 Route::get('/conciertos', [EventoController::class, 'listarConciertos'])->name('conciertos.index');
 
+Route::get('/test-qr', function () {
+    $path = storage_path('app/public/qrcodes/test_qr.png'); // Ruta donde guardar el QR
 
+    // Crea la carpeta si no existe
+    if (!file_exists(dirname($path))) {
+        mkdir(dirname($path), 0777, true);
+    }
+
+    // Generar el QR y guardarlo como PNG
+    QrCode::format('png')->size(300)->generate('Prueba de QR', $path);
+
+    return response()->download($path);
+});
 
 
 Route::get('/mi-cuenta', [ProfileController::class, 'miCuenta'])->name('mi-cuenta');
