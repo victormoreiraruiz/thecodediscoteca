@@ -190,6 +190,34 @@ class CompraController extends Controller
             return response()->json(['error' => 'No se pudo completar la compra.'], 500);
         }
     }
+    public function descargarQrsPdf($compraId)
+{
+    // Recupera la compra junto con las entradas asociadas
+    $compra = Compra::with('entradas')->findOrFail($compraId);
+
+    // Array para guardar las rutas de los QR generados
+    $qrPaths = [];
+
+    // Generar QR por cada entrada de la compra
+    foreach ($compra->entradas as $entrada) {
+        $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}.png");
+        if (file_exists($qrPath)) {
+            $qrPaths[] = $qrPath;
+        }
+    }
+
+    // Crear la instancia de mPDF
+    $mpdf = new \Mpdf\Mpdf();
+
+    // Cargar la vista del PDF
+    $html = view('qrs', compact('compra', 'qrPaths'))->render();
+
+    // Escribir el HTML en el PDF
+    $mpdf->WriteHTML($html);
+
+    // Descargar el PDF
+    return $mpdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
+}
     
 
     

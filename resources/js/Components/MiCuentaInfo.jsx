@@ -109,6 +109,14 @@ const MiCuentaInfo = () => {
                                 </ul>
                             </div>
                         )}
+                        <a 
+                            href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`} 
+                            className="btn btn-primary"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Descargar PDF
+                        </a>
                     </div>
                 ))
             ) : (
