@@ -9,6 +9,7 @@ use App\Models\Evento;
 use App\Models\Entrada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\Compra;
 
 class SalaController extends Controller
 {
@@ -90,40 +91,85 @@ class SalaController extends Controller
 
 
     public function cancelarReserva($id)
-    {
-        $reserva = ReservaDiscoteca::findOrFail($id);
-    
-        // Verifica si es un concierto y elimina el evento asociado
-        if ($reserva->tipo_reserva === 'concierto') {
-            $evento = Evento::where('sala_id', $reserva->sala_id)
-                ->where('fecha_evento', $reserva->fecha_reserva)
-                ->first();
-    
-            if ($evento) {
-                $evento->delete(); // Elimina el evento asociado
+{
+    $reserva = ReservaDiscoteca::findOrFail($id);
+
+    // Verifica si es un concierto y elimina el evento asociado
+    if ($reserva->tipo_reserva === 'concierto') {
+        $evento = Evento::where('sala_id', $reserva->sala_id)
+            ->where('fecha_evento', $reserva->fecha_reserva)
+            ->first();
+
+        if ($evento) {
+            try {
+                // Paso 1: Calcular el total recibido por el organizador 
+                $totalRecibido = 0;
+                $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
+                    $query->where('evento_id', $evento->id);
+                })->get();
+
+                // Calcular el dinero total recibido por las entradas vendidas
+                foreach ($compras as $compra) {
+                    foreach ($compra->entradas as $entrada) {
+                        if ($entrada->evento_id == $evento->id) {
+                            // El dinero recibido por el organizador por la venta de entradas
+                            $totalRecibido += $entrada->precio * $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                        }
+                    }
+                }
+
+                // 2: quitar los ingresos por cancelación
+                $usuarioCreadorEvento = $evento->sala->usuario;  // Usuario que creó el evento 
+                if ($usuarioCreadorEvento) {
+                    $usuarioCreadorEvento->ingresos -= $totalRecibido; // Restamos el total recibido de sus ingresos
+                    $usuarioCreadorEvento->save();
+                }
+
+                // Paso 3: Reembolsar a los usuarios que compraron entradas para el evento
+                foreach ($compras as $compra) {
+                    foreach ($compra->entradas as $entrada) {
+                        if ($entrada->evento_id == $evento->id) {
+                            $totalReembolso = $entrada->precio * $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                            $compra->usuario->saldo += $totalReembolso; // Se reembolsa el dinero al comprador en su saldo
+                            $compra->usuario->save();
+                        }
+                    }
+                }
+
+                // Eliminar el evento
+                $evento->delete();
+            } catch (\Exception $e) {
+                \Log::error('Error al procesar reembolsos para el evento: ' . $e->getMessage());
+                return response()->json(['error' => 'Hubo un problema al procesar los reembolsos.'], 500);
             }
+        } else {
+            return response()->json(['error' => 'Evento no encontrado.'], 404);
         }
-    
-        $usuario = $reserva->usuario;
-        $sala = $reserva->sala;
-    
-        // Verifica si se puede cancelar (no el mismo día)
-        $hoy = now()->startOfDay();
-        $fechaReserva = Carbon::parse($reserva->fecha_reserva);
-    
-        if ($fechaReserva->isSameDay($hoy)) {
-            return response()->json(['error' => 'No se puede cancelar una reserva para el mismo día.'], 403);
-        }
-    
-        // Devuelve el 30% del precio al saldo del usuario
-        $reembolso = $sala->precio * 0.3;
-        $usuario->saldo += $reembolso;
-        $usuario->save();
-    
-        // Elimina la reserva
-        $reserva->delete();
-    
-        return response()->json(['message' => 'Reserva cancelada con éxito.']);
     }
-    
+
+
+    $usuario = $reserva->usuario;
+    $sala = $reserva->sala;
+
+    // Verifica si se puede cancelar (no el mismo día)
+    $hoy = now()->startOfDay();
+    $fechaReserva = Carbon::parse($reserva->fecha_reserva);
+
+    if ($fechaReserva->isSameDay($hoy)) {
+        return response()->json(['error' => 'No se puede cancelar una reserva para el mismo día.'], 403);
+    }
+
+    // Devuelve el 30% del precio al saldo del usuario
+    $reembolso = $sala->precio * 0.3;
+    $usuario->saldo += $reembolso;
+    $usuario->save();
+
+
+    $reserva->delete();
+
+    return response()->json(['message' => 'Reserva cancelada con éxito y reembolsos procesados.']);
+}
+
+
+
 }

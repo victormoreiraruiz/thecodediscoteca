@@ -228,5 +228,8 @@ class CompraController extends Controller
     return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
 }
 
-    
+
+
 }
+
+
