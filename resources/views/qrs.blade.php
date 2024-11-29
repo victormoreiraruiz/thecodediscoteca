@@ -45,27 +45,39 @@
 
     </div>
 
-    @foreach ($compra->entradas as $entrada)
-        <div class="qr-item">
-            <div class="details">
-                <p><strong>Tipo de Entrada:</strong> {{ $entrada->tipo }}</p>
-                <p><strong>Cantidad:</strong> {{ $entrada->pivot->cantidad }}</p>
-                <p><strong>Precio por Entrada:</strong> ${{ number_format($entrada->precio, 2) }}</p>
-                <p><strong>Precio Total:</strong> ${{ number_format($entrada->precio * $entrada->pivot->cantidad, 2) }}</p>
-            </div>
+    @php
+    // Variable para llevar el control de los QR generados
+    $qrIndex = 0;
+@endphp
 
-           
-        </div>
-    @endforeach
-    @foreach ($qrPaths as $index => $qrPath)
+@foreach ($compra->entradas as $entrada)
     <div class="qr-item">
-        <!-- Verifica si existe el archivo y luego lo muestra -->
-        <img src="data:image/png;base64,{{ base64_encode(file_get_contents($qrPath)) }}" alt="QR Code">
         <div class="details">
-            <p><strong>Entrada ID:</strong> {{ $compra->entradas[$index]->id }}</p>
-            <p><strong>Número de Entrada:</strong> {{ $index + 1 }}</p>
+            <p><strong>Tipo de Entrada:</strong> {{ $entrada->tipo }}</p>
+            <p><strong>Cantidad:</strong> {{ $entrada->pivot->cantidad }}</p>
+            <p><strong>Precio por Entrada:</strong> ${{ number_format($entrada->precio, 2) }}</p>
+            <p><strong>Precio Total:</strong> ${{ number_format($entrada->precio * $entrada->pivot->cantidad, 2) }}</p>
         </div>
+
+        <!-- Mostrar los códigos QR para cada entrada -->
+        @for ($i = 0; $i < $entrada->pivot->cantidad; $i++)
+            <div class="qr-item">
+                <!-- Mostrar el QR correspondiente usando $qrIndex -->
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($qrPaths[$qrIndex])) }}" alt="QR Code">
+                
+                <div class="details">
+                    <p><strong>Número de Entrada:</strong> {{ $i + 1 }}</p>
+                </div>
+
+                @php
+                    // Incrementar el índice de QR
+                    $qrIndex++;
+                @endphp
+            </div>
+        @endfor
     </div>
 @endforeach
+
+
 </body>
 </html>
