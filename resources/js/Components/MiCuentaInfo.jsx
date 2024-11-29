@@ -103,12 +103,21 @@ const MiCuentaInfo = () => {
                                                         style={{ width: '150px', height: '150px' }}
                                                     />
                                                 ))}
+                                                
                                             </div>
                                         </li>
-                                    ))}
+                                    ))} <a 
+                            href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`} 
+                            className="btn btn-primary"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Descargar PDF
+                        </a>
                                 </ul>
                             </div>
                         )}
+                       
                     </div>
                 ))
             ) : (

@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
 use Illuminate\Support\Facades\Storage;
+use mPDF;
 
 
 class CompraController extends Controller
@@ -190,7 +191,42 @@ class CompraController extends Controller
             return response()->json(['error' => 'No se pudo completar la compra.'], 500);
         }
     }
-    
+    public function descargarQrsPdf($compraId)
+{
+    // Recupera la compra junto con las entradas y la cantidad de cada entrada
+    $compra = Compra::with('entradas')->findOrFail($compraId);
+
+    // Array para guardar las rutas de los QR generados
+    $qrPaths = [];
+
+    // Generar QR por cada entrada de la compra
+    foreach ($compra->entradas as $entrada) {
+        // Iterar sobre la cantidad de entradas del mismo tipo compradas
+        for ($i = 1; $i <= $entrada->pivot->cantidad; $i++) {
+            // Generar la ruta del QR con un número único para cada entrada
+            // Añadimos un número único para cada entrada (n1, n2, etc.)
+            $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}_n{$i}.png");
+            
+            // Generar el código QR para esta entrada (puedes cambiar el contenido según lo necesites)
+            \QrCode::format('png')->size(150)->generate("compra_{$compra->id}_entrada_{$entrada->id}_n{$i}", $qrPath);
+            
+            // Asegurarse de que el archivo exista antes de agregar la ruta al array
+            if (file_exists($qrPath)) {
+                $qrPaths[] = $qrPath;
+            }
+        }
+    }
+
+    // Crear el PDF usando los datos y los QR
+    $pdf = new \Mpdf\Mpdf();
+
+    // Pasar los datos de las entradas con su cantidad y precio
+    $html = view('qrs', compact('compra', 'qrPaths'))->render();
+    $pdf->WriteHTML($html);
+
+    // Descargar el PDF
+    return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
+}
 
     
 }
