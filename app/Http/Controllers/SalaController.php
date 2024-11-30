@@ -9,6 +9,7 @@ use App\Models\Evento;
 use App\Models\Entrada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\Compra;
 
 class SalaController extends Controller
 {
@@ -100,10 +101,51 @@ class SalaController extends Controller
                 ->first();
     
             if ($evento) {
-                $evento->delete(); // Elimina el evento asociado
+                try {
+                    // Paso 1: Calcular el total recibido por el organizador 
+                    $totalRecibido = 0;
+                    $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
+                        $query->where('evento_id', $evento->id);
+                    })->get();
+    
+                    // Calcular el dinero total recibido por las entradas vendidas
+                    foreach ($compras as $compra) {
+                        foreach ($compra->entradas as $entrada) {
+                            if ($entrada->evento_id == $evento->id) {
+                                // El dinero recibido por el organizador por la venta de entradas
+                                $totalRecibido += $entrada->precio * $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                            }
+                        }
+                    }
+    
+                    // Paso 2: Actualizar los ingresos del creador del evento (restar lo recibido)
+                    $creador = $reserva->usuario; // Usuario que creó la reserva
+                    $creador->ingresos -= $totalRecibido; // Restar los ingresos generados por las entradas
+                    $creador->save();
+    
+                    // : devuelve el dinero a los compradores
+                    foreach ($compras as $compra) {
+                        foreach ($compra->entradas as $entrada) {
+                            if ($entrada->evento_id == $evento->id) {
+                                $totalReembolso = $entrada->precio * $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                                $compra->usuario->saldo += $totalReembolso; // Se reembolsa el dinero al comprador en su saldo
+                                $compra->usuario->save();
+                            }
+                        }
+                    }
+    
+                    // Eliminar el evento
+                    $evento->delete();
+                } catch (\Exception $e) {
+                    \Log::error('Error al procesar reembolsos para el evento: ' . $e->getMessage());
+                    return response()->json(['error' => 'Hubo un problema al procesar los reembolsos.'], 500);
+                }
+            } else {
+                return response()->json(['error' => 'Evento no encontrado.'], 404);
             }
         }
     
+        // Eliminar la reserva
         $usuario = $reserva->usuario;
         $sala = $reserva->sala;
     
@@ -120,10 +162,13 @@ class SalaController extends Controller
         $usuario->saldo += $reembolso;
         $usuario->save();
     
-        // Elimina la reserva
+        // Eliminar la reserva
         $reserva->delete();
     
-        return response()->json(['message' => 'Reserva cancelada con éxito.']);
+        return response()->json(['message' => 'Reserva cancelada con éxito y reembolsos procesados.']);
     }
     
+
+
+
 }
