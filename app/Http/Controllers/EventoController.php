@@ -123,6 +123,12 @@ public function listarConciertos()
     ]);
 }
 
+public function mostrarEvento($eventoId)
+{
+    $evento = Evento::findOrFail($eventoId);
+    return inertia('Evento', ['evento' => $evento]);
+}
+
 
 
 }
