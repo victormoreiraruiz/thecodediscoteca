@@ -7,13 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Compra extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'usuario_id', // Asegúrate de que este campo esté aquí
+        'usuario_id', 
         'total',
         'descuento_aplicado_id',
         'puntos_aplicados',
         'fecha_compra'
     ];
+
+    // Indicar que fecha_compra es un campo de tipo fecha
+    protected $dates = ['fecha_compra'];
 
     public function usuario()
     {
@@ -31,9 +36,9 @@ class Compra extends Model
     }
 
     public function entradas()
-{
-    return $this->belongsToMany(Entrada::class, 'compra_entradas')
-                ->withPivot('cantidad')
-                ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Entrada::class, 'compra_entradas')
+                    ->withPivot('cantidad')
+                    ->withTimestamps();
+    }
 }

@@ -59,6 +59,11 @@ class User extends Authenticatable
     return $this->hasMany(ReservaDiscoteca::class, 'usuario_id');
 }
 
+public function eventos()
+{
+    return $this->hasMany(Evento::class);
+}
+
     public function sube_foto()
     {
         return $this->hasMany(Foto::class);

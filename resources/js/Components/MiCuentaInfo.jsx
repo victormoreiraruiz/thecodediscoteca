@@ -13,11 +13,11 @@ const MiCuentaInfo = () => {
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
     useEffect(() => {
-        if (selectedOption === 'ingresos') {
+        if (selectedOption === 4) {  // Solo cuando se selecciona "Mis Ingresos"
             const fetchIngresos = async () => {
                 try {
                     const response = await axios.get('/mi-cuenta/ingresos');
-                    console.log('Datos de ingresos:', response.data); // Verifica la estructura aquí
+                    console.log('Datos de ingresos:', response.data); // Verifica los datos aquí
                     setIngresos(response.data);
                 } catch (error) {
                     console.error('Error al obtener los ingresos:', error);
@@ -26,6 +26,12 @@ const MiCuentaInfo = () => {
             fetchIngresos();
         }
     }, [selectedOption]);
+
+    // Calcular ingresos totales: Es importante sumar solo los ingresos únicos y asegurarse de que no haya duplicados
+    const totalIngresos = ingresos
+        .map(ingreso => ingreso.total_ingresos)  // Extrae los ingresos individuales
+        .reduce((total, ingreso) => total + ingreso, 0)  // Suma los ingresos
+        .toFixed(2);
 
     const toggleExpand = (type, index) => {
         setExpandedItems((prev) => ({
@@ -63,7 +69,7 @@ const MiCuentaInfo = () => {
         { label: 'Email', detail: "Su email es " + user.email + "." },
         { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
         { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
-        { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos} €` }, // Nuevo campo
+        { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
     ];
 
     const sortedReservas = reservas.slice().sort((a, b) => {
@@ -103,21 +109,20 @@ const MiCuentaInfo = () => {
                                                         style={{ width: '150px', height: '150px' }}
                                                     />
                                                 ))}
-                                                
                                             </div>
                                         </li>
-                                    ))} <a 
-                            href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`} 
-                            className="btn btn-primary"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Descargar PDF
-                        </a>
+                                    ))}
+                                    <a 
+                                        href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`} 
+                                        className="btn btn-primary"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Descargar PDF
+                                    </a>
                                 </ul>
                             </div>
                         )}
-                       
                     </div>
                 ))
             ) : (
@@ -187,6 +192,8 @@ const MiCuentaInfo = () => {
         Inertia.visit('/añadir-saldo');
     };
 
+ 
+
     const selectedItem = items[selectedOption] || { detail: null };
 
     return (
@@ -210,7 +217,23 @@ const MiCuentaInfo = () => {
             </div>
 
             <div className="mi-cuenta-detalles">
-                {selectedItem.detail ? (
+                {selectedOption === 4 ? (  // Si selecciona "Mis Ingresos"
+                    <div>
+                        <h3>Historial de Ingresos</h3>
+                        <p><strong>Ingresos Totales: {totalIngresos} €</strong></p>
+                        <ul>
+                            {ingresos.length > 0 ? (
+                                ingresos.sort((a, b) => new Date(b.fecha_evento) - new Date(a.fecha_evento)).map((ingreso, index) => (
+                                    <li key={index} className="ingreso">
+                                        {`+${ingreso.total_ingresos} € por la venta de entradas del evento ${ingreso.nombre_evento} `}
+                                    </li>
+                                ))
+                            ) : (
+                                <p>No tienes movimientos registrados.</p>
+                            )}
+                        </ul>
+                    </div>
+                ) : selectedItem.detail ? (
                     <div className="mi-cuenta-detalle-info">{selectedItem.detail}</div>
                 ) : (
                     <p className="mi-cuenta-mensaje">Selecciona un elemento para ver los detalles.</p>

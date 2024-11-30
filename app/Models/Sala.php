@@ -20,4 +20,11 @@ class Sala extends Model
     {
         return $this->hasMany(ReservaDiscoteca::class, 'sala_id');
     }
+
+    // Sala.php
+public function eventos()
+{
+    return $this->hasMany(Evento::class, 'sala_id');
+}
+
 }

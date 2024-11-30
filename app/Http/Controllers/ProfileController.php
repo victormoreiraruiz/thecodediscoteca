@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
@@ -105,41 +106,59 @@ public function añadirSaldo(Request $request): RedirectResponse
     return Redirect::route('mi-cuenta')->with('success', 'Saldo añadido correctamente.');
 }
 
+// ProfileController.php
 public function obtenerIngresos(Request $request)
 {
-    $user = $request->user();
+    // Obtener al usuario autenticado
+    $user = auth()->user();
 
-    // Asegúrate de cargar todas las relaciones necesarias
-    $reservas = \App\Models\ReservaDiscoteca::with('evento.entradas.compras')
-        ->where('usuario_id', $user->id)
-        ->where('tipo_reserva', 'concierto')
+    // Obtener las reservas de discotecas del usuario
+    $reservas = \App\Models\ReservaDiscoteca::where('usuario_id', $user->id)
+        ->where('tipo_reserva', 'concierto') // Solo obtener conciertos
         ->get();
 
-    $ingresos = $reservas->map(function ($reserva) {
-        $evento = $reserva->evento;
+    $ingresos = [];
 
-        if (!$evento) {
-            return null; // Ignorar reservas sin evento asociado
+    // Recorrer las reservas y obtener los ingresos de los eventos
+    foreach ($reservas as $reserva) {
+        // Obtener el evento asociado a la reserva (a través de la sala)
+        $evento = $reserva->sala->eventos()->where('fecha_evento', $reserva->fecha_reserva)->first();
+
+        if ($evento) {
+            // Obtener los ingresos de la compra de entradas para ese evento
+            $ventas = $evento->entradas()->with('compras')->get(); 
+
+            $detalleIngresos = [];
+            $totalIngresos = 0;
+
+            foreach ($ventas as $entrada) {
+                foreach ($entrada->compras as $compra) {
+                    $detalleIngresos[] = [
+                        'entrada' => $entrada->tipo,
+                        'cantidad' => $compra->pivot->cantidad,
+                        'total' => $compra->pivot->cantidad * $entrada->precio,
+                        // Asegurarse de que la fecha de compra sea válida
+                        'fecha_compra' => Carbon::parse($compra->fecha_compra)->toIso8601String(), 
+                    ];
+
+                    // Sumar al total de ingresos
+                    $totalIngresos += $compra->pivot->cantidad * $entrada->precio;
+                }
+            }
+
+            // Agregar los ingresos del evento
+            $ingresos[] = [
+                'nombre_evento' => $evento->nombre_evento,
+                'fecha_evento' => Carbon::parse($evento->fecha_evento)->toIso8601String(),
+                'total_ingresos' => $totalIngresos,
+                'detalle_ingresos' => $detalleIngresos,
+            ];
         }
+    }
 
-        $totalIngresos = $evento->entradas->reduce(function ($carry, $entrada) {
-            return $carry + $entrada->compras->sum(function ($compra) use ($entrada) {
-                return $compra->pivot->cantidad * $entrada->precio;
-            });
-        }, 0);
-
-        return [
-            'id' => $evento->id,
-            'nombre_evento' => $evento->nombre_evento,
-            'fecha_evento' => $evento->fecha_evento,
-            'total_ingresos' => $totalIngresos,
-        ];
-    })->filter();
-
-    // Retornar una respuesta JSON limpia
-    return response()->json($ingresos->values());
+    // Retornar los ingresos al frontend
+    return response()->json($ingresos);
 }
-
 
 
 }
