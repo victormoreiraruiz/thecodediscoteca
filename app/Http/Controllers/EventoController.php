@@ -46,11 +46,31 @@ class EventoController extends Controller
      * @param  \App\Models\Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show(Evento $evento)
-    {
-        //
+    public function show($id)
+{
+    $evento = Evento::with('entradas.compras', 'sala')->find($id);
+
+    if (!$evento) {
+        return abort(404, 'Evento no encontrado');
     }
 
+    $entradasVendidas = $evento->entradas->reduce(function ($total, $entrada) {
+        return $total + $entrada->compras->sum('pivot.cantidad');
+    }, 0);
+
+    $aforoTotal = $evento->sala->aforo ?? 0;
+
+    return Inertia::render('Evento', [
+        'evento' => $evento,
+        'estadisticas' => [
+            'entradas_vendidas' => $entradasVendidas,
+            'aforo_total' => $aforoTotal,
+            'porcentaje_ocupado' => $aforoTotal > 0 ? round(($entradasVendidas / $aforoTotal) * 100, 2) : 0,
+        ],
+    ]);
+}
+
+    
     /**
      * Show the form for editing the specified resource.
      *
@@ -69,10 +89,7 @@ class EventoController extends Controller
      * @param  \App\Models\Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Evento $evento)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.
@@ -122,6 +139,61 @@ public function listarConciertos()
         'conciertos' => $conciertos,
     ]);
 }
+
+public function mostrarEvento($id)
+{
+    $evento = Evento::with(['entradas.compras', 'sala'])->findOrFail($id);
+
+    // Obtener la suma de las entradas vendidas
+    $entradasVendidas = $evento->entradas->sum(function ($entrada) {
+        return $entrada->compras->sum(function ($compra) {
+            return $compra->pivot->cantidad;
+        });
+    });
+
+    // Obtener la capacidad total desde la sala asociada
+    $capacidadTotal = $evento->sala->capacidad ?? 0;
+
+    // Calcular el porcentaje de ocupación
+    $porcentajeOcupado = $capacidadTotal > 0 ? round(($entradasVendidas / $capacidadTotal) * 100, 2) : 0;
+
+    return Inertia::render('Evento', [
+        'evento' => $evento,
+        'estadisticas' => [
+            'entradas_vendidas' => $entradasVendidas,
+            'aforo_total' => $capacidadTotal,
+            'porcentaje_ocupado' => $porcentajeOcupado,
+        ],
+    ]);
+}
+
+
+
+
+public function update(Request $request, $id)
+{
+    $evento = Evento::findOrFail($id);
+
+    $request->validate([
+        'nombre_evento' => 'required|string|max:255',
+        'descripcion' => 'required|string',
+        'cartel' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $evento->nombre_evento = $request->input('nombre_evento');
+    $evento->descripcion = $request->input('descripcion');
+
+    if ($request->hasFile('cartel')) {
+        $path = $request->file('cartel')->store('carteles', 'public');
+        $evento->cartel = $path;
+    }
+
+    $evento->save();
+
+    return redirect()->back()->with('success', 'Evento actualizado correctamente.');
+}
+
+
 
 
 
