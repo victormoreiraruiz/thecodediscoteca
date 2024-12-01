@@ -69,10 +69,7 @@ class EventoController extends Controller
      * @param  \App\Models\Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Evento $evento)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.
@@ -130,5 +127,27 @@ public function mostrarEvento($eventoId)
 }
 
 
+public function update(Request $request, $id)
+{
+    $evento = Evento::findOrFail($id);
+
+    $request->validate([
+        'nombre_evento' => 'required|string|max:255',
+        'descripcion' => 'required|string',
+        'cartel' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $evento->nombre_evento = $request->input('nombre_evento');
+    $evento->descripcion = $request->input('descripcion');
+
+    if ($request->hasFile('cartel')) {
+        $path = $request->file('cartel')->store('carteles', 'public');
+        $evento->cartel = $path;
+    }
+
+    $evento->save();
+
+    return redirect()->back()->with('success', 'Evento actualizado correctamente.');
+}
 
 }

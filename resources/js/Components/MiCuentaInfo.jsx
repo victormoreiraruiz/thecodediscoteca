@@ -151,7 +151,7 @@ const MiCuentaInfo = () => {
             onClick={() => toggleExpand('reservas', index)}
         >
             {/* Este es el enlace que lleva a la página del evento */}
-            <Link href={`/mi-cuenta/eventos/${reserva.id +1}`} style={{ color: '#e5cc70' }}>
+            <Link href={`/mi-cuenta/eventos/${reserva.id +1 }`} style={{ color: '#e5cc70' }}>
                 Reserva para el {new Date(reserva.fecha_reserva).toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
             </Link>
         </div>

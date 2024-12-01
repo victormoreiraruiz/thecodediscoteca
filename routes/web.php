@@ -120,6 +120,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->name('mi-cuenta.ingresos');
 Route::get('/mi-cuenta/eventos/{evento}', [EventoController::class, 'mostrarEvento'])->name('evento.mostrar');
+Route::post('/eventos/{id}/editar', [EventoController::class, 'update'])->name('eventos.update');
+
 
 
 Route::get('/dashboard', function () {
