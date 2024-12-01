@@ -3,12 +3,22 @@ import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
 import { usePage, useForm } from '@inertiajs/react';
+import { PieChart, Pie, Tooltip, Cell } from 'recharts';
 
 const Evento = () => {
-    const { evento } = usePage().props;
+    const { evento, estadisticas = {} } = usePage().props;
+
+    const { entradas_vendidas = 0, aforo_total = 0, porcentaje_ocupado = 0 } = estadisticas;
+
+    const COLORS = ['#0088FE', '#FF8042'];
+
+    const data = [
+        { name: 'Entradas Vendidas', value: entradas_vendidas },
+        { name: 'Entradas Disponibles', value: Math.max(aforo_total - entradas_vendidas, 0) },
+    ];
 
     // Configura el formulario con los datos iniciales del evento
-    const { data, setData, post, processing, errors } = useForm({
+    const { data: formData, setData, post, processing, errors } = useForm({
         nombre_evento: evento.nombre_evento || '',
         descripcion: evento.descripcion || '',
         cartel: null,
@@ -40,7 +50,7 @@ const Evento = () => {
                         <input
                             type="text"
                             id="nombre_evento"
-                            value={data.nombre_evento}
+                            value={formData.nombre_evento}
                             onChange={(e) => setData('nombre_evento', e.target.value)}
                             className={errors.nombre_evento ? 'input-error' : ''}
                         />
@@ -51,7 +61,7 @@ const Evento = () => {
                         <label htmlFor="descripcion">Descripción</label>
                         <textarea
                             id="descripcion"
-                            value={data.descripcion}
+                            value={formData.descripcion}
                             onChange={(e) => setData('descripcion', e.target.value)}
                             className={errors.descripcion ? 'input-error' : ''}
                         ></textarea>
@@ -59,12 +69,12 @@ const Evento = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="cartel"><h2>Cartel del Evento</h2></label>
+                        <label htmlFor="cartel">Cartel del Evento</label>
                         <img
-                        src={evento.cartel ? `/storage/${evento.cartel}` : '/imagenes/cartel1.png'}
-                        alt={`Cartel del evento ${evento.nombre_evento}`}
-                        className="fiestacartel"
-                    />
+                            src={evento.cartel ? `/storage/${evento.cartel}` : '/imagenes/cartel1.png'}
+                            alt={`Cartel del evento ${evento.nombre_evento}`}
+                            className="fiestacartel"
+                        />
                         <input
                             type="file"
                             id="cartel"
@@ -80,6 +90,32 @@ const Evento = () => {
                         </button>
                     </div>
                 </form>
+
+                <h3>Estadísticas del Evento</h3>
+                <ul>
+                    <li><h2>Total de Entradas Vendidas: {entradas_vendidas}</h2></li>
+                    <li><h2>Capacidad Total de la Sala: {estadisticas.aforo_total > 0 ? estadisticas.aforo_total : 'No disponible'}</h2></li>
+                    <li><h2>Porcentaje de Ocupación: {estadisticas.porcentaje_ocupado}%</h2></li>
+                </ul>
+
+                <h4>Distribución de Entradas</h4>
+                <PieChart width={400} height={400}>
+                    <Pie
+                        data={data}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={150}
+                        fill="#8884d8"
+                        label
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Pie>
+                    <Tooltip />
+                </PieChart>
             </div>
             <Footer />
         </div>

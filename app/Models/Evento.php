@@ -36,4 +36,12 @@ class Evento extends Model
     {
         return $this->hasMany(Entrada::class, 'evento_id');
     }
+
+    public function compras()
+{
+    return $this->belongsToMany(Compra::class, 'compra_entradas')
+                ->withPivot('cantidad')
+                ->withTimestamps();
+}
+
 }
