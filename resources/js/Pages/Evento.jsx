@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+    PieChart, Pie, Tooltip, Cell,
+    LineChart, Line, CartesianGrid, XAxis, YAxis,
+    BarChart, Bar, Legend
+} from 'recharts';
 import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
 import { usePage, useForm } from '@inertiajs/react';
-import { PieChart, Pie, Tooltip, Cell } from 'recharts';
+import axios from 'axios';
 
 const Evento = () => {
     const { evento, estadisticas = {} } = usePage().props;
@@ -17,25 +22,36 @@ const Evento = () => {
         { name: 'Entradas Disponibles', value: Math.max(aforo_total - entradas_vendidas, 0) },
     ];
 
-    // Configura el formulario con los datos iniciales del evento
     const { data: formData, setData, post, processing, errors } = useForm({
         nombre_evento: evento.nombre_evento || '',
         descripcion: evento.descripcion || '',
         cartel: null,
     });
 
-    // Maneja la subida de archivos
     const handleFileChange = (e) => {
         setData('cartel', e.target.files[0]);
     };
 
-    // Maneja el envío del formulario
     const handleSubmit = (e) => {
         e.preventDefault();
         post(`/eventos/${evento.id}/editar`, {
             onSuccess: () => alert('Evento actualizado correctamente'),
         });
     };
+
+    const [estadisticasVentas, setEstadisticasVentas] = useState([]);
+
+    useEffect(() => {
+        const fetchEstadisticasVentas = async () => {
+            try {
+                const response = await axios.get(`/eventos/${evento.id}/estadisticas-ventas`);
+                setEstadisticasVentas(response.data);
+            } catch (error) {
+                console.error('Error al obtener estadísticas de ventas:', error);
+            }
+        };
+        fetchEstadisticasVentas();
+    }, [evento.id]);
 
     return (
         <div>
@@ -116,6 +132,25 @@ const Evento = () => {
                     </Pie>
                     <Tooltip />
                 </PieChart>
+
+                <h4>Ingresos Acumulativos</h4>
+                <LineChart width={600} height={300} data={estadisticasVentas}>
+                    <CartesianGrid stroke="#ccc" />
+                    <XAxis dataKey="fecha" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="ingresos_acumulados" stroke="#82ca9d" />
+                </LineChart>
+
+                <h4>Ventas de Entradas por Día</h4>
+                <BarChart width={600} height={300} data={estadisticasVentas}>
+                    <CartesianGrid stroke="#ccc" />
+                    <XAxis dataKey="fecha" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="total_ventas" fill="#82ca9d" />
+                </BarChart>
             </div>
             <Footer />
         </div>

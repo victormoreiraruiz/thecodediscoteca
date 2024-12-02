@@ -122,6 +122,8 @@ Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])
 Route::get('/mi-cuenta/eventos/{evento}', [EventoController::class, 'mostrarEvento'])->name('evento.mostrar');
 Route::post('/eventos/{id}/editar', [EventoController::class, 'update'])->name('eventos.update');
 Route::get('/eventos/{id}/ventas', [EventoController::class, 'obtenerDatosVentas']);
+Route::get('eventos/{id}/estadisticas-ventas', [EventoController::class, 'obtenerEstadisticasVentas']);
+
 
 
 Route::get('/dashboard', function () {
