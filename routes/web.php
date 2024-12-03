@@ -86,6 +86,8 @@ Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
 Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
+Route::post('/eventos/{evento}/cancelar-reserva', [SalaController::class, 'cancelarReserva']);
+
 
 
 

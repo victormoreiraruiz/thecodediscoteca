@@ -132,55 +132,47 @@ const MiCuentaInfo = () => {
         },
         {
             label: 'Mis Eventos',
-        detail: reservas.length > 0 ? (
-            <div>
-                <label htmlFor="sort" style={{ color: 'white', marginRight: '10px' }}>Ordenar por:</label>
-                <select
-                    id="sort"
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    style={{ padding: '5px', borderRadius: '5px' }}
-                >
-                    <option value="fecha">Proximidad</option>
-                    <option value="creacion">Creación</option>
-                </select>
-                {sortedReservas.map((reserva, index) => (
-    <div key={index}>
-        <div
-            style={{ cursor: 'pointer', color: '#e5cc70', marginBottom: '10px' }}
-            onClick={() => toggleExpand('reservas', index)}
-        >
-            {/* Este es el enlace que lleva a la página del evento */}
-            <Link href={`/mi-cuenta/eventos/${reserva.id +1 }`} style={{ color: '#e5cc70' }}>
-                Reserva para el {new Date(reserva.fecha_reserva).toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
-            </Link>
-        </div>
-                        {expandedItems.reservas === index && (
-                            <div style={{ marginLeft: '20px' }}>
-                                <h3>Descripción: {reserva.descripcion}</h3>
-                                <button
-                                    style={{
-                                        marginTop: '10px',
-                                        color: '#e5cc70',
-                                        background: 'none',
-                                        border: '1px solid #e5cc70',
-                                        padding: '8px 16px',
-                                        cursor: 'pointer',
-                                    }}
-                                    onClick={() => handleCancelReservation(reserva)}
-                                >
-                                    Cancelar Reserva
-                                </button>
+            detail: reservas.length > 0 ? (
+                <div>
+                    <label htmlFor="sort" style={{ color: 'white', marginRight: '10px' }}>Ordenar por:</label>
+                    <select
+                        id="sort"
+                        value={sortOption}
+                        onChange={(e) => setSortOption(e.target.value)}
+                        style={{ padding: '5px', borderRadius: '5px' }}
+                    >
+                        <option value="fecha">Proximidad</option>
+                        <option value="creacion">Creación</option>
+                    </select>
+                    {sortedReservas.map((reserva, index) => (
+                        <div key={index} style={{ marginBottom: '15px' }}>
+                            <div>
+                                <Link href={`/mi-cuenta/eventos/${reserva.id + 1}`} style={{ color: '#e5cc70' }}>
+                                    Reserva para el {new Date(reserva.fecha_reserva).toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
+                                </Link>
                             </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        ) : (
-            <p>No tienes reservas registradas.</p>
-        ),
-    },
-];
+                            <h3>Descripción: {reserva.descripcion}</h3>
+                            <button
+                                style={{
+                                    marginTop: '10px',
+                                    color: '#e5cc70',
+                                    background: 'none',
+                                    border: '1px solid #e5cc70',
+                                    padding: '8px 16px',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => handleCancelReservation(reserva)}
+                            >
+                                Cancelar Reserva
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p>No tienes reservas registradas.</p>
+            ),
+        },
+    ];
 
     const items = [...userItems, ...staticItems];
 
@@ -195,8 +187,6 @@ const MiCuentaInfo = () => {
     const handleAddSaldo = () => {
         Inertia.visit('/añadir-saldo');
     };
-
- 
 
     const selectedItem = items[selectedOption] || { detail: null };
 

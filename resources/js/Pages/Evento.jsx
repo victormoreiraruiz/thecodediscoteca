@@ -53,6 +53,7 @@ const Evento = () => {
         fetchEstadisticasVentas();
     }, [evento.id]);
 
+    
     return (
         <div>
             <Navigation />
@@ -108,49 +109,53 @@ const Evento = () => {
                 </form>
 
                 <h3>Estadísticas del Evento</h3>
-                <ul>
-                    <li><h2>Total de Entradas Vendidas: {entradas_vendidas}</h2></li>
-                    <li><h2>Capacidad Total de la Sala: {estadisticas.aforo_total > 0 ? estadisticas.aforo_total : 'No disponible'}</h2></li>
-                    <li><h2>Porcentaje de Ocupación: {estadisticas.porcentaje_ocupado}%</h2></li>
-                </ul>
 
-                <h4>Distribución de Entradas</h4>
-                <PieChart width={400} height={400}>
-                    <Pie
-                        data={data}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={150}
-                        fill="#8884d8"
-                        label
-                    >
-                        {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                    </Pie>
-                    <Tooltip />
-                </PieChart>
+                {/* Contenedor para alinear gráficas horizontalmente */}
+                <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px' }}>
+                    <div>
+                        <h4>Distribución de Entradas</h4>
+                        <PieChart width={400} height={400}>
+                            <Pie
+                                data={data}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={150}
+                                fill="#8884d8"
+                                label
+                            >
+                                {data.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </div>
 
-                <h4>Ingresos Acumulativos</h4>
-                <LineChart width={600} height={300} data={estadisticasVentas}>
-                    <CartesianGrid stroke="#ccc" />
-                    <XAxis dataKey="fecha" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="ingresos_acumulados" stroke="#82ca9d" />
-                </LineChart>
+                    <div>
+                        <h4>Ingresos Acumulativos</h4>
+                        <LineChart width={600} height={300} data={estadisticasVentas}>
+                            <CartesianGrid stroke="#ccc" />
+                            <XAxis dataKey="fecha" />
+                            <YAxis />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="ingresos_acumulados" stroke="#82ca9d" />
+                        </LineChart>
+                    </div>
 
-                <h4>Ventas de Entradas por Día</h4>
-                <BarChart width={600} height={300} data={estadisticasVentas}>
-                    <CartesianGrid stroke="#ccc" />
-                    <XAxis dataKey="fecha" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="total_ventas" fill="#82ca9d" />
-                </BarChart>
+                    <div>
+                        <h4>Ventas de Entradas por Día</h4>
+                        <BarChart width={600} height={300} data={estadisticasVentas}>
+                            <CartesianGrid stroke="#ccc" />
+                            <XAxis dataKey="fecha" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="total_ventas" fill="#82ca9d" />
+                        </BarChart>
+                    </div>
+                </div>
             </div>
             <Footer />
         </div>
