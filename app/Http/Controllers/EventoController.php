@@ -194,6 +194,50 @@ public function update(Request $request, $id)
 }
 
 
+public function obtenerEstadisticasVentas($id)
+{
+    $evento = Evento::with(['entradas.compras'])->findOrFail($id);
+
+    // Verificar si el evento tiene entradas asociadas
+    if ($evento->entradas->isEmpty()) {
+        return response()->json([], 200);
+    }
+
+    // Procesar las entradas y sus compras para obtener ventas e ingresos por día
+    $ventasPorDia = $evento->entradas->flatMap(function ($entrada) {
+        return $entrada->compras->map(function ($compra) use ($entrada) {
+            return [
+                'fecha' => $compra->fecha_compra->toDateString(),
+                'ingreso' => $compra->pivot->cantidad * $entrada->precio,
+                'cantidad' => $compra->pivot->cantidad,
+            ];
+        });
+    });
+
+    // Agrupar por fecha
+    $estadisticas = $ventasPorDia
+        ->groupBy('fecha')
+        ->map(function ($compras, $fecha) {
+            return [
+                'fecha' => $fecha,
+                'total_ingresos' => $compras->sum('ingreso'),
+                'total_ventas' => $compras->sum('cantidad'),
+            ];
+        })
+        ->sortBy('fecha') // Asegurarse de que los datos estén ordenados cronológicamente
+        ->values();
+
+    // Calcular los ingresos acumulados
+    $ingresosAcumulados = 0;
+    $estadisticasConAcumulados = $estadisticas->map(function ($dia) use (&$ingresosAcumulados) {
+        $ingresosAcumulados += $dia['total_ingresos'];
+        return array_merge($dia, ['ingresos_acumulados' => $ingresosAcumulados]);
+    });
+
+    return response()->json($estadisticasConAcumulados);
+}
+
+
 
 
 
