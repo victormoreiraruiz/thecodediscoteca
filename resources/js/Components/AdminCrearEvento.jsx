@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 
-const AdminCrearEvento = ({ salas }) => {
+const AdminCrearEvento = ({ salas, setEventos }) => {
     const [nombreEvento, setNombreEvento] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [fechaEvento, setFechaEvento] = useState('');
     const [horaInicio, setHoraInicio] = useState('');
     const [horaFinal, setHoraFinal] = useState('');
-    const [cartel, setCartel] = useState('');
+    const [cartel, setCartel] = useState(null);
     const [salaId, setSalaId] = useState(null);  // Este es el estado para la sala seleccionada
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,6 +22,9 @@ const AdminCrearEvento = ({ salas }) => {
             cartel,
             sala_id: salaId,  // Asegúrate de enviar el ID de la sala
         };
+
+        setLoading(true);
+        setError(null);
 
         try {
             const response = await fetch(route('admin.crearEvento'), {
@@ -35,15 +40,31 @@ const AdminCrearEvento = ({ salas }) => {
                 throw new Error('Error al crear el evento');
             }
 
+            // Si el evento se crea con éxito, actualizamos la lista de eventos
+            const nuevoEvento = await response.json(); // Asumimos que el backend responde con el evento creado
+            setEventos(prevEventos => [...prevEventos, nuevoEvento]);
+
             alert('Evento creado exitosamente');
+            // Limpiar formulario después de crear el evento
+            setNombreEvento('');
+            setDescripcion('');
+            setFechaEvento('');
+            setHoraInicio('');
+            setHoraFinal('');
+            setCartel(null);
+            setSalaId(null);
+
         } catch (error) {
-            alert(error.message);
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className="crear-evento-form">
             <h3>Crear Nuevo Evento</h3>
+            {error && <div className="error">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="nombreEvento">Nombre del Evento</label>
@@ -117,7 +138,9 @@ const AdminCrearEvento = ({ salas }) => {
                         ))}
                     </select>
                 </div>
-                <button type="submit">Crear Evento</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Creando Evento...' : 'Crear Evento'}
+                </button>
             </form>
         </div>
     );

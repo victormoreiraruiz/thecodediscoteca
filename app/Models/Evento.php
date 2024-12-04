@@ -26,7 +26,6 @@ class Evento extends Model
         return $this->belongsTo(Sala::class, 'sala_id');
     }
 
-
     public function reservas()
     {
         return $this->hasManyThrough(ReservaDiscoteca::class, Sala::class, 'id', 'sala_id', 'sala_id', 'id');
@@ -44,5 +43,6 @@ class Evento extends Model
                 ->withPivot('cantidad')
                 ->withTimestamps();
 }
+
 
 }

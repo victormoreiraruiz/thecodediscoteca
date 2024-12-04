@@ -126,6 +126,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/crear-evento', [AdminController::class, 'crearEvento'])->name('admin.crearEvento');
     Route::get('/admin/eventos/crear', [AdminController::class, 'crearEvento'])->name('admin.eventos.crear');
     Route::post('/admin/eventos', [AdminController::class, 'guardarEvento'])->name('admin.eventos.guardar');
+    Route::get('/admin/eventos', [AdminController::class, 'mostrarEventos'])->name('admin.mostrarEventos');
+    Route::delete('/admin/eventos/{id}', [AdminController::class, 'eliminarEvento'])->name('admin.eliminarEvento');
 });
 
    

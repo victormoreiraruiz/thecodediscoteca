@@ -12,17 +12,20 @@ use App\Models\Evento;
 class AdminController extends Controller
 {
     
-
     public function index()
-{
-    $usuarios = User::all();
-    $salas = Sala::where('tipo_sala', 'conferencias')->get();  // Solo la sala "discoteca"
+    {
+        $usuarios = User::all();
+        $salas = Sala::all();
+        $eventos = Evento::with('sala')->get();
+        
+        return Inertia::render('AdminIndex', [
+            'usuarios' => $usuarios,
+            'salas' => $salas,
+            'eventos' => $eventos,
+        ]);
+    }
     
-    return Inertia::render('AdminIndex', [
-        'usuarios' => $usuarios,
-        'salas' => $salas,  // Pasa las salas al componente
-    ]);
-}
+    
 
 
     
@@ -71,19 +74,38 @@ public function crearEvento(Request $request)
     $evento->hora_final = $request->hora_final;
     $evento->sala_id = $request->sala_id;
 
-    // Manejo del archivo de cartel si existe
+
     if ($request->hasFile('cartel')) {
         $cartelPath = $request->file('cartel')->store('carteles', 'public');
         $evento->cartel = $cartelPath;
     }
 
-    // Guarda el evento
+
     $evento->save();
 
-    // Verifica si el evento se guardó correctamente
+    // verifica si el evento se guardó correctamente
     \Log::info('Evento guardado con éxito:', $evento->toArray());
 
     return response()->json(['message' => 'Evento creado exitosamente'], 201);
+}
+
+
+public function mostrarEventos()
+{
+    // recuperar todos los eventos con la relación al creador y la sala
+    $eventos = Evento::with(['creador', 'sala'])->get();
+
+    return inertia('Admin/Eventos', [
+        'eventos' => $eventos,
+    ]);
+}
+
+public function eliminarEvento($id)
+{
+    $evento = Evento::findOrFail($id);
+    $evento->delete();
+
+    return redirect()->route('admin.gestionEventos')->with('success', 'Evento eliminado exitosamente.');
 }
 
 }
