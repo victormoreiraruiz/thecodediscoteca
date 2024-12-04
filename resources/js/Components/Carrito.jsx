@@ -4,12 +4,12 @@ import { Inertia } from '@inertiajs/inertia';
 import Cookies from 'js-cookie';
 
 const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => {
-    // Función para eliminar un producto del carrito
+    // función para eliminar un producto del carrito
     const eliminarDelCarrito = (tipo) => {
         setCarrito(carrito.filter(item => item.tipo !== tipo));
     };
 
-    // Función para actualizar la cantidad de un producto
+    // función para actualizar la cantidad de un producto
     const actualizarCantidad = (tipo, cantidad) => {
         setCarrito(
             carrito.map(item =>
@@ -20,32 +20,32 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
         );
     };
 
-    // Función para vaciar el carrito
+    // función para vaciar el carrito
     const vaciarCarrito = () => {
         setCarrito([]);
         setMostrarCarrito(false);
     };
 
-    // Función para calcular el total del carrito
+    // función para calcular el total del carrito
     const calcularTotal = () => {
         return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
     };
 
-    // Función para finalizar la compra
+    // función para finalizar la compra
     const finalizarCompra = () => {
         Inertia.post('/iniciar-compra', { carrito });
-        // Borrar la cookie después de confirmar la compra
+        // borrar la cookie después de confirmar la compra
         Cookies.remove('carrito');
         setCarrito([]);
         setMostrarCarrito(false);
     };
 
-    // Calcular el número total de productos en el carrito
+    // calcular el número total de productos en el carrito
     const calcularCantidadTotal = () => {
         return carrito.reduce((total, item) => total + item.cantidad, 0);
     };
 
-    // Leer el carrito desde la cookie cuando se carga la página
+    // leer el carrito desde la cookie cuando se carga la página
     useEffect(() => {
         const carritoGuardado = Cookies.get('carrito');
         if (carritoGuardado) {
@@ -53,7 +53,7 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
         }
     }, [setCarrito]);
 
-    // Guardar el carrito en la cookie cada vez que se actualice
+    // guarda el carrito en la cookie cada vez que se actualice
     useEffect(() => {
         if (carrito.length > 0) {
             Cookies.set('carrito', JSON.stringify(carrito), { expires: 7 }); // Expira en 7 días
@@ -62,18 +62,18 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
 
     return (
         <>
-            {/* Icono del carrito con el número de productos */}
+            {/* icono carrito */}
             {carrito.length > 0 && (
                 <div className="carrito-icono" onClick={() => setMostrarCarrito(true)}>
                     🛒
-                    {/* Número de productos en el carrito */}
+                    {/* n productos del carrito */}
                     <span className="carrito-cantidad">
                         {calcularCantidadTotal()}
                     </span>
                 </div>
             )}
 
-            {/* Panel del carrito */}
+            {/* panel del carrito */}
             {mostrarCarrito && (
                 <div className="carrito-panel">
                     <button className="cerrar-carrito" onClick={() => setMostrarCarrito(false)}>

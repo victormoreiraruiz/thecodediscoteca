@@ -104,13 +104,13 @@ class EventoController extends Controller
 
     public function showEntradas($eventoId)
     {
-        // Verifica si el evento existe
+       
         $evento = Evento::findOrFail($eventoId);
 
-        // Obtiene las entradas asociadas al evento
+        // obtiene las entradas asociadas al evento
         $entradas = Entrada::where('evento_id', $eventoId)->get(['tipo', 'precio']);
 
-        // Devuelve la vista con el evento y las entradas
+      
         return Inertia::render('FiestaEntradas', [
             'evento' => $evento,
             'entradas' => $entradas
@@ -132,7 +132,7 @@ public function listarConciertos()
     $conciertos = Evento::whereHas('reservas', function ($query) {
         $query->where('tipo_reserva', 'concierto');
     })
-    ->with(['sala', 'entradas']) // Incluye sala y entradas relacionadas
+    ->with(['sala', 'entradas']) // incluye sala y entradas relacionadas
     ->get();
 
     return inertia('Conciertos', [
@@ -144,17 +144,17 @@ public function mostrarEvento($id)
 {
     $evento = Evento::with(['entradas.compras', 'sala'])->findOrFail($id);
 
-    // Obtener la suma de las entradas vendidas
+    // obtener la suma de las entradas vendidas
     $entradasVendidas = $evento->entradas->sum(function ($entrada) {
         return $entrada->compras->sum(function ($compra) {
             return $compra->pivot->cantidad;
         });
     });
 
-    // Obtener la capacidad total desde la sala asociada
+    // obtener la capacidad total desde la sala asociada
     $capacidadTotal = $evento->sala->capacidad ?? 0;
 
-    // Calcular el porcentaje de ocupación
+    // calcular el porcentaje 
     $porcentajeOcupado = $capacidadTotal > 0 ? round(($entradasVendidas / $capacidadTotal) * 100, 2) : 0;
 
     return Inertia::render('Evento', [
@@ -198,12 +198,12 @@ public function obtenerEstadisticasVentas($id)
 {
     $evento = Evento::with(['entradas.compras'])->findOrFail($id);
 
-    // Verificar si el evento tiene entradas asociadas
+   
     if ($evento->entradas->isEmpty()) {
         return response()->json([], 200);
     }
 
-    // Procesar las entradas y sus compras para obtener ventas e ingresos por día
+    
     $ventasPorDia = $evento->entradas->flatMap(function ($entrada) {
         return $entrada->compras->map(function ($compra) use ($entrada) {
             return [
@@ -214,7 +214,7 @@ public function obtenerEstadisticasVentas($id)
         });
     });
 
-    // Agrupar por fecha
+    // agrupar por fecha
     $estadisticas = $ventasPorDia
         ->groupBy('fecha')
         ->map(function ($compras, $fecha) {
@@ -224,10 +224,10 @@ public function obtenerEstadisticasVentas($id)
                 'total_ventas' => $compras->sum('cantidad'),
             ];
         })
-        ->sortBy('fecha') // Asegurarse de que los datos estén ordenados cronológicamente
+        ->sortBy('fecha') // asegurarse de que los datos estén ordenados cronológicamente
         ->values();
 
-    // Calcular los ingresos acumulados
+    // calcular los ingresos acumulados
     $ingresosAcumulados = 0;
     $estadisticasConAcumulados = $estadisticas->map(function ($dia) use (&$ingresosAcumulados) {
         $ingresosAcumulados += $dia['total_ingresos'];
