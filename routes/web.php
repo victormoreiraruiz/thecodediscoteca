@@ -123,7 +123,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     Route::post('/admin/cambiar-rol', [AdminController::class, 'cambiarRol'])->name('admin.cambiarRol');
     Route::delete('/admin/eliminar-usuario/{id}', [AdminController::class, 'eliminarUsuario'])->name('admin.eliminarUsuario');
-    
+    Route::post('/admin/crear-evento', [AdminController::class, 'crearEvento'])->name('admin.crearEvento');
+    Route::get('/admin/eventos/crear', [AdminController::class, 'crearEvento'])->name('admin.eventos.crear');
+    Route::post('/admin/eventos', [AdminController::class, 'guardarEvento'])->name('admin.eventos.guardar');
 });
 
    

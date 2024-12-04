@@ -17,7 +17,7 @@ class Compra extends Model
         'fecha_compra'
     ];
 
-    // Indicar que fecha_compra es un campo de tipo fecha
+    
     protected $dates = ['fecha_compra'];
 
     public function usuario()
