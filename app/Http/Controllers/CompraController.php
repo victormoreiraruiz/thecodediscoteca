@@ -17,18 +17,18 @@ class CompraController extends Controller
     public function iniciarCompra(Request $request)
     {
         $carrito = $request->input('carrito');
-        session(['carrito' => $carrito]); // Almacena el carrito en la sesión
+        session(['carrito' => $carrito]); // almacena el carrito en la sesión
 
-        // Redirige al resumen de compra sin crear una compra en la base de datos
+        // redirige al resumen de compra sin crear una compra en la base de datos
         return redirect()->route('compra.resumen');
     }
 
-    // Muestra la página de resumen de compra
+  
     public function resumen(Request $request)
     {
         $user = $request->user();
     
-        $carrito = session('carrito', []); // Obtiene el carrito desde la sesión
+        $carrito = session('carrito', []); // obtiene el carrito desde la sesión
         $total = collect($carrito)->reduce(function ($sum, $item) {
             return $sum + ($item['precio'] * $item['cantidad']);
         }, 0);
@@ -64,20 +64,20 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // Crea la compra real solo en este punto
+            // crea la compra real solo en este punto
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // Generar un QR por cada entrada comprada
+            // generar un QR por cada entrada comprada
             foreach ($carrito as $item) {
                 if (isset($item['id']) && isset($item['cantidad'])) {
                     // Asocia la entrada a la compra
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
     
-                    // Generar un QR por cada unidad de la entrada comprada
+                    // generar un QR por cada unidad de la entrada comprada
                     for ($i = 1; $i <= $item['cantidad']; $i++) {
                         $this->generarQr($compra, $item['id'], $i);
                     }
@@ -115,7 +115,7 @@ class CompraController extends Controller
                 Storage::makeDirectory('public/qrcodes');
             }
     
-            // Genera y guarda el QR
+            // genera y guarda el QR
             QrCode::format('png')->size(300)->generate($qrData, storage_path("app/public/{$qrPath}"));
     
             \Log::info("QR generado y guardado en: {$qrPath}");
@@ -134,19 +134,19 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // Verifica si el usuario tiene saldo suficiente
+            // verifica si el usuario tiene saldo suficiente
             if ($user->saldo < $total) {
                 return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
             }
     
-            // Crea el registro de la compra
+            // crea el registro de la compra
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // Asocia las entradas compradas a la compra y genera los QR
+            // asocia las entradas compradas a la compra y genera los QR
             foreach ($carrito as $item) {
                 $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
                     ->where('id', $item['id'])
@@ -158,17 +158,17 @@ class CompraController extends Controller
     
                 $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
     
-                // Generar un QR por cada unidad de la entrada comprada
+                // generar un QR por cada unidad de la entrada comprada
                 for ($i = 1; $i <= $item['cantidad']; $i++) {
                     $this->generarQr($compra, $entrada->id, $i);
                 }
             }
     
-            // Resta el saldo del usuario comprador
+            // resta el saldo del usuario comprador
             $user->saldo -= $total;
             $user->save();
     
-            // Incrementa los ingresos del usuario creador de la reserva
+            // incrementa los ingresos del usuario creador de la reserva
             $reserva = \App\Models\ReservaDiscoteca::where('sala_id', $entrada->evento->sala_id)
                 ->where('fecha_reserva', $entrada->evento->fecha_evento)
                 ->first();
@@ -193,18 +193,18 @@ class CompraController extends Controller
     }
     public function descargarQrsPdf($compraId)
 {
-    // Recupera la compra junto con las entradas y la cantidad de cada entrada
+    // recupera la compra junto con las entradas y la cantidad de cada entrada
     $compra = Compra::with('entradas')->findOrFail($compraId);
 
-    // Array para guardar las rutas de los QR generados
+    // array para guardar las rutas de los QR generados
     $qrPaths = [];
 
-    // Generar QR por cada entrada de la compra
+    // genera n  QR por cada entrada de la compra
     foreach ($compra->entradas as $entrada) {
-        // Iterar sobre la cantidad de entradas del mismo tipo compradas
+        // itera sobre la cantidad de entradas del mismo tipo compradas
         for ($i = 1; $i <= $entrada->pivot->cantidad; $i++) {
-            // Generar la ruta del QR con un número único para cada entrada
-            // Añadimos un número único para cada entrada (n1, n2, etc.)
+            // gener la ruta del QR con un número único para cada entrada
+            // numero único para cada entrada (n1, n2, etc.)
             $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}_n{$i}.png");
             
            
@@ -220,11 +220,11 @@ class CompraController extends Controller
     // Crear el PDF usando los datos y los QR
     $pdf = new \Mpdf\Mpdf();
 
-    // Pasar los datos de las entradas con su cantidad y precio
+    // pasa los datos de las entradas con su cantidad y precio
     $html = view('qrs', compact('compra', 'qrPaths'))->render();
     $pdf->WriteHTML($html);
 
-    // Descargar el PDF
+    // descarga el PDF
     return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
 }
 

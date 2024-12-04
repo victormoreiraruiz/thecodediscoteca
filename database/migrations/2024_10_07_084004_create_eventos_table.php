@@ -21,7 +21,7 @@ return new class extends Migration
             $table->time('hora_inicio');
             $table->time('hora_final');
             $table->string('cartel')->nullable();
-            $table->foreignId('sala_id')->nullable()->constrained('salas')->onDelete('cascade'); // Relación con salas
+            $table->foreignId('sala_id')->nullable()->constrained('salas')->onDelete('cascade');
             $table->timestamps();
         });
     }
