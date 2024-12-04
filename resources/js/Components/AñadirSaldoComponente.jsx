@@ -88,7 +88,7 @@ const AñadirSaldoComponente = () => {
                 </label>
             </form>
             <div id="paypal-button-container" style={{ marginTop: '20px' }}>
-                {/* El botón de PayPal se renderiza aquí */}
+                {}
             </div>
         </div>
     );

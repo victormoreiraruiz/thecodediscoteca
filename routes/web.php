@@ -86,7 +86,10 @@ Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
 Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
-Route::post('/eventos/{evento}/cancelar-reserva', [SalaController::class, 'cancelarReserva']);
+
+
+
+
 
 
 
@@ -118,7 +121,15 @@ Route::get('/api/mesas', function () {
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::post('/admin/cambiar-rol', [AdminController::class, 'cambiarRol'])->name('admin.cambiarRol');
+    Route::delete('/admin/eliminar-usuario/{id}', [AdminController::class, 'eliminarUsuario'])->name('admin.eliminarUsuario');
+    
 });
+
+   
+
+
+
 
 Route::get('/mi-cuenta/ingresos', [ProfileController::class, 'obtenerIngresos'])->name('mi-cuenta.ingresos');
 Route::get('/mi-cuenta/eventos/{evento}', [EventoController::class, 'mostrarEvento'])->name('evento.mostrar');

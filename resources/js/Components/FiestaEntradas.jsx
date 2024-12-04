@@ -1,4 +1,3 @@
-// FiestaEntradas.js
 import React from 'react';
 
 const FiestaEntradas = ({ carrito, setCarrito }) => {

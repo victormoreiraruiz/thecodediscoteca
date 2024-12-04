@@ -21,9 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'saldo',     // Agrega el campo saldo
-        'puntos_totales',    // Agrega el campo puntos
+        'saldo',
+        'puntos_totales',
+        'rol',  // Agrega el campo rol aquí
     ];
+    
 
     /**
      * The attributes that should be hidden for serialization.

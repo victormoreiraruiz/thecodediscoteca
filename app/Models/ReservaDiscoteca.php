@@ -11,7 +11,7 @@ class ReservaDiscoteca extends Model
 
     protected $fillable = [
         'usuario_id',
-        'sala_id', // Relaciona la reserva con la sala
+        'sala_id', 
         'fecha_reserva',
         'disponibilidad',
         'asistentes',

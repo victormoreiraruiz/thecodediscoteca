@@ -11,16 +11,16 @@ import {
     Legend,
 } from 'chart.js';
 
-// Registrar los componentes necesarios
+// registrar los componentes necesarios
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const GraficaIngresos = ({ ingresos }) => {
     const data = {
-        labels: ingresos.map((ingreso) => ingreso.fecha), // Ejemplo: ["2024-11-01", "2024-11-02"]
+        labels: ingresos.map((ingreso) => ingreso.fecha), 
         datasets: [
             {
                 label: 'Ingresos por Fecha',
-                data: ingresos.map((ingreso) => ingreso.total), // Ejemplo: [50, 75]
+                data: ingresos.map((ingreso) => ingreso.total), 
                 borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderWidth: 2,

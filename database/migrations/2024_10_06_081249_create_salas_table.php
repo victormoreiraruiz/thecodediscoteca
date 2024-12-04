@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('salas', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo_sala', ['conferencias', 'privada', 'celebraciones']);
+            $table->enum('tipo_sala', ['conferencias', 'privada', 'celebraciones', 'discoteca']);
             $table->integer('capacidad');
             $table->decimal('precio', 8, 2); 
             $table->text('descripcion')->nullable();

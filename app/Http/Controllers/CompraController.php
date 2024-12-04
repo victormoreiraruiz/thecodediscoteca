@@ -13,7 +13,7 @@ use mPDF;
 
 class CompraController extends Controller
 {
-    // Solo almacena el carrito en la sesión y redirige al resumen
+
     public function iniciarCompra(Request $request)
     {
         $carrito = $request->input('carrito');
@@ -110,7 +110,7 @@ class CompraController extends Controller
             $qrData = "Compra ID: {$compra->id}\nEntrada ID: {$entradaId}\nNúmero: {$indice}\nUsuario ID: {$compra->usuario_id}\nTotal Compra: {$compra->total}";
             $qrPath = "qrcodes/compra_{$compra->id}_entrada_{$entradaId}_n{$indice}.png";
     
-            // Asegúrate de que la carpeta de destino exista
+          
             if (!Storage::exists('public/qrcodes')) {
                 Storage::makeDirectory('public/qrcodes');
             }
@@ -207,10 +207,10 @@ class CompraController extends Controller
             // Añadimos un número único para cada entrada (n1, n2, etc.)
             $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}_n{$i}.png");
             
-            // Generar el código QR para esta entrada (puedes cambiar el contenido según lo necesites)
+           
             \QrCode::format('png')->size(150)->generate("compra_{$compra->id}_entrada_{$entrada->id}_n{$i}", $qrPath);
             
-            // Asegurarse de que el archivo exista antes de agregar la ruta al array
+           
             if (file_exists($qrPath)) {
                 $qrPaths[] = $qrPath;
             }

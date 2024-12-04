@@ -68,10 +68,10 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Recupera las compras del usuario con los detalles de las entradas
+        // recupera las compras del usuario con los detalles de las entradas
         $compras = $user->compras()->with('entradas')->get() ?? collect([]);
 
-        // Recupera las reservas del usuario con la información de la sala
+        // recupera las reservas del usuario con la información de la sala
         $reservas = $user->reservas()->with('sala')->get() ?? collect([]);
 
         return Inertia::render('MiCuentaInfo', [
@@ -94,38 +94,38 @@ class ProfileController extends Controller
 public function añadirSaldo(Request $request): RedirectResponse
 {
     $request->validate([
-        'saldo' => 'required|numeric|min:0.01', // Aceptar valores decimales y validar el mínimo
+        'saldo' => 'required|numeric|min:0.01', 
     ]);
 
     $user = $request->user();
 
-    // Aumentar el saldo
+    // aumentar el saldo
     $user->saldo = round($user->saldo + $request->input('saldo'), 2);
     $user->save();
 
     return Redirect::route('mi-cuenta')->with('success', 'Saldo añadido correctamente.');
 }
 
-// ProfileController.php
+
 public function obtenerIngresos(Request $request)
 {
-    // Obtener al usuario autenticado
+    
     $user = auth()->user();
 
-    // Obtener las reservas de discotecas del usuario
+    // obtener las reservas de discotecas del usuario
     $reservas = \App\Models\ReservaDiscoteca::where('usuario_id', $user->id)
-        ->where('tipo_reserva', 'concierto') // Solo obtener conciertos
+        ->where('tipo_reserva', 'concierto') // solo  conciertos
         ->get();
 
     $ingresos = [];
 
-    // Recorrer las reservas y obtener los ingresos de los eventos
+    // recorrer las reservas y obtener los ingresos de los eventos
     foreach ($reservas as $reserva) {
-        // Obtener el evento asociado a la reserva (a través de la sala)
+        // obtener el evento asociado a la reserva (a través de la sala)
         $evento = $reserva->sala->eventos()->where('fecha_evento', $reserva->fecha_reserva)->first();
 
         if ($evento) {
-            // Obtener los ingresos de la compra de entradas para ese evento
+            // obtener los ingresos de la compra de entradas para ese evento
             $ventas = $evento->entradas()->with('compras')->get(); 
 
             $detalleIngresos = [];
@@ -137,16 +137,16 @@ public function obtenerIngresos(Request $request)
                         'entrada' => $entrada->tipo,
                         'cantidad' => $compra->pivot->cantidad,
                         'total' => $compra->pivot->cantidad * $entrada->precio,
-                        // Asegurarse de que la fecha de compra sea válida
+                        // asegurara de que la fecha de compra sea valida
                         'fecha_compra' => Carbon::parse($compra->fecha_compra)->toIso8601String(), 
                     ];
 
-                    // Sumar al total de ingresos
+                   
                     $totalIngresos += $compra->pivot->cantidad * $entrada->precio;
                 }
             }
 
-            // Agregar los ingresos del evento
+            // agregar los ingresos del evento
             $ingresos[] = [
                 'nombre_evento' => $evento->nombre_evento,
                 'fecha_evento' => Carbon::parse($evento->fecha_evento)->toIso8601String(),
@@ -156,7 +156,7 @@ public function obtenerIngresos(Request $request)
         }
     }
 
-    // Retornar los ingresos al frontend
+   // devuelve lls ingresos
     return response()->json($ingresos);
 }
 
