@@ -1,0 +1,451 @@
+[33mcommit 04132ccdf8ca23b603fefb6dbbc14d851e00f99d[m[33m ([m[1;36mHEAD -> [m[1;32mcambiosusuales[m[33m, [m[1;31morigin/admin[m[33m, [m[1;32madmin[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Dec 4 21:50:34 2024 +0100
+
+    ver todos los eventos en panel de admin y borrarlos
+
+[33mcommit 696f8b713b05cfe02e00654658cda125f6bbec0e[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Dec 4 19:43:05 2024 +0100
+
+    se puede crear eventos desde el panel de admin
+
+[33mcommit 12ee5689f6bc3f3614436173a496b96ca98ccddc[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Dec 4 19:14:07 2024 +0100
+
+    panel de admin muestra usuarios, puede cambiar de rol y eliminar usuarios
+
+[33mcommit 806c9967814e2bcb3854bcf16e65596a7cdb153d[m[33m ([m[1;31morigin/cambiosusuales[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Dec 3 15:49:33 2024 +0100
+
+    cancelar y graficas alineadas
+
+[33mcommit 8bd234ae68067b20fdc2b566876f5ef2a9684ff4[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Mon Dec 2 18:19:26 2024 +0100
+
+    grafica de ingresos y de entradas por dias
+
+[33mcommit 0858bcf89374066dd49b4f0085542407e62b6542[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sun Dec 1 12:41:25 2024 +0100
+
+    grafica de porcentaje de ocupacion en la pagina de evento
+
+[33mcommit e3eecf231d5f7f5cf55b331596062c802df095a0[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sun Dec 1 11:16:25 2024 +0100
+
+    la página de cada evento te permite modificar sus datos y cartel
+
+[33mcommit 40eb43e05bd2148f11d348132e8831df56ad59c9[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sat Nov 30 21:27:35 2024 +0100
+
+    creada una pagina por cada evento
+
+[33mcommit 19c79deb1c39a42c74dab56f9542ea2b3da22dbb[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sat Nov 30 20:36:35 2024 +0100
+
+    ahora si funciona bien el registro de ingresos
+
+[33mcommit a525e7b559ba8921b180e0de6933a017db069246[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sat Nov 30 11:29:12 2024 +0100
+
+    se le resta al usuario los ingresos obtenidos por vender las entradas despues de cancelar el concierto
+
+[33mcommit af3563783b1dc8f64d722610c8dd5e58ea7b75e2[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Fri Nov 29 18:25:30 2024 +0100
+
+    al cancelar el concierto con entradas vendidas se le devuelve el dinero a los usuarios
+
+[33mcommit db7ce247c1c719a858eee3c4483326d3938fdd42[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Fri Nov 29 16:34:57 2024 +0100
+
+    ya se genera el pdf con un QR por cada entrada
+
+[33mcommit 3c5b9d645c44b9affda08d457380af39994aced5[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 28 22:47:04 2024 +0100
+
+    se genera el qr pero no muy bien
+
+[33mcommit c05dbb03361ddf30e5d12fe0b98517616271e300[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 28 21:33:21 2024 +0100
+
+    botón de descargar pdf y se descarga con los datos de la compra pero sin los qrs
+
+[33mcommit 2a701afbf16e3e5bcf7e1fa38f93dc80b873c384[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 28 19:30:48 2024 +0100
+
+    cookies implementadas, se ve el carrito en todas las páginas de la web
+
+[33mcommit 48302a0407e0ea6cf3b6233c5f2088a48ba41b03[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 27 21:27:02 2024 +0100
+
+    mayor de edad para registro, panel de administrador, navigation cambiado
+
+[33mcommit 6a04debf3421686f2b53f56edcbc376dbb1f96b2[m[33m ([m[1;31morigin/QR[m[33m, [m[1;32mQR[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 27 16:36:20 2024 +0100
+
+    se genera el qr de fiestas y entradas, se muestra un qr en mis compras por cada entrada comprada
+
+[33mcommit ddab19a1decfa492cdf7d88f2331c1c3b2816b7a[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 26 21:08:15 2024 +0100
+
+    se genera un codigo QR por cada entrada comprada de fiestas
+
+[33mcommit c79f00c78cbc07e124d2e85380515705eba74d96[m[33m ([m[1;31morigin/conciertos[m[33m, [m[1;32mconciertos[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 26 19:17:29 2024 +0100
+
+    los conciertos se quedan asi de momento
+
+[33mcommit eae9e14f2bd4d2b22d058cf6720064417804626a[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 26 16:54:03 2024 +0100
+
+    modificada los datos de mi cuenta, ya se puede hacer conciertos en todas las salas
+
+[33mcommit fe14004b0b12dbe7283849888b6c69fc325c3573[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Mon Nov 25 21:01:09 2024 +0100
+
+    el usuario que ha hecho un concierto obtiene los ingresos de las entras
+
+[33mcommit 654d00f9ba0dce78313ff98ae76f06f93ea67b28[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Mon Nov 25 19:27:31 2024 +0100
+
+    la página conciertos y cada concierto mas bonito y se puede comprar entradas
+
+[33mcommit 3bf0eb27048f06b0a123c7970e0b0f7a4da01e68[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sun Nov 24 11:09:15 2024 +0100
+
+    el usuario puede subir carteles al crear un concierto
+
+[33mcommit 446c5bf09c3cfd2f7b9b8b5ee3539cdd681c603a[m[33m ([m[1;31morigin/rehaciendo[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mrehaciendo[m[33m, [m[1;32mmain[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sun Nov 24 10:02:41 2024 +0100
+
+    ya va bien la pagina de fiestas
+
+[33mcommit dfcaaf137e6748504ffd63f805a0ae4648ae964b[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Sun Nov 24 09:48:09 2024 +0100
+
+    se crean los conciertos, aparecen en la página conciertos y conciertos/id muestra la entrada y se puede comprar
+
+[33mcommit c36a3023e0a7fd5b6139edbe87fa68e470a5ab7f[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Fri Nov 22 20:30:45 2024 +0100
+
+    lo mismo que la ultima vez
+
+[33mcommit 144807c47fd047ab2e5a90201b9009eb118dec4c[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 21 12:30:03 2024 +0100
+
+    poniendolo bonito, reservas ya todo bien
+
+[33mcommit eea774849f8058dc8dfe68e225f166b06e23990c[m[33m ([m[1;32mcorreo[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 21 09:43:26 2024 +0100
+
+    vuelta atras
+
+[33mcommit 624ce28225ca2df9a10abe9ce1db35e62163da26[m
+Merge: 270d0a7 8be66d1
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 14 19:52:44 2024 +0100
+
+    Merge pull request #82 from victormoreiraruiz/reservarsalas
+    
+    errores de mierda
+
+[33mcommit 8be66d13cd8de2f97f1e85a01c7d6d454339a529[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 19:43:37 2024 +0100
+
+    errores de mierda
+
+[33mcommit 270d0a7fa93dcac042d34799fffc06f735004dcb[m
+Merge: 02940de 2e20ee1
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 14 19:27:03 2024 +0100
+
+    Merge pull request #81 from victormoreiraruiz/reservarsalas
+    
+    Reservarsalas
+
+[33mcommit 2e20ee1368f41248d96095a26906af525b4aabdb[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 19:19:35 2024 +0100
+
+    no se puede reservar una fecha ya reservada
+
+[33mcommit 9ff4d9477896b9e2a3ad282312ba2cef84215097[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 19:07:46 2024 +0100
+
+    las reservas por el calendario ya se crean y se refleja de manera asincrona, cambiado los estilos de micuenta
+
+[33mcommit 02940dea9cf218e5515e2ec18bb0888894cc78e9[m
+Merge: 3da2692 ce8ef77
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 14 16:09:11 2024 +0100
+
+    Merge pull request #80 from victormoreiraruiz/reservarsalas
+    
+    Reservarsalas
+
+[33mcommit ce8ef7784d982f6c901b246f55dfb9f8e7e59507[m
+Merge: 7dd7194 3da2692
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 14 16:08:59 2024 +0100
+
+    Merge branch 'master' into reservarsalas
+
+[33mcommit 7dd71945f909d45ee3830dec6aef8caa7bf4d494[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 16:03:00 2024 +0100
+
+    las reservas se hacen desde el calendario pero va regular
+
+[33mcommit 5dedc33c78e8dc3fb2f0d5377f12f8a6da1e9ce4[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 15:42:57 2024 +0100
+
+    calendario y se muestra la reserva en una página fea
+
+[33mcommit 0ec6b7d3f2e65aea1a534b78cb0926abc0e34eff[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 11:15:08 2024 +0100
+
+    todo vuelve como antes
+
+[33mcommit 3da269210a16e7bbf5b60415d4e4ff43c71c17db[m
+Merge: d307454 35e71ba
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 14 10:52:21 2024 +0100
+
+    Merge pull request #79 from victormoreiraruiz/micuenta
+    
+    paginas de salas medio hechas
+
+[33mcommit 35e71bac2b88ca174621daad6348ff3ecf483571[m[33m ([m[1;31morigin/micuenta[m[33m, [m[1;32mmicuenta[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 14 10:51:34 2024 +0100
+
+    paginas de salas medio hechas
+
+[33mcommit d30745412ce328c9f52905dbf005c5061e667fab[m
+Merge: 0c4a146 ab836fc
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Wed Nov 13 13:17:30 2024 +0100
+
+    Merge pull request #78 from victormoreiraruiz/reservarsalas
+    
+    creacion de las paginas para poder hacer las reservas
+
+[33mcommit ab836fc03825d6e53804ecebf5d5ad347fdef40c[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 13 13:16:35 2024 +0100
+
+    creacion de las paginas para poder hacer las reservas
+
+[33mcommit 0c4a146b05fe86ca6d2d45efb4922c514fb1e193[m
+Merge: 72bb7e2 bc36ac3
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Wed Nov 13 11:59:01 2024 +0100
+
+    Merge pull request #77 from victormoreiraruiz/carrito
+    
+    Carrito
+
+[33mcommit bc36ac3c4f13378ec72da6613ea91453603d320b[m[33m ([m[1;31morigin/carrito[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 13 11:58:09 2024 +0100
+
+    creada la pagina eventos
+
+[33mcommit a0b7b5401f63cdcbc035ffce4fd14867be1f1e1e[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 13 09:33:01 2024 +0100
+
+    creación de la página galeria
+
+[33mcommit 238b9155800d1cfe9f1af6885e1f24e5a599dce0[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 13 09:07:23 2024 +0100
+
+    implementación paypal( falta ajustar la cuenta ) y sistema de puntos
+
+[33mcommit 9b1fc3b542e63917e20d431f422e4aadad835caf[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 11:29:48 2024 +0100
+
+    intentando implementar pago con paypal
+
+[33mcommit 23fe6d05a4de9dae0c1e3f0e8673477965dfea6c[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 11:02:08 2024 +0100
+
+    solucionado compras e historial
+
+[33mcommit 72bb7e2ed75028e8f69541771869877ac8485be0[m
+Merge: 84c10bf a1bcf15
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Tue Nov 12 10:46:39 2024 +0100
+
+    Merge pull request #76 from victormoreiraruiz/carrito
+    
+    Carrito
+
+[33mcommit a1bcf15ce758edf8ea41edd4696bcd7e13260c51[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 10:45:55 2024 +0100
+
+    historial arreglado, cambiar registro vacio
+
+[33mcommit 2349f8cf4e7100e7717479721470edabfa868fc4[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 09:37:21 2024 +0100
+
+    la transicción se realiza, hay que arreglar el historial puesto que se visualiza al finalizar compra en el carrito y no en la página de finalizar compra
+
+[33mcommit e02b1ba9d2c746c1630e7c6e7241de26d9185d87[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 08:53:21 2024 +0100
+
+    historial de compras
+
+[33mcommit 84c10bfa8a42f81a61f9e3bd38da340aa3226144[m
+Merge: 70e6523 4aa5973
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Tue Nov 12 08:39:24 2024 +0100
+
+    Merge pull request #75 from victormoreiraruiz/carrito
+    
+    Carrito
+
+[33mcommit 4aa5973cf2a3cac719dd167fe59a39dcbc694d4e[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 12 08:38:34 2024 +0100
+
+    el botón de saldo ya funciona correctamente
+
+[33mcommit 9e175be889d1c0f73a27c900430c35e3695602d4[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Mon Nov 11 11:05:28 2024 +0100
+
+    carrito ya funciona y se visualiza perfecto
+
+[33mcommit 70e65239e926d2c79035a5748146c88902c9a121[m
+Merge: 093033e a86182f
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Fri Nov 8 09:09:09 2024 +0100
+
+    Merge pull request #74 from victormoreiraruiz/carrito
+    
+    finalizar compra mas o menos bien
+
+[33mcommit a86182f95287aa40218388d7bd27efb2699b36bc[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Fri Nov 8 09:04:23 2024 +0100
+
+    finalizar compra mas o menos bien
+
+[33mcommit 093033e009924bd3343a6a66310360c74c7791e6[m
+Merge: 5525228 9ea8170
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 7 12:44:51 2024 +0100
+
+    Merge pull request #73 from victormoreiraruiz/carrito
+    
+    el carrito funciona y está boonico
+
+[33mcommit 9ea81706522d5b5ed8dc9704d01ada424da9a6db[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 7 12:44:01 2024 +0100
+
+    el carrito funciona y está boonico
+
+[33mcommit 5525228fbf02e3d214255ba88f8005b278b9103a[m
+Merge: 046e4cf 45741b8
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Thu Nov 7 11:59:14 2024 +0100
+
+    Merge pull request #72 from victormoreiraruiz/issue37-registro
+    
+    creada la página fiesta
+
+[33mcommit 45741b8aa0de4c282315448972c3ea45f2545b90[m[33m ([m[1;31morigin/issue37-registro[m[33m)[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 7 11:54:33 2024 +0100
+
+    cambios en modelos y migraciones mas implantacion de carrito
+
+[33mcommit 5f72f73f582ca0887da46c3fa81b9b5991eb1fef[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Thu Nov 7 09:20:41 2024 +0100
+
+    creada la página fiesta
+
+[33mcommit 046e4cf5345f2ab6da237357189bb69a3d45f03e[m
+Merge: c59f328 37343d1
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Wed Nov 6 13:58:48 2024 +0100
+
+    Merge pull request #71 from victormoreiraruiz/issue37-registro
+    
+    cambiado el index y cabecero
+
+[33mcommit 37343d1c1a107c7cc8ff4436549d64a6c0359c52[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Wed Nov 6 13:55:53 2024 +0100
+
+    se ve bien el header y corregido el index
+
+[33mcommit 3515204184bbe103877088d11201c2a19aa95dfe[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 5 20:06:17 2024 +0100
+
+    cambiado los carteles del index
+
+[33mcommit c59f328ae4330b680a4e95b68d49eb3105830110[m
+Merge: 23b1a5b 9b04c7b
+Author: Victor <78365183+victormoreiraruiz@users.noreply.github.com>
+Date:   Tue Nov 5 19:57:42 2024 +0100
+
+    Merge pull request #70 from victormoreiraruiz/micuenta
+    
+    Micuenta
+
+[33mcommit 9b04c7b0ab0a6992cb9ce59258c824e02ff05e3d[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 5 19:53:07 2024 +0100
+
+    formulario de cambiar contraseña al pulsar el boton
+
+[33mcommit 02a630b75ac8039cb6ad89a176b7bd225054d95e[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Tue Nov 5 19:39:18 2024 +0100
+
+    cambiar contraseña funciona
+
+[33mcommit 88b1e399f57122200364522a2560898b67d23354[m
+Author: victormoreiraruiz <victormanuel.moreira@iesdonana.org>
+Date:   Fri Nov 1 14:22:46 2024
