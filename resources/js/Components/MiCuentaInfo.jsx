@@ -11,13 +11,48 @@ const MiCuentaInfo = () => {
     const [sortOption, setSortOption] = useState('fecha'); // Estado para la ordenación
     const [ingresos, setIngresos] = useState([]); // Estado para los ingresos
     const [notificaciones, setNotificaciones] = useState([]);
-
- // Estado para las notificaciones
+    const [nuevasNotificaciones, setNuevasNotificaciones] = useState(0); // Estado para notificaciones no leídas
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
+    // Fetch de notificaciones al cargar el componente
     useEffect(() => {
-        if (selectedOption === 4) {  // Solo cuando se selecciona "Mis Ingresos"
+        const fetchNotificaciones = async () => {
+            try {
+                const response = await axios.get('/notificaciones');
+                setNotificaciones(response.data);
+
+                // Calcular las no leídas
+                const noLeidas = response.data.filter(notificacion => !notificacion.leido).length;
+                setNuevasNotificaciones(noLeidas); // Actualiza el estado con la cantidad de no leídas
+            } catch (error) {
+                console.error('Error al obtener las notificaciones:', error);
+            }
+        };
+
+        fetchNotificaciones();
+    }, []); // Ejecutar solo una vez al cargar el componente
+
+    // Marcar todas como leídas al ver las notificaciones
+    useEffect(() => {
+        if (selectedOption === 5) { // Cuando selecciona "Notificaciones"
+            const marcarTodasComoLeidas = async () => {
+                try {
+                    await axios.put('/notificaciones/marcar-todas-leidas'); // Ruta para marcar todas como leídas
+                    setNotificaciones((prev) => prev.map((n) => ({ ...n, leido: true })));
+                    setNuevasNotificaciones(0); // Resetea el contador de nuevas notificaciones
+                } catch (error) {
+                    console.error('Error al marcar todas como leídas:', error);
+                }
+            };
+
+            marcarTodasComoLeidas();
+        }
+    }, [selectedOption]);
+
+    // Fetch de ingresos si se selecciona "Mis Ingresos"
+    useEffect(() => {
+        if (selectedOption === 4) {
             const fetchIngresos = async () => {
                 try {
                     const response = await axios.get('/mi-cuenta/ingresos');
@@ -28,35 +63,9 @@ const MiCuentaInfo = () => {
                 }
             };
             fetchIngresos();
-        } else if (selectedOption === 5) { // Solo cuando se selecciona "Notificaciones"
-            const fetchNotificaciones = async () => {
-                try {
-                    const response = await axios.get('/notificaciones');
-                    setNotificaciones(response.data);
-                } catch (error) {
-                    console.error('Error al obtener las notificaciones:', error);
-                }
-            };
-            fetchNotificaciones();
         }
     }, [selectedOption]);
 
-    useEffect(() => {
-        if (selectedOption === 5) {
-            const fetchNotificaciones = async () => {
-                try {
-                    const response = await axios.get('/notificaciones');
-                    console.log('Notificaciones obtenidas:', response.data);
-                    setNotificaciones(response.data);
-                } catch (error) {
-                    console.error('Error al obtener las notificaciones:', error);
-                }
-            };
-            fetchNotificaciones();
-        }
-    }, [selectedOption]);
-
-    // Calcular ingresos totales: Es importante sumar solo los ingresos únicos y asegurarse de que no haya duplicados
     const totalIngresos = ingresos
         .map(ingreso => ingreso.total_ingresos)  // Extrae los ingresos individuales
         .reduce((total, ingreso) => total + ingreso, 0)  // Suma los ingresos
@@ -112,7 +121,10 @@ const MiCuentaInfo = () => {
         { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
         { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
-        { label: 'Notificaciones', detail: 'Aquí puedes ver tus notificaciones.' }, // Nueva opción
+        { 
+            label: `Notificaciones${nuevasNotificaciones > 0 ? ` (${nuevasNotificaciones})` : ''}`, 
+            detail: 'Aquí puedes ver tus notificaciones.',
+        }, // Nueva opción con contador
     ];
 
     const sortedReservas = reservas.slice().sort((a, b) => {
