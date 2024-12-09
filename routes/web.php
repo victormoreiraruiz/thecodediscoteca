@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NotificacionController;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -130,7 +131,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/eventos/{id}', [AdminController::class, 'eliminarEvento'])->name('admin.eliminarEvento');
 });
 
-   
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notificaciones', [NotificacionController::class, 'index']);
+});
+
 
 
 

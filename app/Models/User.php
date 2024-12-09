@@ -80,4 +80,9 @@ public function noEsAdmin()
 {
     return $this->rol !== 'admin';
 }
+
+public function notificaciones()
+{
+    return $this->hasMany(Notificacion::class, 'usuario_id');
+}
 }

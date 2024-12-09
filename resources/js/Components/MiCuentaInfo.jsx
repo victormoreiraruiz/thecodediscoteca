@@ -10,6 +10,9 @@ const MiCuentaInfo = () => {
     const [expandedItems, setExpandedItems] = useState({ compras: null, reservas: null }); // Estado del acordeón
     const [sortOption, setSortOption] = useState('fecha'); // Estado para la ordenación
     const [ingresos, setIngresos] = useState([]); // Estado para los ingresos
+    const [notificaciones, setNotificaciones] = useState([]);
+
+ // Estado para las notificaciones
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
@@ -25,6 +28,31 @@ const MiCuentaInfo = () => {
                 }
             };
             fetchIngresos();
+        } else if (selectedOption === 5) { // Solo cuando se selecciona "Notificaciones"
+            const fetchNotificaciones = async () => {
+                try {
+                    const response = await axios.get('/notificaciones');
+                    setNotificaciones(response.data);
+                } catch (error) {
+                    console.error('Error al obtener las notificaciones:', error);
+                }
+            };
+            fetchNotificaciones();
+        }
+    }, [selectedOption]);
+
+    useEffect(() => {
+        if (selectedOption === 5) {
+            const fetchNotificaciones = async () => {
+                try {
+                    const response = await axios.get('/notificaciones');
+                    console.log('Notificaciones obtenidas:', response.data);
+                    setNotificaciones(response.data);
+                } catch (error) {
+                    console.error('Error al obtener las notificaciones:', error);
+                }
+            };
+            fetchNotificaciones();
         }
     }, [selectedOption]);
 
@@ -65,12 +93,26 @@ const MiCuentaInfo = () => {
         }
     };
 
+    const handleMarkAsRead = async (id) => {
+        try {
+            await axios.put(`/notificaciones/${id}/visto`);
+            setNotificaciones((prev) =>
+                prev.map((n) =>
+                    n.id === id ? { ...n, leido: true } : n
+                )
+            );
+        } catch (error) {
+            console.error('Error al marcar como leída:', error);
+        }
+    };
+
     const userItems = [
         { label: 'Nombre', detail: "Su nombre es " + user.name + "." },
         { label: 'Email', detail: "Su email es " + user.email + "." },
         { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
         { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
+        { label: 'Notificaciones', detail: 'Aquí puedes ver tus notificaciones.' }, // Nueva opción
     ];
 
     const sortedReservas = reservas.slice().sort((a, b) => {
@@ -113,8 +155,8 @@ const MiCuentaInfo = () => {
                                             </div>
                                         </li>
                                     ))}
-                                    <a 
-                                        href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`} 
+                                    <a
+                                        href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`}
                                         className="btn btn-primary"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -226,6 +268,24 @@ const MiCuentaInfo = () => {
                                 <p>No tienes movimientos registrados.</p>
                             )}
                         </ul>
+                    </div>
+                ) : selectedOption === 5 ? (
+                    <div>
+                        <h3>Tus Notificaciones</h3>
+                        {Array.isArray(notificaciones) && notificaciones.length > 0 ? (
+                            <ul>
+                                {notificaciones.map((notificacion, index) => (
+                                    <li key={index} style={{ marginBottom: '10px' }}>
+                                        <p style={{ color: notificacion.leido ? '#aaa' : '#fff' }}>
+                                            {notificacion.mensaje}
+                                        </p>
+                                        
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No tienes notificaciones pendientes.</p>
+                        )}
                     </div>
                 ) : selectedItem.detail ? (
                     <div className="mi-cuenta-detalle-info">{selectedItem.detail}</div>
