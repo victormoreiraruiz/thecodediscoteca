@@ -10,7 +10,9 @@ const MiCuentaInfo = () => {
     const [expandedItems, setExpandedItems] = useState({ compras: null, reservas: null }); // Estado del acordeón
     const [sortOption, setSortOption] = useState('fecha'); // Estado para la ordenación
     const [ingresos, setIngresos] = useState([]); // Estado para los ingresos
-    const [notificaciones, setNotificaciones] = useState([]); // Estado para las notificaciones
+    const [notificaciones, setNotificaciones] = useState([]);
+
+ // Estado para las notificaciones
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
@@ -30,6 +32,21 @@ const MiCuentaInfo = () => {
             const fetchNotificaciones = async () => {
                 try {
                     const response = await axios.get('/notificaciones');
+                    setNotificaciones(response.data);
+                } catch (error) {
+                    console.error('Error al obtener las notificaciones:', error);
+                }
+            };
+            fetchNotificaciones();
+        }
+    }, [selectedOption]);
+
+    useEffect(() => {
+        if (selectedOption === 5) {
+            const fetchNotificaciones = async () => {
+                try {
+                    const response = await axios.get('/notificaciones');
+                    console.log('Notificaciones obtenidas:', response.data);
                     setNotificaciones(response.data);
                 } catch (error) {
                     console.error('Error al obtener las notificaciones:', error);
@@ -255,7 +272,7 @@ const MiCuentaInfo = () => {
                 ) : selectedOption === 5 ? (
                     <div>
                         <h3>Tus Notificaciones</h3>
-                        {notificaciones.length > 0 ? (
+                        {Array.isArray(notificaciones) && notificaciones.length > 0 ? (
                             <ul>
                                 {notificaciones.map((notificacion, index) => (
                                     <li key={index} style={{ marginBottom: '10px' }}>

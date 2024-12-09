@@ -9,13 +9,17 @@ class NotificacionController extends Controller
 {
     // Obtener todas las notificaciones del usuario autenticado
     public function index()
-    {
-        $notificaciones = Notificacion::where('usuario_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+{
+    \Log::info('Usuario autenticado: ' . auth()->id());
+    
+    $notificaciones = Notificacion::where('usuario_id', auth()->id())
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        return response()->json($notificaciones);
-    }
+    return response()->json($notificaciones);
+}
+
+    
 
     // Marcar una notificación como vista
     public function marcarComoVista($id)
