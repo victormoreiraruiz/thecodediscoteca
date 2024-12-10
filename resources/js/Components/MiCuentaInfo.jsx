@@ -13,6 +13,15 @@ const MiCuentaInfo = () => {
     const [notificaciones, setNotificaciones] = useState([]);
     const [nuevasNotificaciones, setNuevasNotificaciones] = useState(0); // Estado para notificaciones no leídas
 
+    const sortedReservas = reservas.slice().sort((a, b) => {
+        if (sortOption === 'fecha') {
+            return new Date(a.fecha_reserva) - new Date(b.fecha_reserva);
+        } else if (sortOption === 'creacion') {
+            return new Date(b.created_at) - new Date(a.created_at);
+        }
+        return 0;
+    });
+
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
     // Fetch de notificaciones al cargar el componente
@@ -35,7 +44,7 @@ const MiCuentaInfo = () => {
 
     // Marcar todas como leídas al ver las notificaciones
     useEffect(() => {
-        if (selectedOption === 5) { // Cuando selecciona "Notificaciones"
+        if (selectedOption === 2) { // Cuando selecciona "Notificaciones"
             const marcarTodasComoLeidas = async () => {
                 try {
                     await axios.put('/notificaciones/marcar-todas-leidas'); // Ruta para marcar todas como leídas
@@ -52,7 +61,7 @@ const MiCuentaInfo = () => {
 
     // Fetch de ingresos si se selecciona "Mis Ingresos"
     useEffect(() => {
-        if (selectedOption === 4) {
+        if (selectedOption === 1) {
             const fetchIngresos = async () => {
                 try {
                     const response = await axios.get('/mi-cuenta/ingresos');
@@ -116,25 +125,39 @@ const MiCuentaInfo = () => {
     };
 
     const userItems = [
-        { label: 'Nombre', detail: "Su nombre es " + user.name + "." },
-        { label: 'Email', detail: "Su email es " + user.email + "." },
-        { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
-        { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
+        {
+            label: 'Mi Perfil',
+            detail: (
+                <div>
+                    <p><strong>Nombre:</strong> {user.name}</p>
+                    <p><strong>Email:</strong> {user.email}</p>
+                    <p><strong>Saldo:</strong> {user.saldo} €</p>
+                    <p><strong>Puntos:</strong> {user.puntos_totales}</p>
+                    <button
+                        className="mi-cuenta-boton-password"
+                        onClick={() => handleAddSaldo()}
+                        style={{
+                            marginTop: '10px',
+                            color: '#000000',
+                            background: '#e5cc70',
+                            border: 'none',
+                            padding: '8px 16px',
+                            cursor: 'pointer',
+                            borderRadius: '5px',
+                        }}
+                    >
+                        Añadir Saldo
+                    </button>
+                </div>
+            ),
+        },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
         { 
             label: `Notificaciones${nuevasNotificaciones > 0 ? ` (${nuevasNotificaciones})` : ''}`, 
             detail: 'Aquí puedes ver tus notificaciones.',
-        }, // Nueva opción con contador
+        },
     ];
-
-    const sortedReservas = reservas.slice().sort((a, b) => {
-        if (sortOption === 'fecha') {
-            return new Date(a.fecha_reserva) - new Date(b.fecha_reserva);
-        } else if (sortOption === 'creacion') {
-            return new Date(b.created_at) - new Date(a.created_at);
-        }
-        return 0;
-    });
+    
 
     const staticItems = [
         {
@@ -259,13 +282,10 @@ const MiCuentaInfo = () => {
                         </li>
                     ))}
                 </ul>
-                <button className="mi-cuenta-boton-password" onClick={handleAddSaldo}>
-                    Añadir Saldo
-                </button>
             </div>
 
             <div className="mi-cuenta-detalles">
-                {selectedOption === 4 ? (  // Si selecciona "Mis Ingresos"
+                {selectedOption === 1 ? (  // Si selecciona "Mis Ingresos"
                     <div>
                         <h3>Historial de Ingresos</h3>
                         <p><strong>Ingresos Totales: {totalIngresos} €</strong></p>
@@ -281,7 +301,7 @@ const MiCuentaInfo = () => {
                             )}
                         </ul>
                     </div>
-                ) : selectedOption === 5 ? (
+                ) : selectedOption === 2 ? (
                     <div>
                         <h3>Tus Notificaciones</h3>
                         {Array.isArray(notificaciones) && notificaciones.length > 0 ? (
