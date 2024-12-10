@@ -10,6 +10,12 @@ const ResumenCompra = () => {
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
 
     const handleConfirmarCompra = () => {
+        if (!user) {
+            alert('Debes iniciar sesión para confirmar tu compra.');
+            Inertia.visit('/register'); // Redirige a la página de registro
+            return;
+        }
+
         Inertia.post('/confirmar-compra', {
             carrito,
             total,

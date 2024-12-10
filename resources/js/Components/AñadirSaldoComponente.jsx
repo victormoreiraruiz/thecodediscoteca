@@ -68,14 +68,14 @@ const AñadirSaldoComponente = () => {
                 onSubmit={(e) => {
                     e.preventDefault();
                     if (!saldo || parseFloat(saldo) <= 0) {
-                        alert('Por favor, introduce un monto válido.');
+                        alert('Por favor, introduce una cantidad válida.');
                         return;
                     }
                 }}
                 className="añadir-saldo-form"
             >
                 <label>
-                    Monto a añadir (€):
+                    Saldo a añadir (€):
                     <input
                         type="number"
                         min="0.01"

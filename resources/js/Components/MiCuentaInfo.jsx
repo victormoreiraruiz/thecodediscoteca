@@ -11,13 +11,57 @@ const MiCuentaInfo = () => {
     const [sortOption, setSortOption] = useState('fecha'); // Estado para la ordenación
     const [ingresos, setIngresos] = useState([]); // Estado para los ingresos
     const [notificaciones, setNotificaciones] = useState([]);
+    const [nuevasNotificaciones, setNuevasNotificaciones] = useState(0); // Estado para notificaciones no leídas
 
- // Estado para las notificaciones
+    const sortedReservas = reservas.slice().sort((a, b) => {
+        if (sortOption === 'fecha') {
+            return new Date(a.fecha_reserva) - new Date(b.fecha_reserva);
+        } else if (sortOption === 'creacion') {
+            return new Date(b.created_at) - new Date(a.created_at);
+        }
+        return 0;
+    });
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
 
+    // Fetch de notificaciones al cargar el componente
     useEffect(() => {
-        if (selectedOption === 4) {  // Solo cuando se selecciona "Mis Ingresos"
+        const fetchNotificaciones = async () => {
+            try {
+                const response = await axios.get('/notificaciones');
+                setNotificaciones(response.data);
+
+                // Calcular las no leídas
+                const noLeidas = response.data.filter(notificacion => !notificacion.leido).length;
+                setNuevasNotificaciones(noLeidas); // Actualiza el estado con la cantidad de no leídas
+            } catch (error) {
+                console.error('Error al obtener las notificaciones:', error);
+            }
+        };
+
+        fetchNotificaciones();
+    }, []); // Ejecutar solo una vez al cargar el componente
+
+    // Marcar todas como leídas al ver las notificaciones
+    useEffect(() => {
+        if (selectedOption === 2) { // Cuando selecciona "Notificaciones"
+            const marcarTodasComoLeidas = async () => {
+                try {
+                    await axios.put('/notificaciones/marcar-todas-leidas'); // Ruta para marcar todas como leídas
+                    setNotificaciones((prev) => prev.map((n) => ({ ...n, leido: true })));
+                    setNuevasNotificaciones(0); // Resetea el contador de nuevas notificaciones
+                } catch (error) {
+                    console.error('Error al marcar todas como leídas:', error);
+                }
+            };
+
+            marcarTodasComoLeidas();
+        }
+    }, [selectedOption]);
+
+    // Fetch de ingresos si se selecciona "Mis Ingresos"
+    useEffect(() => {
+        if (selectedOption === 1) {
             const fetchIngresos = async () => {
                 try {
                     const response = await axios.get('/mi-cuenta/ingresos');
@@ -28,35 +72,9 @@ const MiCuentaInfo = () => {
                 }
             };
             fetchIngresos();
-        } else if (selectedOption === 5) { // Solo cuando se selecciona "Notificaciones"
-            const fetchNotificaciones = async () => {
-                try {
-                    const response = await axios.get('/notificaciones');
-                    setNotificaciones(response.data);
-                } catch (error) {
-                    console.error('Error al obtener las notificaciones:', error);
-                }
-            };
-            fetchNotificaciones();
         }
     }, [selectedOption]);
 
-    useEffect(() => {
-        if (selectedOption === 5) {
-            const fetchNotificaciones = async () => {
-                try {
-                    const response = await axios.get('/notificaciones');
-                    console.log('Notificaciones obtenidas:', response.data);
-                    setNotificaciones(response.data);
-                } catch (error) {
-                    console.error('Error al obtener las notificaciones:', error);
-                }
-            };
-            fetchNotificaciones();
-        }
-    }, [selectedOption]);
-
-    // Calcular ingresos totales: Es importante sumar solo los ingresos únicos y asegurarse de que no haya duplicados
     const totalIngresos = ingresos
         .map(ingreso => ingreso.total_ingresos)  // Extrae los ingresos individuales
         .reduce((total, ingreso) => total + ingreso, 0)  // Suma los ingresos
@@ -107,22 +125,39 @@ const MiCuentaInfo = () => {
     };
 
     const userItems = [
-        { label: 'Nombre', detail: "Su nombre es " + user.name + "." },
-        { label: 'Email', detail: "Su email es " + user.email + "." },
-        { label: 'Saldo', detail: "Su saldo actual es de " + `${user.saldo} €` },
-        { label: 'Puntos', detail: "Dispone de un total de " + user.puntos_totales + " puntos." },
+        {
+            label: 'Mi Perfil',
+            detail: (
+                <div>
+                    <p><strong>Nombre:</strong> {user.name}</p>
+                    <p><strong>Email:</strong> {user.email}</p>
+                    <p><strong>Saldo:</strong> {user.saldo} €</p>
+                    <p><strong>Puntos:</strong> {user.puntos_totales}</p>
+                    <button
+                        className="mi-cuenta-boton-password"
+                        onClick={() => handleAddSaldo()}
+                        style={{
+                            marginTop: '10px',
+                            color: '#000000',
+                            background: '#e5cc70',
+                            border: 'none',
+                            padding: '8px 16px',
+                            cursor: 'pointer',
+                            borderRadius: '5px',
+                        }}
+                    >
+                        Añadir Saldo
+                    </button>
+                </div>
+            ),
+        },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
-        { label: 'Notificaciones', detail: 'Aquí puedes ver tus notificaciones.' }, // Nueva opción
+        { 
+            label: `Notificaciones${nuevasNotificaciones > 0 ? ` (${nuevasNotificaciones})` : ''}`, 
+            detail: 'Aquí puedes ver tus notificaciones.',
+        },
     ];
-
-    const sortedReservas = reservas.slice().sort((a, b) => {
-        if (sortOption === 'fecha') {
-            return new Date(a.fecha_reserva) - new Date(b.fecha_reserva);
-        } else if (sortOption === 'creacion') {
-            return new Date(b.created_at) - new Date(a.created_at);
-        }
-        return 0;
-    });
+    
 
     const staticItems = [
         {
@@ -247,13 +282,10 @@ const MiCuentaInfo = () => {
                         </li>
                     ))}
                 </ul>
-                <button className="mi-cuenta-boton-password" onClick={handleAddSaldo}>
-                    Añadir Saldo
-                </button>
             </div>
 
             <div className="mi-cuenta-detalles">
-                {selectedOption === 4 ? (  // Si selecciona "Mis Ingresos"
+                {selectedOption === 1 ? (  // Si selecciona "Mis Ingresos"
                     <div>
                         <h3>Historial de Ingresos</h3>
                         <p><strong>Ingresos Totales: {totalIngresos} €</strong></p>
@@ -269,7 +301,7 @@ const MiCuentaInfo = () => {
                             )}
                         </ul>
                     </div>
-                ) : selectedOption === 5 ? (
+                ) : selectedOption === 2 ? (
                     <div>
                         <h3>Tus Notificaciones</h3>
                         {Array.isArray(notificaciones) && notificaciones.length > 0 ? (

@@ -21,21 +21,13 @@ class NotificacionController extends Controller
 
     
 
-    // Marcar una notificación como vista
-    public function marcarComoVista($id)
-    {
-        $notificacion = Notificacion::findOrFail($id);
+public function marcarTodasLeidas()
+{
+    Notificacion::where('usuario_id', auth()->id())->update(['leido' => true]);
 
-        // Verificar que la notificación pertenece al usuario autenticado
-        if ($notificacion->usuario_id === auth()->id()) {
-            $notificacion->leido = true; // Cambiado a 'leido' para reflejar el nombre de tu columna
-            $notificacion->save();
+    return response()->json(['message' => 'Todas las notificaciones han sido marcadas como leídas.']);
+}
 
-            return response()->json(['message' => 'Notificación marcada como vista.']);
-        }
-
-        return response()->json(['error' => 'No autorizado.'], 403);
-    }
 
     // Crear una nueva notificación
     public function crearNotificacion(Request $request)
