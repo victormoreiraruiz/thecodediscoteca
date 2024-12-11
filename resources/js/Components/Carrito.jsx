@@ -2,8 +2,36 @@
 import React, { useEffect, useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import Cookies from 'js-cookie';
+import { usePage } from '@inertiajs/react';
 
 const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => {
+    const { auth } = usePage().props
+
+    useEffect(() => {
+        const carritoGuardado = Cookies.get('carrito');
+        if (carritoGuardado) {
+            const parsedCarrito = JSON.parse(carritoGuardado);
+            if (parsedCarrito.userId !== auth.user?.id) {
+                // Si el carrito no pertenece al usuario autenticado, eliminarlo
+                Cookies.remove('carrito', { path: '/' });
+                setCarrito([]);
+            } else {
+                setCarrito(parsedCarrito.items || []);
+            }
+        }
+    }, [auth.user?.id, setCarrito]);
+
+    useEffect(() => {
+        if (carrito.length > 0) {
+            Cookies.set(
+                'carrito',
+                JSON.stringify({ userId: auth.user?.id, items: carrito }),
+                { expires: 7, path: '/' }
+            );
+        } else {
+            Cookies.remove('carrito', { path: '/' });
+        }
+    }, [carrito, auth.user?.id]);
     // función para eliminar un producto del carrito
     const eliminarDelCarrito = (tipo) => {
         setCarrito(carrito.filter(item => item.tipo !== tipo));
@@ -46,19 +74,6 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
     };
 
     // leer el carrito desde la cookie cuando se carga la página
-    useEffect(() => {
-        const carritoGuardado = Cookies.get('carrito');
-        if (carritoGuardado) {
-            setCarrito(JSON.parse(carritoGuardado));
-        }
-    }, [setCarrito]);
-
-    // guarda el carrito en la cookie cada vez que se actualice
-    useEffect(() => {
-        if (carrito.length > 0) {
-            Cookies.set('carrito', JSON.stringify(carrito), { expires: 7 }); // Expira en 7 días
-        }
-    }, [carrito]);
 
     return (
         <>

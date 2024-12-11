@@ -56,4 +56,6 @@ class RegisteredUserController extends Controller
     
         return redirect('/index'); // Ruta del panel de usuario
     }
+
+    
 }

@@ -224,7 +224,7 @@ const MiCuentaInfo = () => {
                     {sortedReservas.map((reserva, index) => (
                         <div key={index} style={{ marginBottom: '15px' }}>
                             <div>
-                                <Link href={`/mi-cuenta/eventos/${reserva.id}`} style={{ color: '#e5cc70' }}>
+                                <Link href={`/mi-cuenta/eventos/${reserva.id +1}`} style={{ color: '#e5cc70' }}>
                                     Reserva para el {new Date(reserva.fecha_reserva).toLocaleDateString()} - Sala: {reserva.sala.tipo_sala}
                                 </Link>
                             </div>

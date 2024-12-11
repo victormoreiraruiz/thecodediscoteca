@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cookie;
 
 class ProfileController extends Controller
 {
@@ -158,6 +159,55 @@ public function obtenerIngresos(Request $request)
 
    // devuelve lls ingresos
     return response()->json($ingresos);
+}
+
+public function convertToPromotor(Request $request)
+{
+    $request->validate([
+        'nombre_completo' => 'required|string',
+        'documento_fiscal' => 'required|string',
+        'direccion' => 'required|string',
+        'telefono' => 'required|string',
+        'informacion_bancaria' => 'nullable|string',
+    ]);
+
+    $user = Auth::user();
+    $user->update([
+        'documento_fiscal' => $request->documento_fiscal,
+        'direccion' => $request->direccion,
+        'telefono' => $request->telefono,
+        'informacion_bancaria' => $request->informacion_bancaria,
+        'rol' => 'promotor',
+    ]);
+
+    Auth::user()->refresh(); // Refresca el estado del usuario
+
+    return redirect()->route('eventos')->with('message', '¡Ahora eres promotor!');
+
+}
+
+
+public function mostrarFormularioPromotor()
+{
+    return Inertia::render('FormularioPromotor', [
+        'user' => Auth::user(),
+    ]);
+}
+
+public function logout(Request $request)
+{
+    // Cerrar sesión del usuario
+    Auth::logout();
+
+    // Eliminar la cookie del carrito
+    Cookie::queue(Cookie::forget('carrito')->withPath('/'));
+
+    // Invalidar la sesión
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    // Redirigir a la página de inicio
+    return redirect('/')->with('message', 'Sesión cerrada correctamente.');
 }
 
 
