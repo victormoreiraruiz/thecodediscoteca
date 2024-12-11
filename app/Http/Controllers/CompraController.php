@@ -193,40 +193,42 @@ class CompraController extends Controller
     }
     public function descargarQrsPdf($compraId)
 {
-    // recupera la compra junto con las entradas y la cantidad de cada entrada
-    $compra = Compra::with('entradas')->findOrFail($compraId);
-
-    // array para guardar las rutas de los QR generados
+    $compra = Compra::with(['entradas.evento'])->findOrFail($compraId);
     $qrPaths = [];
 
-    // genera n  QR por cada entrada de la compra
     foreach ($compra->entradas as $entrada) {
-        // itera sobre la cantidad de entradas del mismo tipo compradas
         for ($i = 1; $i <= $entrada->pivot->cantidad; $i++) {
-            // gener la ruta del QR con un número único para cada entrada
-            // numero único para cada entrada (n1, n2, etc.)
             $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}_n{$i}.png");
-            
-           
-            \QrCode::format('png')->size(150)->generate("compra_{$compra->id}_entrada_{$entrada->id}_n{$i}", $qrPath);
-            
-           
-            if (file_exists($qrPath)) {
-                $qrPaths[] = $qrPath;
+
+            try {
+                \QrCode::format('png')->size(150)->generate("compra_{$compra->id}_entrada_{$entrada->id}_n{$i}", $qrPath);
+
+                if (is_file($qrPath)) {
+                    $qrPaths[] = $qrPath;
+                } else {
+                    \Log::warning("Archivo no válido: {$qrPath}");
+                }
+            } catch (\Exception $e) {
+                \Log::error("Error al generar QR: {$e->getMessage()}");
             }
         }
     }
 
-    // Crear el PDF usando los datos y los QR
-    $pdf = new \Mpdf\Mpdf();
+    // Filtrar rutas inválidas
+    $qrPaths = array_filter($qrPaths, fn($path) => is_file($path));
+    $qrPaths = array_unique($qrPaths);
 
-    // pasa los datos de las entradas con su cantidad y precio
+    \Log::info("Rutas finales de QR:", $qrPaths);
+
+    $pdf = new \Mpdf\Mpdf();
     $html = view('qrs', compact('compra', 'qrPaths'))->render();
     $pdf->WriteHTML($html);
 
-    // descarga el PDF
     return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
 }
+
+    
+
 
 
 

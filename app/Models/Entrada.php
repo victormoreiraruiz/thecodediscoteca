@@ -10,11 +10,14 @@ class Entrada extends Model
 
 {
     protected $fillable = ['evento_id', 'tipo', 'precio'];
-    public function evento()
-{
-    return $this->belongsTo(Evento::class);
-}
 
+
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class, 'evento_id');
+    }
+
+    
 public function compras()
 {
     return $this->belongsToMany(Compra::class, 'compra_entradas')

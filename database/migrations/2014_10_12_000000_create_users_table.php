@@ -24,6 +24,10 @@ return new class extends Migration
             $table->decimal('saldo', 10, 2)->default(0);
             $table->enum('membresia', ['base', 'plata','oro','diamante'])->default('base');
             $table->decimal('ingresos', 10, 2)->default(0);
+            $table->string('documento_fiscal')->nullable();
+            $table->string('direccion')->nullable();
+            $table->string('telefono')->nullable();
+            $table->string('informacion_bancaria')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

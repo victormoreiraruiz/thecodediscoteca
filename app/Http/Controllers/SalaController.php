@@ -30,6 +30,15 @@ class SalaController extends Controller
 
     public function crearReserva(Request $request, $id)
     {
+
+        $usuario = auth()->user();
+
+    // Verificar que el usuario tenga rol de promotor o admin para realizar la reserva
+    if (!$usuario || !in_array($usuario->rol, ['promotor', 'admin'])) {
+        return response()->json([
+            'error' => 'Solo los promotores o administradores pueden realizar reservas.',
+        ], 403);
+    }
         $validatedData = $request->validate([
             'fecha_reserva' => 'required|date',
             'descripcion' => 'required|string',
@@ -42,7 +51,6 @@ class SalaController extends Controller
             'cartel' => 'nullable|required_if:tipo_reserva,concierto|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
     
-        $usuario = auth()->user(); 
         $sala = Sala::findOrFail($id); 
     
         if ($usuario->saldo < $sala->precio) {
@@ -180,7 +188,21 @@ class SalaController extends Controller
 
     
     
+public function mostrarSalaCelebraciones()
+{
+    $user = auth()->user();
 
+    // Verificar si el usuario tiene rol de promotor o admin
+    if (!$user || !in_array($user->rol, ['promotor', 'admin'])) {
+        return redirect()->route('convertir-promotor')
+            ->with('message', 'Debes ser promotor o administrador para acceder a esta sección.');
+    }
+
+    // Renderizar la página con los datos necesarios
+    return Inertia::render('SalaCelebraciones', [
+        'user' => $user, // Pasar datos del usuario si es necesario
+    ]);
+}
 
 
 }

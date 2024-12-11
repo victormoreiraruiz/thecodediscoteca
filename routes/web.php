@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificacionController;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Http\Middleware\PromotorOAdmin;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,8 @@ Route::get('/api/eventos/{eventoId}/entradas', [EntradaController::class, 'obten
 Route::post('/api/conciertos/{eventoId}/comprar-entradas', [CompraController::class, 'comprarEntradasConcierto']);
 Route::get('/conciertos/{id}', [EventoController::class, 'mostrarConcierto'])->name('conciertos.mostrar');
 Route::get('/conciertos', [EventoController::class, 'listarConciertos'])->name('conciertos.index');
+Route::get('/convertir-promotor', [ProfileController::class, 'mostrarFormularioPromotor'])->name('convertir-promotor');
+Route::post('/convertir-promotor', [ProfileController::class, 'convertToPromotor'])->name('convertir-promotor.post');
 
 Route::get('/test-qr', function () {
     $path = storage_path('app/public/qrcodes/test_qr.png'); // Ruta donde guardar el QR
@@ -146,6 +149,8 @@ Route::get('/mi-cuenta/eventos/{evento}', [EventoController::class, 'mostrarEven
 Route::post('/eventos/{id}/editar', [EventoController::class, 'update'])->name('eventos.update');
 Route::get('/eventos/{id}/ventas', [EventoController::class, 'obtenerDatosVentas']);
 Route::get('eventos/{id}/estadisticas-ventas', [EventoController::class, 'obtenerEstadisticasVentas']);
+Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
+
 
 
 
