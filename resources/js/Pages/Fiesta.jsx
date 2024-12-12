@@ -15,7 +15,8 @@ export default function Welcome() {
             <Navigation />
             <Header />
             <FiestaCartel />
-            <FiestaEntradas carrito={carrito} setCarrito={setCarrito} />
+            <FiestaEntradas carrito={carrito} setCarrito={setCarrito} nombreEvento="Nombre del Evento" />
+
             <Carrito carrito={carrito} setCarrito={setCarrito} mostrarCarrito={mostrarCarrito} setMostrarCarrito={setMostrarCarrito} />
             <Footer />
         </div>
