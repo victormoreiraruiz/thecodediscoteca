@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 use mPDF;
 
 
@@ -64,20 +65,18 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // crea la compra real solo en este punto
+            // Crea la compra
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // generar un QR por cada entrada comprada
+            // Asocia entradas y genera QRs
             foreach ($carrito as $item) {
                 if (isset($item['id']) && isset($item['cantidad'])) {
-                    // Asocia la entrada a la compra
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
     
-                    // generar un QR por cada unidad de la entrada comprada
                     for ($i = 1; $i <= $item['cantidad']; $i++) {
                         $this->generarQr($compra, $item['id'], $i);
                     }
@@ -88,8 +87,13 @@ class CompraController extends Controller
                 $user->saldo -= $total;
             }
     
+            // Incrementar puntos
             $puntosGanados = $total * 0.10; // 10% del total gastado
             $user->puntos_totales += $puntosGanados;
+    
+            // Actualizar membresía
+            $user->actualizarMembresia();
+    
             $user->save();
     
             DB::commit();
@@ -103,6 +107,7 @@ class CompraController extends Controller
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
     }
+    
     
     private function generarQr($compra, $entradaId, $indice)
     {

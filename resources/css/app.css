@@ -1296,3 +1296,8 @@ h2 {
 
 
 
+.busqueda-texto {
+  color: #000; /* Ajusta el color según sea necesario */
+  font-weight: bold;
+  margin-top: 5px; /* Espaciado opcional */
+}

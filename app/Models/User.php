@@ -85,4 +85,19 @@ public function notificaciones()
 {
     return $this->hasMany(Notificacion::class, 'usuario_id');
 }
+
+public function actualizarMembresia()
+{
+    if ($this->puntos_totales >= 200) {
+        $this->membresia = 'diamante';
+    } elseif ($this->puntos_totales >= 100) {
+        $this->membresia = 'oro';
+    } elseif ($this->puntos_totales >= 50) {
+        $this->membresia = 'plata';
+    } else {
+        $this->membresia = 'base';
+    }
+
+    $this->save();
+}
 }
