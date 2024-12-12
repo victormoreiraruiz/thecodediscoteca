@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 use mPDF;
 
 
@@ -64,20 +65,18 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // crea la compra real solo en este punto
+            // Crea la compra
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // generar un QR por cada entrada comprada
+            // Asocia entradas y genera QRs
             foreach ($carrito as $item) {
                 if (isset($item['id']) && isset($item['cantidad'])) {
-                    // Asocia la entrada a la compra
                     $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
     
-                    // generar un QR por cada unidad de la entrada comprada
                     for ($i = 1; $i <= $item['cantidad']; $i++) {
                         $this->generarQr($compra, $item['id'], $i);
                     }
@@ -88,8 +87,13 @@ class CompraController extends Controller
                 $user->saldo -= $total;
             }
     
+            // Incrementar puntos
             $puntosGanados = $total * 0.10; // 10% del total gastado
             $user->puntos_totales += $puntosGanados;
+    
+            // Actualizar membresía
+            $user->actualizarMembresia();
+    
             $user->save();
     
             DB::commit();
@@ -103,6 +107,7 @@ class CompraController extends Controller
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
     }
+    
     
     private function generarQr($compra, $entradaId, $indice)
     {
@@ -134,49 +139,50 @@ class CompraController extends Controller
     
         DB::beginTransaction();
         try {
-            // verifica si el usuario tiene saldo suficiente
+            // Verifica si el usuario tiene saldo suficiente
             if ($user->saldo < $total) {
                 return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
             }
     
-            // crea el registro de la compra
+            // Crea el registro de la compra
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
                 'fecha_compra' => now(),
             ]);
     
-            // asocia las entradas compradas a la compra y genera los QR
             foreach ($carrito as $item) {
-                $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
-                    ->where('id', $item['id'])
-                    ->first();
+                // Procesar solo las entradas de concierto
+                if ($item['tipo'] === 'concierto') {
+                    $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
+                        ->where('id', $item['id'])
+                        ->first();
     
-                if (!$entrada) {
-                    throw new \Exception("La entrada no es válida para el concierto seleccionado.");
-                }
+                    if (!$entrada) {
+                        throw new \Exception("La entrada no es válida para el concierto seleccionado.");
+                    }
     
-                $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+                    // Asocia las entradas compradas a la compra
+                    $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
     
-                // generar un QR por cada unidad de la entrada comprada
-                for ($i = 1; $i <= $item['cantidad']; $i++) {
-                    $this->generarQr($compra, $entrada->id, $i);
+                    // Generar un QR por cada unidad de la entrada comprada
+                    for ($i = 1; $i <= $item['cantidad']; $i++) {
+                        $this->generarQr($compra, $entrada->id, $i);
+                    }
                 }
             }
     
-            // resta el saldo del usuario comprador
+            // Resta el saldo del usuario comprador
             $user->saldo -= $total;
             $user->save();
     
-            // incrementa los ingresos del usuario creador de la reserva
-            $reserva = \App\Models\ReservaDiscoteca::where('sala_id', $entrada->evento->sala_id)
-                ->where('fecha_reserva', $entrada->evento->fecha_evento)
-                ->first();
+            // Incrementa los ingresos del usuario creador del evento
+            $evento = \App\Models\Evento::find($eventoId);
     
-            if ($reserva) {
-                $creador = $reserva->usuario; // Usuario que creó la reserva
-                $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) use ($reserva) {
-                    return $sum + ($item['cantidad'] * $reserva->precio_entrada);
+            if ($evento) {
+                $creador = $evento->promotor; // Usuario que creó el evento
+                $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) {
+                    return $sum + ($item['precio'] * $item['cantidad']);
                 }, 0);
                 $creador->ingresos += $ingresoTotal;
                 $creador->save();
@@ -191,6 +197,7 @@ class CompraController extends Controller
             return response()->json(['error' => 'No se pudo completar la compra.'], 500);
         }
     }
+    
     public function descargarQrsPdf($compraId)
 {
     $compra = Compra::with(['entradas.evento'])->findOrFail($compraId);

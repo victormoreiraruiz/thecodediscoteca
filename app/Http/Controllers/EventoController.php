@@ -117,6 +117,16 @@ class EventoController extends Controller
         ]);
     }
 
+    public function obtenerEntradas($eventoId)
+{
+    $entradas = \App\Models\Entrada::where('evento_id', $eventoId)
+        ->with('evento') // Incluye la relación con el evento
+        ->get();
+
+    return response()->json($entradas);
+}
+
+
  
     public function mostrarConcierto($id)
 {
