@@ -60,6 +60,10 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
         return carrito.reduce((total, item) => total + item.cantidad, 0);
     };
 
+    useEffect(() => {
+        console.log('Estado del carrito:', carrito);
+    }, [carrito]);
+
     return (
         <>
             {carrito.length > 0 && (
@@ -83,7 +87,9 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
                         <ul>
                             {carrito.map(item => (
                                 <li key={`${item.tipo}-${item.eventoId}`} className="carrito-item">
-                                    <span>{item.nombre_evento} - Entrada {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}</span>
+                                    <span>
+                                        {item.nombre_evento || 'Evento desconocido'} - Entrada {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}
+                                    </span>
                                     <input
                                         type="number"
                                         min="1"

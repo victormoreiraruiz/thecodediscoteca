@@ -126,6 +126,7 @@ class EventoController extends Controller
     return response()->json($entradas);
 }
 
+
  
     public function mostrarConcierto($id)
 {

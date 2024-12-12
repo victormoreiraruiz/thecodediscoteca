@@ -26,11 +26,12 @@ const FiestaEntradas = ({ carrito, setCarrito, nombreEvento }) => {
 
     return (
         <div className="tienda">
-            <p>ENTRADAS PARA: {nombreEvento}</p>
+           <h2> ENTRADAS</h2>
 
             {entradas.map(entrada => (
                 <div key={entrada.tipo} className="entrada">
                     <h3>Entrada {entrada.tipo.charAt(0).toUpperCase() + entrada.tipo.slice(1)}</h3>
+                    <br></br>
                     <div className="precio">Precio: {entrada.precio}€</div>
                     <button
                         className="reservar"

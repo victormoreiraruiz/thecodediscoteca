@@ -9,13 +9,14 @@ import React, { useState } from 'react';
 export default function Welcome() {
     const [carrito, setCarrito] = useState([]);
     const [mostrarCarrito, setMostrarCarrito] = useState(false);
+    const nombreEvento = 'Fiesta de Año Nuevo';
 
     return (
         <div>
             <Navigation />
             <Header />
             <FiestaCartel />
-            <FiestaEntradas carrito={carrito} setCarrito={setCarrito} nombreEvento="Nombre del Evento" />
+            <FiestaEntradas carrito={carrito} setCarrito={setCarrito}  nombreEvento={nombreEvento} />
 
             <Carrito carrito={carrito} setCarrito={setCarrito} mostrarCarrito={mostrarCarrito} setMostrarCarrito={setMostrarCarrito} />
             <Footer />
