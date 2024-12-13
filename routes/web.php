@@ -133,6 +133,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/eventos', [AdminController::class, 'guardarEvento'])->name('admin.eventos.guardar');
     Route::get('/admin/eventos', [AdminController::class, 'mostrarEventos'])->name('admin.mostrarEventos');
     Route::delete('/admin/eventos/{id}', [AdminController::class, 'eliminarEvento'])->name('admin.eliminarEvento');
+    Route::post('/admin/actualizarSaldo', [AdminController::class, 'actualizarSaldo'])->name('admin.actualizarSaldo');
+    
+
 });
 
 Route::middleware(['auth'])->group(function () {
