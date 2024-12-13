@@ -1301,3 +1301,30 @@ h2 {
   font-weight: bold;
   margin-top: 5px; /* Espaciado opcional */
 }
+
+.sorteos button {
+  margin: 5px;
+  padding: 10px 15px;
+  background-color: #e5cc70;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.sorteos button:hover {
+  background-color: #f3d465;
+}
+
+.resultado {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}

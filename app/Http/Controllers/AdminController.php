@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Sala;
 use App\Models\Evento;
+use App\Models\Notificacion;
 
 
 class AdminController extends Controller
@@ -107,5 +108,43 @@ public function eliminarEvento($id)
 
     return redirect()->route('admin.gestionEventos')->with('success', 'Evento eliminado exitosamente.');
 }
+
+public function actualizarSaldo(Request $request)
+{
+    // Validar los datos de entrada
+    $validated = $request->validate([
+        'id' => 'required|exists:users,id', // El ID debe existir en la tabla de usuarios
+        'saldo' => 'required|numeric|min:0', // El saldo debe ser un número mayor o igual a 0
+        'mensaje' => 'nullable|string', // Mensaje opcional
+    ]);
+
+    try {
+        // Buscar el usuario
+        $user = User::findOrFail($validated['id']);
+
+        // Incrementar el saldo
+        $nuevoSaldo = $user->saldo + $validated['saldo'];
+        $user->saldo = $nuevoSaldo;
+        $user->save();
+
+        // Crear la notificación
+        Notificacion::create([
+            'usuario_id' => $user->id,
+            'mensaje' => $validated['mensaje'] ?? 'Tu saldo ha sido actualizado.',
+            'leido' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Saldo actualizado correctamente y notificación enviada.',
+            'nuevoSaldo' => $nuevoSaldo,
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Error al actualizar el saldo:', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Error interno del servidor.'], 500);
+    }
+}
+
+
+
 
 }
