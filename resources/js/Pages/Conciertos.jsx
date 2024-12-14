@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
+import Carrito from '../Components/Carrito';
 import { Link } from '@inertiajs/react';
 
 export default function Conciertos({ conciertos }) {
+   const [carrito, setCarrito] = useState([]);
+      const [mostrarCarrito, setMostrarCarrito] = useState(false);
   return (
     <div>
       <Navigation />
@@ -32,6 +35,12 @@ export default function Conciertos({ conciertos }) {
           </div>
         ))}
       </div>
+      <Carrito
+                carrito={carrito}
+                setCarrito={setCarrito}
+                mostrarCarrito={mostrarCarrito}
+                setMostrarCarrito={setMostrarCarrito}
+            />
       <Footer />
     </div>
   );

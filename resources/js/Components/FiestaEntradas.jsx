@@ -37,7 +37,7 @@ const FiestaEntradas = ({ carrito, setCarrito, nombreEvento }) => {
                         className="reservar"
                         onClick={() => agregarAlCarrito(entrada)}
                     >
-                        Comprar
+                        Añadir
                     </button>
                 </div>
             ))}

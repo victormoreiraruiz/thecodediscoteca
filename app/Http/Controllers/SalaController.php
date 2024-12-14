@@ -9,6 +9,7 @@ use App\Models\Evento;
 use App\Models\Entrada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use App\Models\Compra;
 use App\Models\Notificacion;
 
@@ -29,75 +30,85 @@ class SalaController extends Controller
     }
 
     public function crearReserva(Request $request, $id)
-    {
+{
+    $usuario = auth()->user();
 
-        $usuario = auth()->user();
-
-    // Verificar que el usuario tenga rol de promotor o admin para realizar la reserva
     if (!$usuario || !in_array($usuario->rol, ['promotor', 'admin'])) {
+        $redirectUrl = url()->current(); // Esto incluirá la URL de la API actual
         return response()->json([
             'error' => 'Solo los promotores o administradores pueden realizar reservas.',
+            'redirect_to' => route('convertir-promotor') . '?redirect_to=' . urlencode($redirectUrl),
         ], 403);
     }
-        $validatedData = $request->validate([
-            'fecha_reserva' => 'required|date',
-            'descripcion' => 'required|string',
-            'asistentes' => 'required|integer|min:1',
-            'tipo_reserva' => 'required|in:privada,concierto',
-            'precio_entrada' => 'nullable|required_if:tipo_reserva,concierto|numeric|min:0',
-            'nombre_concierto' => 'nullable|required_if:tipo_reserva,concierto|string',
-            'hora_inicio' => 'nullable|required_if:tipo_reserva,concierto|date_format:H:i',
-            'hora_fin' => 'nullable|required_if:tipo_reserva,concierto|date_format:H:i',
-            'cartel' => 'nullable|required_if:tipo_reserva,concierto|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-    
-        $sala = Sala::findOrFail($id); 
-    
-        if ($usuario->saldo < $sala->precio) {
-            return response()->json(['error' => 'Saldo insuficiente para realizar la reserva.'], 403);
-        }
-    
-        $usuario->saldo -= $sala->precio;
-        $usuario->save();
-    
-        $reserva = ReservaDiscoteca::create([
-            'usuario_id' => $usuario->id,
-            'sala_id' => $id,
-            'fecha_reserva' => $validatedData['fecha_reserva'],
-            'disponibilidad' => 'reservada',
-            'asistentes' => $validatedData['asistentes'],
-            'descripcion' => $validatedData['descripcion'],
-            'tipo_reserva' => $validatedData['tipo_reserva'],
-            'precio_entrada' => $validatedData['tipo_reserva'] === 'concierto' ? $validatedData['precio_entrada'] : null,
-        ]);
-    
-        if ($validatedData['tipo_reserva'] === 'concierto') {
-            $cartelPath = null;
-    
-            if ($request->hasFile('cartel')) {
-                $cartelPath = $request->file('cartel')->store('imagenes', 'public');
-            }
-    
-            $evento = \App\Models\Evento::create([
-                'nombre_evento' => $validatedData['nombre_concierto'],
-                'descripcion' => $validatedData['descripcion'],
-                'fecha_evento' => $validatedData['fecha_reserva'],
-                'hora_inicio' => $validatedData['hora_inicio'],
-                'hora_final' => $validatedData['hora_fin'],
-                'cartel' => $cartelPath,
-                'sala_id' => $sala->id,
-            ]);
-    
-            \App\Models\Entrada::create([
-                'evento_id' => $evento->id,
-                'tipo' => 'normal',
-                'precio' => $validatedData['precio_entrada'],
-            ]);
-        }
-    
-        return response()->json(['message' => 'Reserva creada exitosamente.'], 201);
+
+    // Validar los datos enviados por el usuario
+    $validatedData = $request->validate([
+        'fecha_reserva' => 'required|date',
+        'descripcion' => 'required|string',
+        'asistentes' => 'required|integer|min:1',
+        'tipo_reserva' => 'required|in:privada,concierto',
+        'precio_entrada' => 'nullable|required_if:tipo_reserva,concierto|numeric|min:0',
+        'nombre_concierto' => 'nullable|required_if:tipo_reserva,concierto|string',
+        'hora_inicio' => 'nullable|required_if:tipo_reserva,concierto|date_format:H:i',
+        'hora_fin' => 'nullable|required_if:tipo_reserva,concierto|date_format:H:i',
+        'cartel' => 'nullable|required_if:tipo_reserva,concierto|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // Buscar la sala por su ID
+    $sala = Sala::findOrFail($id);
+
+    // Verificar si el usuario tiene saldo suficiente para realizar la reserva
+    if ($usuario->saldo < $sala->precio) {
+        return response()->json(['error' => 'Saldo insuficiente para realizar la reserva.'], 403);
     }
-    
+
+    // Descontar el precio de la sala del saldo del usuario
+    $usuario->saldo -= $sala->precio;
+    $usuario->save();
+
+    // Crear la reserva en la base de datos
+    $reserva = ReservaDiscoteca::create([
+        'usuario_id' => $usuario->id,
+        'sala_id' => $id,
+        'fecha_reserva' => $validatedData['fecha_reserva'],
+        'disponibilidad' => 'reservada',
+        'asistentes' => $validatedData['asistentes'],
+        'descripcion' => $validatedData['descripcion'],
+        'tipo_reserva' => $validatedData['tipo_reserva'],
+        'precio_entrada' => $validatedData['tipo_reserva'] === 'concierto' ? $validatedData['precio_entrada'] : null,
+    ]);
+
+    // Si la reserva es de tipo "concierto", crea un evento asociado
+    if ($validatedData['tipo_reserva'] === 'concierto') {
+        $cartelPath = null;
+
+        // Guardar el cartel si se subió
+        if ($request->hasFile('cartel')) {
+            $cartelPath = $request->file('cartel')->store('imagenes', 'public');
+        }
+
+        $evento = \App\Models\Evento::create([
+            'nombre_evento' => $validatedData['nombre_concierto'],
+            'descripcion' => $validatedData['descripcion'],
+            'fecha_evento' => $validatedData['fecha_reserva'],
+            'hora_inicio' => $validatedData['hora_inicio'],
+            'hora_final' => $validatedData['hora_fin'],
+            'cartel' => $cartelPath,
+            'sala_id' => $sala->id,
+        ]);
+
+        // Crear entradas para el evento
+        \App\Models\Entrada::create([
+            'evento_id' => $evento->id,
+            'tipo' => 'normal',
+            'precio' => $validatedData['precio_entrada'],
+        ]);
+    }
+
+    // Respuesta exitosa
+    return response()->json(['message' => 'Reserva creada exitosamente.'], 201);
+}
+
 
     public function cancelarReserva($id)
 {

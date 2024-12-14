@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
@@ -180,11 +182,20 @@ public function convertToPromotor(Request $request)
         'rol' => 'promotor',
     ]);
 
-    Auth::user()->refresh(); // Refresca el estado del usuario
+    Auth::user()->refresh();
 
-    return redirect()->route('eventos')->with('message', '¡Ahora eres promotor!');
+    // Usar el parámetro redirect_to o la URL almacenada en la sesión
+    $redirectUrl = $request->query('redirect_to', session('url.intended', route('eventos')));
 
+    Log::info('Redirigiendo a:', ['url' => $redirectUrl]);
+
+    return redirect($redirectUrl)->with('message', '¡Ahora eres promotor!');
 }
+
+
+
+
+
 
 
 public function mostrarFormularioPromotor()
@@ -208,6 +219,20 @@ public function logout(Request $request)
 
     // Redirigir a la página de inicio
     return redirect('/')->with('message', 'Sesión cerrada correctamente.');
+}
+
+public function login(Request $request)
+{
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        return redirect()->intended(); // Redirige a la URL almacenada o a un fallback
+    }
+
+    return back()->withErrors([
+        'email' => 'Credenciales inválidas.',
+    ]);
 }
 
 

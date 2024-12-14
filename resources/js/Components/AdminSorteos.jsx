@@ -14,7 +14,7 @@ const AdminSorteos = ({ usuarios = [] }) => {
     setLoading(true);
     setError(null);
 
-    // Filtrar usuarios por nivel de membresía
+    // filtra usuarios por nivel de miembro
     const usuariosFiltrados = usuarios.filter(user => user.membresia === nivel);
 
     if (usuariosFiltrados.length === 0) {
@@ -23,13 +23,13 @@ const AdminSorteos = ({ usuarios = [] }) => {
       return;
     }
 
-    // Seleccionar un ganador aleatorio
+    // selecciona un ganador random
     const ganador = usuariosFiltrados[Math.floor(Math.random() * usuariosFiltrados.length)];
 
     try {
       console.log('Ganador seleccionado:', ganador);
 
-      // Actualizar saldo del ganador y enviar la notificación
+      // actuaiza saldo del ganador y envia la ntfcn
       const response = await fetch(route('admin.actualizarSaldo'), {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ const AdminSorteos = ({ usuarios = [] }) => {
         },
         body: JSON.stringify({
           id: ganador.id,
-          saldo: premio, // Enviar solo el incremento del saldo
+          saldo: premio, // envia premio
           mensaje: `¡Felicidades ${ganador.name}! Has ganado el sorteo mensual y tu saldo ha sido incrementado en ${premio} euros.`,
         }),
       });

@@ -112,7 +112,7 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
 
                     <div className="carrito-botones">
                         <button onClick={() => setCarrito([])}>Vaciar Carrito</button>
-                        <button onClick={finalizarCompra}>Finalizar Compra</button>
+                        <button onClick={finalizarCompra}>Tramitar Compra</button>
                     </div>
                 </div>
             )}
