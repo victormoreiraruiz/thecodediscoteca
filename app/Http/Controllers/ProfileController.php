@@ -205,13 +205,22 @@ public function mostrarFormularioPromotor()
     ]);
 }
 
+
+
 public function logout(Request $request)
 {
     // Cerrar sesión del usuario
     Auth::logout();
 
-    // Eliminar la cookie del carrito
+    // Eliminar cookies específicas, como carrito
     Cookie::queue(Cookie::forget('carrito')->withPath('/'));
+
+    // Eliminar todas las cookies relacionadas con formularioReserva
+    foreach ($request->cookies as $key => $value) {
+        if (str_starts_with($key, 'formularioReserva_')) {
+            Cookie::queue(Cookie::forget($key)->withPath('/'));
+        }
+    }
 
     // Invalidar la sesión
     $request->session()->invalidate();
@@ -220,6 +229,7 @@ public function logout(Request $request)
     // Redirigir a la página de inicio
     return redirect('/')->with('message', 'Sesión cerrada correctamente.');
 }
+
 
 public function login(Request $request)
 {

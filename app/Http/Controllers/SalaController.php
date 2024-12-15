@@ -34,7 +34,8 @@ class SalaController extends Controller
     $usuario = auth()->user();
 
     if (!$usuario || !in_array($usuario->rol, ['promotor', 'admin'])) {
-        $redirectUrl = url()->current(); // Esto incluirá la URL de la API actual
+        // Redirigir al formulario de conversión con la página anterior como parámetro
+        $redirectUrl = url()->previous();
         return response()->json([
             'error' => 'Solo los promotores o administradores pueden realizar reservas.',
             'redirect_to' => route('convertir-promotor') . '?redirect_to=' . urlencode($redirectUrl),

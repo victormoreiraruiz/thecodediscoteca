@@ -11,6 +11,10 @@ const FormularioPromotor = ({ onComplete }) => {
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({}); // Estado para los errores de validación
+    const handleVolverAtras = () => {
+        window.history.back(); // Regresa a la página anterior
+    };
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -119,10 +123,14 @@ const FormularioPromotor = ({ onComplete }) => {
                     onChange={handleChange}
                 />
             </div>
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading} onClick={handleVolverAtras} className="volver-atras-boton">
                 {loading ? 'Procesando...' : 'Convertirme en Promotor'}
             </button>
         </form>
+
+
+// Agregar el botón en el JSX
+
     );
 };
 

@@ -25,26 +25,33 @@ class CompraController extends Controller
     }
 
   
-    public function resumen(Request $request)
-    {
-        $user = $request->user();
-    
-        $carrito = session('carrito', []); // obtiene el carrito desde la sesión
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-    
-        return Inertia::render('ResumenCompra', [
-            'carrito' => $carrito,
-            'total' => $total,
-            'user' => $user ? [
-                'nombre' => $user->name,
-                'correo' => $user->email,
-                'saldo' => $user->saldo,
-                'puntos_totales' => $user->puntos_totales,
-            ] : null,
-        ]);
-    }
+  public function resumen(Request $request)
+{
+    $user = $request->user();
+
+    \Log::info('Datos del usuario:', [
+        'nombre' => $user->name ?? null,
+        'correo' => $user->email ?? null,
+        'saldo' => $user->saldo ?? null,
+    ]);
+
+    $carrito = session('carrito', []); // obtiene el carrito desde la sesión
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+
+    return Inertia::render('ResumenCompra', [
+        'carrito' => $carrito,
+        'total' => $total,
+        'user' => $user ? [
+            'nombre' => $user->name,
+            'correo' => $user->email,
+            'saldo' => $user->saldo,
+                // Confirmar aquí que el saldo es correcto
+        ] : null,
+    ]);
+}
+
     
 
     

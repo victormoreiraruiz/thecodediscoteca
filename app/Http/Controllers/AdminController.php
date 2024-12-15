@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Sala;
 use App\Models\Evento;
 use App\Models\Notificacion;
+use App\Models\Compra;
+use App\Models\ReservaDiscoteca;
+use Carbon\Carbon;
 
 
 class AdminController extends Controller
@@ -104,10 +107,92 @@ public function mostrarEventos()
 public function eliminarEvento($id)
 {
     $evento = Evento::findOrFail($id);
-    $evento->delete();
 
-    return redirect()->route('admin.gestionEventos')->with('success', 'Evento eliminado exitosamente.');
+    try {
+        // Buscar la reserva asociada al evento
+        $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
+            ->where('fecha_reserva', $evento->fecha_evento)
+            ->first();
+
+        if ($reserva) {
+            // Verifica si es el mismo día y no permite eliminar si aplica
+            $hoy = now()->startOfDay();
+            $fechaReserva = Carbon::parse($reserva->fecha_reserva);
+
+            if ($fechaReserva->isSameDay($hoy)) {
+                return response()->json(['error' => 'No se puede eliminar un evento para el mismo día.'], 403);
+            }
+
+            // Devolver el 30% del precio al usuario que hizo la reserva
+            $usuarioReserva = $reserva->usuario;
+            $sala = $reserva->sala;
+            $reembolso = $sala->precio * 0.3;
+
+            $usuarioReserva->saldo += $reembolso;
+            $usuarioReserva->save();
+
+            // Eliminar la reserva
+            $reserva->delete();
+        }
+
+        // Procesar reembolsos si el evento tiene compras asociadas
+        $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
+            $query->where('evento_id', $evento->id);
+        })->get();
+
+        $totalReembolsado = 0;
+
+        foreach ($compras as $compra) {
+            $totalReembolso = 0;
+
+            foreach ($compra->entradas as $entrada) {
+                if ($entrada->evento_id == $evento->id) {
+                    $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                    $totalReembolso += $entrada->precio * $cantidad;
+                }
+            }
+
+            // Reembolsar al usuario
+            $compra->usuario->saldo += $totalReembolso;
+            $compra->usuario->save();
+
+            // Crear notificación para el comprador
+            Notificacion::create([
+                'usuario_id' => $compra->usuario->id,
+                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido eliminado. Se ha reembolsado el importe de tu compra.",
+                'leido' => false,
+            ]);
+
+            $totalReembolsado += $totalReembolso;
+        }
+
+        // Actualizar los ingresos del creador del evento
+        $creador = $evento->usuario; // Suponiendo que el evento tiene un creador asociado
+        if ($creador) {
+            $totalRecibido = $compras->sum(function ($compra) use ($evento) {
+                return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) use ($compra) {
+                    $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                    return $entrada->precio * $cantidad;
+                });
+            });
+
+            $creador->ingresos -= $totalRecibido;
+            $creador->save();
+        }
+
+        // Eliminar el evento
+        $evento->delete();
+
+    } catch (\Exception $e) {
+        \Log::error('Error al eliminar evento y procesar reembolsos: ' . $e->getMessage());
+        return response()->json(['error' => 'Hubo un problema al eliminar el evento y procesar los reembolsos.'], 500);
+    }
+
+    return response()->json(['message' => 'Evento y reserva eliminados con éxito, reembolsos procesados.']);
 }
+
+
+
 
 public function actualizarSaldo(Request $request)
 {

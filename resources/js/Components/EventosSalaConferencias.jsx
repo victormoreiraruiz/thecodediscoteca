@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const EventosSalaConferencias = () => {
   const [motivo, setMotivo] = useState('');
@@ -15,6 +16,7 @@ const EventosSalaConferencias = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
 
+  // Cargar las fechas reservadas de la sala
   const fetchBookedDates = async () => {
     try {
       const response = await axios.get('/api/salas/3/reservas');
@@ -24,6 +26,23 @@ const EventosSalaConferencias = () => {
     }
   };
 
+  // Restaurar los datos del formulario desde la cookie al cargar la página
+  useEffect(() => {
+    const savedFormData = Cookies.get('formularioReserva');
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      setMotivo(parsedData.motivo || '');
+      setNumeroPersonas(parsedData.numeroPersonas || 30);
+      setTipoReserva(parsedData.tipoReserva || 'privada');
+      setPrecioEntrada(parsedData.precioEntrada || '');
+      setNombreConcierto(parsedData.nombreConcierto || '');
+      setHoraInicio(parsedData.horaInicio || '');
+      setHoraFin(parsedData.horaFin || '');
+      setSelectedDate(parsedData.selectedDate ? new Date(parsedData.selectedDate) : null);
+    }
+  }, []);
+
+  // Llamada inicial para obtener las fechas reservadas
   useEffect(() => {
     fetchBookedDates();
   }, []);
@@ -75,12 +94,25 @@ const EventosSalaConferencias = () => {
       formData.append('cartel', cartel);
     }
 
+    // Guardar los datos del formulario en una cookie si el usuario no tiene permisos
+    const formDataToSave = {
+      motivo,
+      numeroPersonas,
+      tipoReserva,
+      precioEntrada,
+      nombreConcierto,
+      horaInicio,
+      horaFin,
+      selectedDate,
+    };
+
     try {
       await axios.post('/api/salas/3/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       alert('Reserva creada exitosamente');
+      Cookies.remove('formularioReserva'); // Limpiar la cookie después de confirmar la reserva
       setMotivo('');
       setNumeroPersonas(30);
       setTipoReserva('privada');
@@ -93,13 +125,15 @@ const EventosSalaConferencias = () => {
       fetchBookedDates();
     } catch (error) {
       if (error.response && error.response.status === 403) {
-        // Si el error es por falta de permisos, mostrar un alert y redirigir
-        const redirectUrl = error.response.data.redirect_to; // Usar la URL proporcionada por el servidor
-        const confirmRedirect = window.confirm(
-          'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
-        );
-        if (confirmRedirect && redirectUrl) {
-          window.location.href = redirectUrl;
+        if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
+          Cookies.set('formularioReserva', JSON.stringify(formDataToSave), { expires: 1 }); // Guardar en cookie
+          const confirmRedirect = window.confirm(
+            'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
+          );
+          if (confirmRedirect) {
+            const currentUrl = window.location.pathname;
+            window.location.href = `/convertir-promotor?redirect_to=${encodeURIComponent(currentUrl)}`;
+          }
         }
       } else {
         console.error('Error al crear la reserva:', error);
