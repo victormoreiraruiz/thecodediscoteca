@@ -43,6 +43,9 @@ class Evento extends Model
                 ->withPivot('cantidad')
                 ->withTimestamps();
 }
-
+public function usuario()
+{
+    return $this->belongsTo(User::class, 'usuario_id'); // Asegúrate de que 'usuario_id' es la columna correcta
+}
 
 }
