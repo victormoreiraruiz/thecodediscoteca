@@ -28,7 +28,9 @@ class ProfileController extends Controller
         ]);
     }
 
-
+    public function UserActual(Request $request) {
+        return response()->json(['id' => auth()->user()->id]);
+    }
     /**
      * Update the user's profile information.
      */
@@ -217,7 +219,7 @@ public function logout(Request $request)
 
     // Eliminar todas las cookies relacionadas con formularioReserva
     foreach ($request->cookies as $key => $value) {
-        if (str_starts_with($key, 'formularioReserva_')) {
+        if (str_starts_with($key, 'formularioReserva')) {
             Cookie::queue(Cookie::forget($key)->withPath('/'));
         }
     }

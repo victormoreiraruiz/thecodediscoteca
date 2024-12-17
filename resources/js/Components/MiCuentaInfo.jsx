@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
 import { Link } from '@inertiajs/react';
+import TablaCompras from './TablaCompras';
 
 const MiCuentaInfo = () => {
     const { user, compras = [], reservas = [] } = usePage().props; // Props globales
@@ -23,6 +24,7 @@ const MiCuentaInfo = () => {
     });
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
+    const comprasFiltradas = compras.filter(compra => compra.entradas && compra.entradas.length > 0);
 
     // Fetch de notificaciones al cargar el componente
     useEffect(() => {
@@ -162,50 +164,7 @@ const MiCuentaInfo = () => {
     const staticItems = [
         {
             label: 'Mis Compras',
-            detail: compras.length > 0 ? (
-                compras.map((compra, index) => (
-                    <div key={index}>
-                        <div
-                            style={{ cursor: 'pointer', color: '#e5cc70', marginBottom: '10px' }}
-                            onClick={() => toggleExpand('compras', index)}
-                        >
-                            Compra realizada el {new Date(compra.fecha_compra).toLocaleDateString()} - Total: {compra.total}€
-                        </div>
-                        {expandedItems.compras === index && (
-                            <div style={{ marginLeft: '20px' }}>
-                                <h3>Detalles de los productos:</h3>
-                                <ul>
-                                    {compra.entradas.map((entrada, i) => (
-                                        <li key={i}>
-                                            {entrada.tipo.charAt(0).toUpperCase() + entrada.tipo.slice(1)} x {entrada.pivot.cantidad}
-                                            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                                                {Array.from({ length: entrada.pivot.cantidad }).map((_, qrIndex) => (
-                                                    <img
-                                                        key={qrIndex}
-                                                        src={`/storage/qrcodes/compra_${compra.id}_entrada_${entrada.id}_n${qrIndex + 1}.png`}
-                                                        alt={`QR Entrada ${entrada.id} - ${qrIndex + 1}`}
-                                                        style={{ width: '150px', height: '150px' }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </li>
-                                    ))}
-                                    <a
-                                        href={`/mi-cuenta/compras/${compra.id}/descargar-pdf`}
-                                        className="btn btn-primary"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Descargar PDF
-                                    </a>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                ))
-            ) : (
-                <p>No tienes compras registradas.</p>
-            ),
+            detail: <TablaCompras compras={compras} />, // Utiliza el nuevo componente
         },
         {
             label: 'Mis Eventos',

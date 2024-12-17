@@ -136,6 +136,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/eventos', [AdminController::class, 'mostrarEventos'])->name('admin.mostrarEventos');
     Route::delete('/admin/eventos/{id}', [AdminController::class, 'eliminarEvento'])->name('admin.eliminarEvento');
     Route::post('/admin/actualizarSaldo', [AdminController::class, 'actualizarSaldo'])->name('admin.actualizarSaldo');
+    Route::get('/admin/eventos/{evento}/editar', [EventoController::class, 'show'])->name('admin.evento.show')->middleware('can:admin');
+    Route::get('/eventos/{id}', [EventoController::class, 'show'])->name('eventos.show');
     
 
 });
@@ -147,6 +149,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::get('/api/usuario_actual', [ProfileController::class, 'UserActual']);
 
 
 

@@ -111,7 +111,7 @@ class SalaController extends Controller
 }
 
 
-    public function cancelarReserva($id)
+public function cancelarReserva($id)
 {
     $reserva = ReservaDiscoteca::findOrFail($id);
 
@@ -123,41 +123,50 @@ class SalaController extends Controller
 
         if ($evento) {
             try {
-                // Calcula el total recibido por el organizador 
-                $totalRecibido = 0;
+                // Obtiene todas las compras relacionadas con las entradas del evento
                 $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
                     $query->where('evento_id', $evento->id);
-                })->get();
+                })->with('entradas')->get();
 
                 // Procesa el reembolso y envía notificaciones a los compradores
                 foreach ($compras as $compra) {
                     $totalReembolso = 0;
 
                     foreach ($compra->entradas as $entrada) {
+                        // Validar que la entrada pertenezca al evento actual
                         if ($entrada->evento_id == $evento->id) {
-                            $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                            // Accede directamente al atributo pivot->cantidad
+                            $cantidad = $entrada->pivot->cantidad ?? 0;
                             $totalReembolso += $entrada->precio * $cantidad;
                         }
                     }
 
-                    // Devuelve el dinero al comprador
-                    $compra->usuario->saldo += $totalReembolso;
-                    $compra->usuario->save();
+                    if ($totalReembolso > 0) {
+                        // Devuelve el dinero al comprador
+                        $compra->usuario->saldo += $totalReembolso;
+                        $compra->usuario->save();
 
-                    // Crea una notificación para el comprador
-                    Notificacion::create([
-                        'usuario_id' => $compra->usuario->id,
-                        'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra.",
-                        'leido' => false,
-                    ]);
-                    
+                        // Crea una notificación para el comprador
+                        Notificacion::create([
+                            'usuario_id' => $compra->usuario->id,
+                            'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra.",
+                            'leido' => false,
+                        ]);
+
+                        // Elimina las entradas relacionadas con la compra
+                        $compra->entradas()->detach();
+                    }
                 }
 
-                // Actualiza los ingresos del creador del evento (restar lo recibido)
+                // Elimina las compras después de procesar el reembolso
+                Compra::whereHas('entradas', function ($query) use ($evento) {
+                    $query->where('evento_id', $evento->id);
+                })->delete();
+
+                // Actualiza los ingresos del creador del evento
                 $totalRecibido = $compras->sum(function ($compra) use ($evento) {
-                    return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) use ($compra) {
-                        $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
-                        return $entrada->precio * $cantidad;
+                    return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) {
+                        return $entrada->precio * ($entrada->pivot->cantidad ?? 0);
                     });
                 });
 
@@ -165,6 +174,7 @@ class SalaController extends Controller
                 $creador->ingresos -= $totalRecibido;
                 $creador->save();
 
+                // Elimina el evento
                 $evento->delete();
             } catch (\Exception $e) {
                 \Log::error('Error al procesar reembolsos para el evento: ' . $e->getMessage());
@@ -194,9 +204,8 @@ class SalaController extends Controller
     $reserva->delete();
 
     return response()->json(['message' => 'Reserva cancelada con éxito y reembolsos procesados.']);
-    return response()->json($notificaciones->toArray());
-
 }
+
 
     
     

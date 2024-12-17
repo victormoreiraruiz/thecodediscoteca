@@ -15,8 +15,29 @@ const EventosSalaConferencias = () => {
   const [cartel, setCartel] = useState(null); // Archivo del cartel
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
+  const [userId, setUserId] = useState(null);
 
   // Cargar las fechas reservadas de la sala
+  useEffect(() => {
+    // Llama a tu API para obtener el ID del usuario actual
+    axios.get('/api/usuario_actual').then(response => {
+        const currentUserId = response.data.id;
+        setUserId(currentUserId);
+
+        // Verificar si la cookie pertenece al usuario actual
+        const reservaCookie = Cookies.get('formularioReserva');
+        if (reservaCookie) {
+            const cookieData = JSON.parse(reservaCookie);
+            if (cookieData.userId !== currentUserId) {
+                // Elimina la cookie si no pertenece al usuario actual
+                Cookies.remove('formularioReserva');
+            }
+        }
+    }).catch(error => {
+        console.error('Error al obtener el usuario actual:', error);
+    });
+  }, []);
+
   const fetchBookedDates = async () => {
     try {
       const response = await axios.get('/api/salas/3/reservas');
@@ -96,6 +117,7 @@ const EventosSalaConferencias = () => {
 
     // Guardar los datos del formulario en una cookie si el usuario no tiene permisos
     const formDataToSave = {
+      userId, // Guardar el ID del usuario junto con los datos del formulario
       motivo,
       numeroPersonas,
       tipoReserva,

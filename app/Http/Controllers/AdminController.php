@@ -132,10 +132,10 @@ public function eliminarEvento(Request $request, $id)
             $usuarioReserva->saldo += $reembolso;
             $usuarioReserva->save();
 
-            // Crear una notificación para el usuario de la reserva con el motivo de la cancelación
+            // Crear una notificación para el usuario de la reserva
             Notificacion::create([
                 'usuario_id' => $usuarioReserva->id,
-                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el 30% del importe de tu compra. Motivo de la cancelación: {$motivoCancelacion}",
+                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el 30% del importe de tu reserva. Motivo de la cancelación: {$motivoCancelacion}",
                 'leido' => false,
             ]);
 
@@ -146,48 +146,52 @@ public function eliminarEvento(Request $request, $id)
         // Procesar reembolsos si el evento tiene compras asociadas
         $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
             $query->where('evento_id', $evento->id);
-        })->get();
-
-        $totalReembolsado = 0;
+        })->with('entradas')->get();
 
         foreach ($compras as $compra) {
             $totalReembolso = 0;
 
             foreach ($compra->entradas as $entrada) {
                 if ($entrada->evento_id == $evento->id) {
-                    $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
+                    // Accede a la cantidad de la tabla pivote
+                    $cantidad = $entrada->pivot->cantidad ?? 0;
                     $totalReembolso += $entrada->precio * $cantidad;
                 }
             }
 
-            // Reembolsar al usuario
-            $compra->usuario->saldo += $totalReembolso;
-            $compra->usuario->save();
+            if ($totalReembolso > 0) {
+                // Reembolsar al usuario
+                $compra->usuario->saldo += $totalReembolso;
+                $compra->usuario->save();
 
-            // Crear notificación para el comprador
-            Notificacion::create([
-                'usuario_id' => $compra->usuario->id,
-                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra. Motivo de la cancelación: {$motivoCancelacion}",
-                'leido' => false,
-            ]);
+                // Crear notificación para el comprador
+                Notificacion::create([
+                    'usuario_id' => $compra->usuario->id,
+                    'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra. Motivo de la cancelación: {$motivoCancelacion}",
+                    'leido' => false,
+                ]);
+            }
 
-            $totalReembolsado += $totalReembolso;
+            // Eliminar la relación con las entradas
+            $compra->entradas()->detach();
+
+            // Eliminar la compra
+            $compra->delete();
         }
 
         // Actualizar los ingresos del creador del evento
         $creador = $evento->creador; // Accedemos al creador a través del evento
         if ($creador) {
-            $totalRecibido = $compras->sum(function ($compra) use ($evento) {
-                return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) use ($compra) {
-                    $cantidad = $compra->entradas()->where('entrada_id', $entrada->id)->first()->pivot->cantidad;
-                    return $entrada->precio * $cantidad;
+            $totalReembolsado = $compras->sum(function ($compra) {
+                return $compra->entradas->sum(function ($entrada) {
+                    return $entrada->precio * ($entrada->pivot->cantidad ?? 0);
                 });
             });
 
-            $creador->ingresos -= $totalRecibido;
+            $creador->ingresos -= $totalReembolsado;
             $creador->save();
 
-            // Crear una notificación para el creador del evento con el motivo de la cancelación
+            // Crear una notificación para el creador del evento
             Notificacion::create([
                 'usuario_id' => $creador->id,
                 'mensaje' => "Tu evento '{$evento->nombre_evento}' ha sido cancelado. Motivo de la cancelación: {$motivoCancelacion}",
@@ -203,7 +207,7 @@ public function eliminarEvento(Request $request, $id)
         return response()->json(['error' => 'Hubo un problema al eliminar el evento y procesar los reembolsos.'], 500);
     }
 
-    return response()->json(['message' => 'Evento y reserva eliminados con éxito, reembolsos procesados.']);
+    return response()->json(['message' => 'Evento, compras y reservas eliminados con éxito, reembolsos procesados.']);
 }
 
 

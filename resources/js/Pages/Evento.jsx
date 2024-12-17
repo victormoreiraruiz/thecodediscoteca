@@ -113,7 +113,7 @@ const Evento = () => {
                 {/* Contenedor para alinear gráficas horizontalmente */}
                 <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
-                        <h4>Distribución de Entradas</h4>
+                        <h2>Distribución de Entradas</h2>
                         <PieChart width={400} height={400}>
                             <Pie
                                 data={data}
@@ -134,7 +134,7 @@ const Evento = () => {
                     </div>
 
                     <div>
-                        <h4>Ingresos Acumulativos</h4>
+                        <h2>Ingresos Acumulativos</h2>
                         <LineChart width={600} height={300} data={estadisticasVentas}>
                             <CartesianGrid stroke="#ccc" />
                             <XAxis dataKey="fecha" />
@@ -145,7 +145,7 @@ const Evento = () => {
                     </div>
 
                     <div>
-                        <h4>Ventas de Entradas por Día</h4>
+                        <h2>Ventas de Entradas por Día</h2>
                         <BarChart width={600} height={300} data={estadisticasVentas}>
                             <CartesianGrid stroke="#ccc" />
                             <XAxis dataKey="fecha" />
