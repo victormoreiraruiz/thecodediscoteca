@@ -4,6 +4,7 @@ import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
 import { Link } from '@inertiajs/react';
 import TablaCompras from './TablaCompras';
+import TablaNotificaciones from './TablaNotificaciones';
 
 const MiCuentaInfo = () => {
     const { user, compras = [], reservas = [] } = usePage().props; // Props globales
@@ -154,9 +155,9 @@ const MiCuentaInfo = () => {
             ),
         },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
-        { 
-            label: `Notificaciones${nuevasNotificaciones > 0 ? ` (${nuevasNotificaciones})` : ''}`, 
-            detail: 'Aquí puedes ver tus notificaciones.',
+        {
+            label: `Notificaciones${nuevasNotificaciones > 0 ? ` (${nuevasNotificaciones})` : ''}`,
+            detail: <TablaNotificaciones notificaciones={notificaciones} />,
         },
     ];
     
@@ -262,21 +263,7 @@ const MiCuentaInfo = () => {
                     </div>
                 ) : selectedOption === 2 ? (
                     <div>
-                        <h3>Tus Notificaciones</h3>
-                        {Array.isArray(notificaciones) && notificaciones.length > 0 ? (
-                            <ul>
-                                {notificaciones.map((notificacion, index) => (
-                                    <li key={index} style={{ marginBottom: '10px' }}>
-                                        <p style={{ color: notificacion.leido ? '#aaa' : '#fff' }}>
-                                            {notificacion.mensaje}
-                                        </p>
-                                        
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>No tienes notificaciones pendientes.</p>
-                        )}
+                        <TablaNotificaciones notificaciones={notificaciones} />
                     </div>
                 ) : selectedItem.detail ? (
                     <div className="mi-cuenta-detalle-info">{selectedItem.detail}</div>

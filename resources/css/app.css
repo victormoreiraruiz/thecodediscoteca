@@ -1336,3 +1336,116 @@ h2 {
 .opciones-pago label {
   color: white
 }
+
+/* Contenedor principal */
+.tabla-compras-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Estilo general de la tabla */
+.tabla-compras {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.tabla-compras th,
+.tabla-compras td {
+  padding: 5px;
+  text-align: center;
+  color: #fff;
+  border-bottom: 1px solid #444;
+}
+
+.tabla-compras th {
+  background-color: #333;
+  color: #e5cc70;
+  cursor: pointer;
+}
+
+.tabla-compras th:hover {
+  background-color: #444;
+}
+
+/* Filtro superior */
+.tabla-compras-filtro {
+  background-color: #333;
+  padding: 10px;
+  text-align: center;
+}
+
+.filtro-fechas {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  align-items: center;
+}
+
+.filtro-fechas label {
+  color: #fff;
+}
+
+.filtro-fechas input {
+  margin-left: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+}
+
+/* Filas de la tabla */
+.tabla-compras-row:hover {
+  background-color: #222;
+}
+
+/* Botón de descarga */
+.tabla-compras-btn {
+  background-color: #e5cc70;
+  color: #000;
+  padding: 5px 10px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  display: inline-block;
+}
+
+.tabla-compras-btn:hover {
+  background-color: #d4b852;
+  color: #000;
+}
+
+/* Mensaje cuando no hay datos */
+.tabla-compras-vacia {
+  padding: 10px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Paginación */
+.tabla-compras-paginacion {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.paginacion-btn {
+  padding: 4px 8px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.paginacion-btn.activo {
+  background-color: #e5cc70;
+  color: #000;
+}
+
+.paginacion-btn:hover {
+  background-color: #444;
+}
