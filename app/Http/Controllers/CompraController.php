@@ -25,89 +25,96 @@ class CompraController extends Controller
     }
 
   
-    public function resumen(Request $request)
-    {
-        $user = $request->user();
-    
-        $carrito = session('carrito', []); // obtiene el carrito desde la sesión
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-    
-        return Inertia::render('ResumenCompra', [
-            'carrito' => $carrito,
-            'total' => $total,
-            'user' => $user ? [
-                'nombre' => $user->name,
-                'correo' => $user->email,
-                'saldo' => $user->saldo,
-                'puntos_totales' => $user->puntos_totales,
-            ] : null,
-        ]);
-    }
+  public function resumen(Request $request)
+{
+    $user = $request->user();
+
+    \Log::info('Datos del usuario:', [
+        'nombre' => $user->name ?? null,
+        'correo' => $user->email ?? null,
+        'saldo' => $user->saldo ?? null,
+    ]);
+
+    $carrito = session('carrito', []); // obtiene el carrito desde la sesión
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+
+    return Inertia::render('ResumenCompra', [
+        'carrito' => $carrito,
+        'total' => $total,
+        'user' => $user ? [
+            'nombre' => $user->name,
+            'correo' => $user->email,
+            'saldo' => $user->saldo,
+                // Confirmar aquí que el saldo es correcto
+        ] : null,
+    ]);
+}
+
     
 
     
-    public function confirmarCompra(Request $request)
-    {
-        $user = $request->user();
-        $carrito = session('carrito', []);
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-        $pagarConSaldo = $request->input('pagarConSaldo');
-    
-        \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
-    
-        if ($pagarConSaldo && $user->saldo < $total) {
-            return redirect()->back()->withErrors(['saldo' => 'Saldo insuficiente para realizar la compra.']);
-        }
-    
-        DB::beginTransaction();
-        try {
-            // Crea la compra
-            $compra = Compra::create([
-                'usuario_id' => $user->id,
-                'total' => $total,
-                'fecha_compra' => now(),
-            ]);
-    
-            // Asocia entradas y genera QRs
-            foreach ($carrito as $item) {
-                if (isset($item['id']) && isset($item['cantidad'])) {
-                    $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
-    
-                    for ($i = 1; $i <= $item['cantidad']; $i++) {
-                        $this->generarQr($compra, $item['id'], $i);
-                    }
+public function confirmarCompra(Request $request)
+{
+    $user = $request->user();
+    $carrito = session('carrito', []);
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+    $pagarConSaldo = $request->input('pagarConSaldo');
+
+    \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
+
+    if ($pagarConSaldo && $user->saldo < $total) {
+        return redirect()->back()->withErrors(['saldo' => 'Saldo insuficiente para realizar la compra.']);
+    }
+
+    DB::beginTransaction();
+    try {
+        // Crea la compra
+        $compra = Compra::create([
+            'usuario_id' => $user->id,
+            'total' => $total,
+            'fecha_compra' => now(),
+        ]);
+
+        // Asocia entradas y genera QRs
+        foreach ($carrito as $item) {
+            if (isset($item['id']) && isset($item['cantidad'])) {
+                $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+
+                for ($i = 1; $i <= $item['cantidad']; $i++) {
+                    $this->generarQr($compra, $item['id'], $i);
                 }
             }
-    
-            if ($pagarConSaldo) {
-                $user->saldo -= $total;
-            }
-    
-            // Incrementar puntos
-            $puntosGanados = $total * 0.10; // 10% del total gastado
-            $user->puntos_totales += $puntosGanados;
-    
-            // Actualizar membresía
-            $user->actualizarMembresia();
-    
-            $user->save();
-    
-            DB::commit();
-    
-            session()->forget('carrito');
-    
-            return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
         }
+
+        if ($pagarConSaldo) {
+            $user->saldo -= $total;
+        }
+
+        // Incrementar puntos
+        $puntosGanados = round($total * 0.10); // Redondeamos a un número entero
+        $user->puntos_totales += intval($puntosGanados); // Aseguramos que sea un entero
+
+        // Actualizar membresía
+        $user->actualizarMembresia();
+
+        $user->save();
+
+        DB::commit();
+
+        session()->forget('carrito');
+
+        return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error al confirmar compra:', ['error' => $e->getMessage()]);
+        return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
     }
-    
+}
+
     
     private function generarQr($compra, $entradaId, $indice)
     {

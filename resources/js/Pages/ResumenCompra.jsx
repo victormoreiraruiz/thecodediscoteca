@@ -9,10 +9,14 @@ const ResumenCompra = () => {
     const [correo, setCorreo] = useState(user ? user.correo : '');
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
 
+    // Calcular el saldo actual y el saldo restante asegurando valores válidos
+    const saldoActual = parseFloat(user?.saldo || 0); // Asegurarse de que siempre sea un número
+    const saldoRestante = pagarConSaldo ? saldoActual - total : saldoActual;
+
     const handleConfirmarCompra = () => {
         if (!user) {
             alert('Debes iniciar sesión para confirmar tu compra.');
-            Inertia.visit('/register'); // Redirige a la página de registro
+            Inertia.visit('/login'); // Redirige a la página de registro
             return;
         }
 
@@ -24,6 +28,10 @@ const ResumenCompra = () => {
             onSuccess: () => alert('¡Compra confirmada!'),
             onError: (errors) => alert(errors.saldo || errors.error || 'Error al realizar la compra.'),
         });
+    };
+
+    const handleVolverAtras = () => {
+        window.history.back(); // Regresa a la página anterior
     };
 
     useEffect(() => {
@@ -68,7 +76,10 @@ const ResumenCompra = () => {
             <div className="productos">
                 {carrito.map((item, index) => (
                     <div key={index} className="producto">
-                        <h3>Entrada {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)} x {item.cantidad} Precio: {(item.precio * item.cantidad).toFixed(2)}€</h3>
+                        <h3>
+                            Entrada {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)} x {item.cantidad} 
+                            Precio: {(item.precio * item.cantidad).toFixed(2)}€
+                        </h3>
                     </div>
                 ))}
             </div>
@@ -79,7 +90,7 @@ const ResumenCompra = () => {
                 <h3>Datos del Comprador</h3>
                 <form>
                     <label>
-                        Nombre:
+                        <h6>Nombre:</h6>
                         <input
                             type="text"
                             value={nombre}
@@ -89,7 +100,7 @@ const ResumenCompra = () => {
                         />
                     </label>
                     <label>
-                        Correo:
+                        <h6>Correo:</h6>
                         <input
                             type="email"
                             value={correo}
@@ -102,20 +113,28 @@ const ResumenCompra = () => {
             </div>
 
             <div className="opciones-pago">
-                <label style={{ color: 'white' }}>
+                <h3>Saldo Actual: {saldoActual.toFixed(2)}€</h3>
+                {pagarConSaldo && (
+                    <h3>Saldo Restante: {saldoRestante.toFixed(2)}€</h3>
+                )}
+                <label>
                     <input
                         type="checkbox"
                         checked={pagarConSaldo}
                         onChange={(e) => setPagarConSaldo(e.target.checked)}
-                        disabled={user?.saldo < total}
+                        disabled={saldoActual < total}
                     />
                     Pagar con saldo
                 </label>
-                {user?.saldo < total && (
+                {saldoActual < total && (
                     <p style={{ color: 'red' }}>Saldo insuficiente para esta compra.</p>
                 )}
                 <button onClick={handleConfirmarCompra} className="confirmar-compra-boton">
                     Confirmar Compra
+                </button>
+                <br />
+                <button onClick={handleVolverAtras} className="volver-atras-boton" style={{ marginTop: '10px' }}>
+                    Volver Atrás
                 </button>
             </div>
 

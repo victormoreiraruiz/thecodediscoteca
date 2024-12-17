@@ -92,7 +92,7 @@ export default function Login({ status, canResetPassword }) {
                             </label>
                         </div>
 
-                        <div className="flex items-center justify-end mt-4">
+                        <div>
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
@@ -101,11 +101,22 @@ export default function Login({ status, canResetPassword }) {
                                     ¿Olvidaste tu contraseña?
                                 </Link>
                             )}
+                            <br></br>
+                            <Link
+                                    href="/register"
+                                    className="underline text-sm text-gray-200 hover:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    No tengo cuenta aún
+                                </Link>
+                                <br></br>
+
+                               
 
                             <PrimaryButton className="ml-4" disabled={processing}>
                                 Iniciar sesión
                             </PrimaryButton>
                         </div>
+                
                     </form>
 
                     {/* Imagen derecha */}

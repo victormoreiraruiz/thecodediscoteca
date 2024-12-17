@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const EventosSalaConferencias = () => {
   const [motivo, setMotivo] = useState('');
@@ -14,6 +15,28 @@ const EventosSalaConferencias = () => {
   const [cartel, setCartel] = useState(null); // Archivo del cartel
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
+  const [userId, setUserId] = useState(null);
+
+  // Cargar las fechas reservadas de la sala
+  useEffect(() => {
+    // Llama a tu API para obtener el ID del usuario actual
+    axios.get('/api/usuario_actual').then(response => {
+        const currentUserId = response.data.id;
+        setUserId(currentUserId);
+
+        // Verificar si la cookie pertenece al usuario actual
+        const reservaCookie = Cookies.get('formularioReserva');
+        if (reservaCookie) {
+            const cookieData = JSON.parse(reservaCookie);
+            if (cookieData.userId !== currentUserId) {
+                // Elimina la cookie si no pertenece al usuario actual
+                Cookies.remove('formularioReserva');
+            }
+        }
+    }).catch(error => {
+        console.error('Error al obtener el usuario actual:', error);
+    });
+  }, []);
 
   const fetchBookedDates = async () => {
     try {
@@ -24,6 +47,23 @@ const EventosSalaConferencias = () => {
     }
   };
 
+  // Restaurar los datos del formulario desde la cookie al cargar la página
+  useEffect(() => {
+    const savedFormData = Cookies.get('formularioReserva');
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      setMotivo(parsedData.motivo || '');
+      setNumeroPersonas(parsedData.numeroPersonas || 30);
+      setTipoReserva(parsedData.tipoReserva || 'privada');
+      setPrecioEntrada(parsedData.precioEntrada || '');
+      setNombreConcierto(parsedData.nombreConcierto || '');
+      setHoraInicio(parsedData.horaInicio || '');
+      setHoraFin(parsedData.horaFin || '');
+      setSelectedDate(parsedData.selectedDate ? new Date(parsedData.selectedDate) : null);
+    }
+  }, []);
+
+  // Llamada inicial para obtener las fechas reservadas
   useEffect(() => {
     fetchBookedDates();
   }, []);
@@ -75,12 +115,26 @@ const EventosSalaConferencias = () => {
       formData.append('cartel', cartel);
     }
 
+    // Guardar los datos del formulario en una cookie si el usuario no tiene permisos
+    const formDataToSave = {
+      userId, // Guardar el ID del usuario junto con los datos del formulario
+      motivo,
+      numeroPersonas,
+      tipoReserva,
+      precioEntrada,
+      nombreConcierto,
+      horaInicio,
+      horaFin,
+      selectedDate,
+    };
+
     try {
       await axios.post('/api/salas/3/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       alert('Reserva creada exitosamente');
+      Cookies.remove('formularioReserva'); // Limpiar la cookie después de confirmar la reserva
       setMotivo('');
       setNumeroPersonas(30);
       setTipoReserva('privada');
@@ -93,21 +147,22 @@ const EventosSalaConferencias = () => {
       fetchBookedDates();
     } catch (error) {
       if (error.response && error.response.status === 403) {
-          // Si el error es por falta de permisos, mostrar un alert y redirigir
-          if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
-              const confirmRedirect = window.confirm(
-                  'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
-              );
-              if (confirmRedirect) {
-                  window.location.href = '/convertir-promotor';
-              }
+        if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
+          Cookies.set('formularioReserva', JSON.stringify(formDataToSave), { expires: 1 }); // Guardar en cookie
+          const confirmRedirect = window.confirm(
+            'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
+          );
+          if (confirmRedirect) {
+            const currentUrl = window.location.pathname;
+            window.location.href = `/convertir-promotor?redirect_to=${encodeURIComponent(currentUrl)}`;
           }
+        }
       } else {
-          console.error('Error al crear la reserva:', error);
-          alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
+        console.error('Error al crear la reserva:', error);
+        alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
       }
-  }
-};
+    }
+  };
 
   return (
     <div>

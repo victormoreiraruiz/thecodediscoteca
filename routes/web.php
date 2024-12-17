@@ -88,8 +88,10 @@ Route::get('/salacelebraciones', function () {return Inertia::render('SalaCelebr
 Route::get('/salaconferencias', function () {return Inertia::render('SalaConferencias');})->name('sala-conferencias');
 Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
-Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
+Route::middleware([])->group(function () {
+    Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
+});
 
 
 
@@ -134,6 +136,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/eventos', [AdminController::class, 'mostrarEventos'])->name('admin.mostrarEventos');
     Route::delete('/admin/eventos/{id}', [AdminController::class, 'eliminarEvento'])->name('admin.eliminarEvento');
     Route::post('/admin/actualizarSaldo', [AdminController::class, 'actualizarSaldo'])->name('admin.actualizarSaldo');
+    Route::get('/admin/eventos/{evento}/editar', [EventoController::class, 'show'])->name('admin.evento.show')->middleware('can:admin');
+    Route::get('/eventos/{id}', [EventoController::class, 'show'])->name('eventos.show');
     
 
 });
@@ -145,6 +149,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::get('/api/usuario_actual', [ProfileController::class, 'UserActual']);
 
 
 

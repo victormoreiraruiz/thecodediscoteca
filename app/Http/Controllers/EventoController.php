@@ -46,29 +46,10 @@ class EventoController extends Controller
      * @param  \App\Models\Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-{
-    $evento = Evento::with('entradas.compras', 'sala')->find($id);
 
-    if (!$evento) {
-        return abort(404, 'Evento no encontrado');
-    }
-
-    $entradasVendidas = $evento->entradas->reduce(function ($total, $entrada) {
-        return $total + $entrada->compras->sum('pivot.cantidad');
-    }, 0);
-
-    $aforoTotal = $evento->sala->aforo ?? 0;
-
-    return Inertia::render('Evento', [
-        'evento' => $evento,
-        'estadisticas' => [
-            'entradas_vendidas' => $entradasVendidas,
-            'aforo_total' => $aforoTotal,
-            'porcentaje_ocupado' => $aforoTotal > 0 ? round(($entradasVendidas / $aforoTotal) * 100, 2) : 0,
-        ],
-    ]);
-}
+    
+    
+    
 
     
     /**
@@ -149,6 +130,43 @@ public function listarConciertos()
         'conciertos' => $conciertos,
     ]);
 }
+
+public function show($id)
+{
+    // Buscar evento con sus relaciones
+    $evento = Evento::with('entradas.compras', 'sala')->find($id);
+
+    if (!$evento) {
+        return abort(404, 'Evento no encontrado');
+    }
+
+    // Verificar si el usuario tiene permiso para ver este evento
+    if (auth()->user()->cannot('view', $evento)) {
+        return redirect()->route('admin.eventos.index')->with('error', 'No tienes permiso para ver este evento.');
+    }
+
+    $entradasVendidas = $evento->entradas->sum(function ($entrada) {
+        return $entrada->compras->sum(function ($compra) {
+            return $compra->pivot->cantidad;
+        });
+    });
+
+    // obtener la capacidad total desde la sala asociada
+    $capacidadTotal = $evento->sala->capacidad ?? 0;
+
+    // calcular el porcentaje 
+    $porcentajeOcupado = $capacidadTotal > 0 ? round(($entradasVendidas / $capacidadTotal) * 100, 2) : 0;
+
+    return Inertia::render('Evento', [
+        'evento' => $evento,
+        'estadisticas' => [
+            'entradas_vendidas' => $entradasVendidas,
+           'aforo_total' => $capacidadTotal,
+            'porcentaje_ocupado' => $porcentajeOcupado,
+        ],
+    ]);
+}
+
 
 public function mostrarEvento($id)
 {
