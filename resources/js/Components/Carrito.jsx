@@ -51,9 +51,7 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
 
     const finalizarCompra = () => {
         Inertia.post('/iniciar-compra', { carrito });
-        Cookies.remove('carrito');
-        setCarrito([]);
-        setMostrarCarrito(false);
+        setMostrarCarrito(false); 
     };
 
     const calcularCantidadTotal = () => {

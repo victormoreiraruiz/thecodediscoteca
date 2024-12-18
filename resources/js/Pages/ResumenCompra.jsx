@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
+import Cookies from 'js-cookie';
 
 const ResumenCompra = () => {
     const props = usePage().props;
@@ -8,31 +9,53 @@ const ResumenCompra = () => {
     const [nombre, setNombre] = useState(user ? user.nombre : '');
     const [correo, setCorreo] = useState(user ? user.correo : '');
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
+    const [pagoRealizado, setPagoRealizado] = useState(false);
 
-    // Calcular el saldo actual y el saldo restante asegurando valores válidos
-    const saldoActual = parseFloat(user?.saldo || 0); // Asegurarse de que siempre sea un número
+    const saldoActual = parseFloat(user?.saldo || 0);
     const saldoRestante = pagarConSaldo ? saldoActual - total : saldoActual;
+
+    const eliminarCarrito = () => {
+        // Forzar eliminación de la cookie de forma manual
+        document.cookie = "carrito=; path=/; domain=127.0.0.1; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        document.cookie = "carrito=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    
+        // Intentar con js-cookie como respaldo
+        Cookies.remove('carrito', { path: '/', domain: '127.0.0.1' });
+        Cookies.remove('carrito', { path: '/' });
+    
+        console.log('Intentando eliminar cookie carrito');
+        console.log('Estado actual de las cookies:', document.cookie);
+    };
+    
 
     const handleConfirmarCompra = () => {
         if (!user) {
             alert('Debes iniciar sesión para confirmar tu compra.');
-            Inertia.visit('/login'); // Redirige a la página de registro
+            Inertia.visit('/login');
             return;
         }
-
+    
+        if (!pagarConSaldo && !pagoRealizado) {
+            alert('Debes seleccionar un método de pago para confirmar tu compra.');
+            return;
+        }
+    
         Inertia.post('/confirmar-compra', {
             carrito,
             total,
             pagarConSaldo,
         }, {
-            onSuccess: () => alert('¡Compra confirmada!'),
-            onError: (errors) => alert(errors.saldo || errors.error || 'Error al realizar la compra.'),
+            onSuccess: () => {
+                alert('¡Compra confirmada!');
+                eliminarCarrito(); // Llamamos a la función para eliminar la cookie
+            },
+            onError: (errors) => {
+                alert(errors.saldo || errors.error || 'Error al realizar la compra.');
+            },
         });
     };
-
-    const handleVolverAtras = () => {
-        window.history.back(); // Regresa a la página anterior
-    };
+    
+    
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -44,16 +67,19 @@ const ResumenCompra = () => {
                     createOrder: (data, actions) => {
                         return actions.order.create({
                             purchase_units: [{
-                                amount: {
-                                    value: total.toFixed(2),
-                                },
+                                amount: { value: total.toFixed(2) },
                             }],
                         });
                     },
                     onApprove: (data, actions) => {
                         return actions.order.capture().then(details => {
                             alert('¡Pago realizado con éxito por ' + details.payer.name.given_name + '!');
-                            Inertia.post('/confirmar-compra', { carrito, total, pagarConSaldo: false });
+                            setPagoRealizado(true);
+                            Inertia.post('/confirmar-compra', { carrito, total, pagarConSaldo: false }, {
+                                onSuccess: () => {
+                                    eliminarCookieCarrito(); // Elimina la cookie aquí también
+                                }
+                            });
                         });
                     },
                     onError: (err) => {
@@ -86,37 +112,9 @@ const ResumenCompra = () => {
 
             <h2>Total a Pagar: {total.toFixed(2)}€</h2>
 
-            <div className="datos-comprador">
-                <h3>Datos del Comprador</h3>
-                <form>
-                    <label>
-                        <h6>Nombre:</h6>
-                        <input
-                            type="text"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                            required
-                            disabled={!!user}
-                        />
-                    </label>
-                    <label>
-                        <h6>Correo:</h6>
-                        <input
-                            type="email"
-                            value={correo}
-                            onChange={(e) => setCorreo(e.target.value)}
-                            required
-                            disabled={!!user}
-                        />
-                    </label>
-                </form>
-            </div>
-
             <div className="opciones-pago">
                 <h3>Saldo Actual: {saldoActual.toFixed(2)}€</h3>
-                {pagarConSaldo && (
-                    <h3>Saldo Restante: {saldoRestante.toFixed(2)}€</h3>
-                )}
+                {pagarConSaldo && <h3>Saldo Restante: {saldoRestante.toFixed(2)}€</h3>}
                 <label>
                     <input
                         type="checkbox"
@@ -126,22 +124,17 @@ const ResumenCompra = () => {
                     />
                     Pagar con saldo
                 </label>
-                {saldoActual < total && (
-                    <p style={{ color: 'red' }}>Saldo insuficiente para esta compra.</p>
-                )}
+                {saldoActual < total && <p style={{ color: 'red' }}>Saldo insuficiente para esta compra.</p>}
                 <button onClick={handleConfirmarCompra} className="confirmar-compra-boton">
                     Confirmar Compra
                 </button>
                 <br />
-                <button onClick={handleVolverAtras} className="volver-atras-boton" style={{ marginTop: '10px' }}>
+                <button onClick={() => window.history.back()} className="volver-atras-boton" style={{ marginTop: '10px' }}>
                     Volver Atrás
                 </button>
             </div>
 
-            {/* Contenedor del botón PayPal */}
-            <div id="paypal-button-container" style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {/* Botón de PayPal */}
-            </div>
+            <div id="paypal-button-container" style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}></div>
         </div>
     );
 };

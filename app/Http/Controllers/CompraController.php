@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
 use mPDF;
 
 
@@ -55,6 +56,7 @@ class CompraController extends Controller
     
 
     
+
 public function confirmarCompra(Request $request)
 {
     $user = $request->user();
@@ -105,7 +107,11 @@ public function confirmarCompra(Request $request)
 
         DB::commit();
 
+        // Eliminar carrito de la sesión
         session()->forget('carrito');
+
+        // Eliminar la cookie del carrito
+        Cookie::queue(Cookie::forget('carrito'));
 
         return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
     } catch (\Exception $e) {
@@ -114,7 +120,6 @@ public function confirmarCompra(Request $request)
         return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
     }
 }
-
     
     private function generarQr($compra, $entradaId, $indice)
     {
