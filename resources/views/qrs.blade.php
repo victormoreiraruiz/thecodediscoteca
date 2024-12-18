@@ -60,7 +60,7 @@
                     <p><strong>Evento:</strong> {{ $entrada->evento->nombre_evento }}</p>
                     <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($entrada->evento->fecha_evento)->format('d/m/Y') }}</p>
                     <p><strong>Hora de Inicio:</strong> {{ \Carbon\Carbon::parse($entrada->evento->hora_inicio)->format('H:i') }}</p>
-                    <p><strong>Hora de Inicio:</strong> {{ \Carbon\Carbon::parse($entrada->evento->hora_final)->format('H:i') }}</p>
+                    <p><strong>Hora de Fin:</strong> {{ \Carbon\Carbon::parse($entrada->evento->hora_final)->format('H:i') }}</p>
                 @endif
             </div>
 

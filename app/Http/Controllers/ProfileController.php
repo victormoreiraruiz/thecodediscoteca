@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cookie;
+use App\Models\Evento;
 
 class ProfileController extends Controller
 {
@@ -86,15 +87,22 @@ class ProfileController extends Controller
     }
 
     public function miCuenta(Request $request)
-{
-    $user = $request->user();
-
-    return Inertia::render('MiCuenta', [
-        'user' => $user,
-        'compras' => $user->compras()->with('entradas')->get(),
-        'reservas' => $user->reservas()->with('sala')->get(),
-    ]);
-}
+    {
+        $user = $request->user();
+    
+        return Inertia::render('MiCuenta', [
+            'user' => $user,
+            'compras' => $user->compras()->with('entradas')->get(),
+            'eventos' => Evento::whereHas('sala.reservas', function ($query) use ($user) {
+                $query->where('usuario_id', $user->id);
+            })->with('sala.reservas')->get()->map(function ($evento) {
+                $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
+                return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
+            }),
+        ]);
+    }
+    
+    
 
 public function añadirSaldo(Request $request): RedirectResponse
 {
