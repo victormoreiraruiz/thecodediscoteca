@@ -266,7 +266,17 @@ public function obtenerEstadisticasVentas($id)
 }
 
 
+public function obtenerEventosUsuario(Request $request)
+{
+    $user = $request->user();
 
+    // Obtener eventos asociados a las reservas del usuario
+    $eventos = Evento::whereHas('sala.reservas', function ($query) use ($user) {
+        $query->where('usuario_id', $user->id);
+    })->get();
+
+    return response()->json($eventos);
+}
 
 
 }

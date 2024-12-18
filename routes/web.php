@@ -88,7 +88,10 @@ Route::get('/salacelebraciones', function () {return Inertia::render('SalaCelebr
 Route::get('/salaconferencias', function () {return Inertia::render('SalaConferencias');})->name('sala-conferencias');
 Route::get('/salaprivada', function () {return Inertia::render('SalaPrivada');})->name('sala-privada');
 Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcupadas']);
+Route::delete('/api/eventos/{id}', [SalaController::class, 'cancelarReserva'])->name('eventos.cancelar');
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
+
+
 Route::middleware([])->group(function () {
     Route::post('/api/salas/{id}/reservar', [SalaController::class, 'crearReserva']);
 });
