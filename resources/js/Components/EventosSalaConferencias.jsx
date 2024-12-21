@@ -16,27 +16,25 @@ const EventosSalaConferencias = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [isCookieValidated, setIsCookieValidated] = useState(false); // Nuevo estado
 
-  // Cargar las fechas reservadas de la sala
   useEffect(() => {
-    // Llama a tu API para obtener el ID del usuario actual
     axios.get('/api/usuario_actual').then(response => {
         const currentUserId = response.data.id;
         setUserId(currentUserId);
 
-        // Verificar si la cookie pertenece al usuario actual
         const reservaCookie = Cookies.get('formularioReserva');
         if (reservaCookie) {
             const cookieData = JSON.parse(reservaCookie);
             if (cookieData.userId !== currentUserId) {
                 // Elimina la cookie si no pertenece al usuario actual
-                Cookies.remove('formularioReserva');
+                Cookies.remove('formularioReserva', { path: '/' });
             }
         }
     }).catch(error => {
         console.error('Error al obtener el usuario actual:', error);
     });
-  }, []);
+}, []);
 
   const fetchBookedDates = async () => {
     try {
@@ -47,6 +45,47 @@ const EventosSalaConferencias = () => {
     }
   };
 
+  useEffect(() => {
+    const validateCookie = async () => {
+      try {
+        const response = await axios.get('/api/usuario_actual');
+        const currentUserId = response.data.id;
+        setUserId(currentUserId);
+
+        const reservaCookie = Cookies.get('formularioReserva');
+        if (reservaCookie) {
+          const cookieData = JSON.parse(reservaCookie);
+          if (cookieData.userId !== currentUserId) {
+            // Elimina la cookie si no pertenece al usuario actual
+            Cookies.remove('formularioReserva', { path: '/' });
+          }
+        }
+      } catch (error) {
+        console.error('Error al obtener el usuario actual:', error);
+      } finally {
+        setIsCookieValidated(true); // Marca que la validación ha terminado
+      }
+    };
+
+    validateCookie();
+  }, []);
+
+  useEffect(() => {
+    if (isCookieValidated) {
+      const savedFormData = Cookies.get('formularioReserva');
+      if (savedFormData) {
+        const parsedData = JSON.parse(savedFormData);
+        setMotivo(parsedData.motivo || '');
+        setNumeroPersonas(parsedData.numeroPersonas || 30);
+        setTipoReserva(parsedData.tipoReserva || 'privada');
+        setPrecioEntrada(parsedData.precioEntrada || '');
+        setNombreConcierto(parsedData.nombreConcierto || '');
+        setHoraInicio(parsedData.horaInicio || '');
+        setHoraFin(parsedData.horaFin || '');
+        setSelectedDate(parsedData.selectedDate ? new Date(parsedData.selectedDate) : null);
+      }
+    }
+  }, [isCookieValidated]);
   // Restaurar los datos del formulario desde la cookie al cargar la página
   useEffect(() => {
     const savedFormData = Cookies.get('formularioReserva');
@@ -97,6 +136,33 @@ const EventosSalaConferencias = () => {
       alert('Por favor, completa todos los campos obligatorios para el concierto.');
       return;
     }
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      setErrors({});
+  
+      const newErrors = validateForm();
+      if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          return;
+      }
+  
+      setLoading(true);
+  
+      Inertia.post(route('convertir-promotor.post'), formData, {
+          onSuccess: () => {
+              alert('¡Ahora eres promotor!');
+              Cookies.remove('formularioReserva', { path: '/' }); // Elimina la cookie aquí
+              if (onComplete) onComplete();
+              window.location.href = route('eventos.index');
+          },
+          onError: (serverErrors) => {
+              setErrors(serverErrors);
+              alert('Hubo un error al convertirte en promotor.');
+          },
+          onFinish: () => setLoading(false),
+      });
+  };
 
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
@@ -163,6 +229,8 @@ const EventosSalaConferencias = () => {
       }
     }
   };
+
+  
 
   return (
     <div>
