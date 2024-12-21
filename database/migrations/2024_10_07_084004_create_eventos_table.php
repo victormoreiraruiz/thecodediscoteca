@@ -22,6 +22,7 @@ return new class extends Migration
             $table->time('hora_final');
             $table->string('cartel')->nullable();
             $table->foreignId('sala_id')->nullable()->constrained('salas')->onDelete('cascade');
+            $table->enum('estado', ['pendiente', 'apto', 'denegado'])->default('pendiente'); 
             $table->timestamps();
         });
     }

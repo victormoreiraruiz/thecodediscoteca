@@ -29,6 +29,23 @@ class AdminController extends Controller
         ]);
     }
     
+    public function actualizarEstadoEvento(Request $request, $id)
+    {
+        // Encuentra el evento por ID o lanza un error 404 si no existe
+        $evento = Evento::findOrFail($id);
+
+        // Valida el estado recibido
+        $validated = $request->validate([
+            'estado' => 'required|in:pendiente,apto,denegado',
+        ]);
+
+        // Actualiza el estado del evento
+        $evento->estado = $validated['estado'];
+        $evento->save();
+
+        // Retorna una respuesta JSON
+        return response()->json(['message' => 'Estado del evento actualizado correctamente']);
+    }
     
 
 
