@@ -1,27 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
-const AdminCrearEvento = ({ salas, setEventos }) => {
+
+const AdminCrearEvento = () => {
     const [nombreEvento, setNombreEvento] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [fechaEvento, setFechaEvento] = useState('');
     const [horaInicio, setHoraInicio] = useState('');
     const [horaFinal, setHoraFinal] = useState('');
     const [cartel, setCartel] = useState(null);
-    const [salaId, setSalaId] = useState(null);  // Este es el estado para la sala seleccionada
+    const [precioNormal, setPrecioNormal] = useState('');
+    const [precioVip, setPrecioVip] = useState('');
+    const [precioPremium, setPrecioPremium] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [diasOcupados, setDiasOcupados] = useState([]); // Días ocupados desde el servidor
+
+    // Fetch para obtener los días ocupados
+    useEffect(() => {
+        const fetchDiasOcupados = async () => {
+            try {
+                const response = await fetch(route('eventos.diasOcupados')); // Ruta del backend para obtener días ocupados
+                const data = await response.json();
+                setDiasOcupados(data); // Suponemos que el backend devuelve un array de fechas ocupadas
+            } catch (err) {
+                console.error('Error al obtener los días ocupados:', err);
+            }
+        };
+        fetchDiasOcupados();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const data = {
-            nombre_evento: nombreEvento,
-            descripcion,
-            fecha_evento: fechaEvento,
-            hora_inicio: horaInicio,
-            hora_final: horaFinal,
-            cartel,
-            sala_id: salaId,  // Asegúrate de enviar el ID de la sala
-        };
+
+        const formData = new FormData();
+        formData.append('nombre_evento', nombreEvento);
+        formData.append('descripcion', descripcion);
+        formData.append('fecha_evento', fechaEvento);
+        formData.append('hora_inicio', horaInicio);
+        formData.append('hora_final', horaFinal);
+        formData.append('cartel', cartel);
+        formData.append('precio_normal', precioNormal);
+        if (precioVip) formData.append('precio_vip', precioVip);
+        if (precioPremium) formData.append('precio_premium', precioPremium);
 
         setLoading(true);
         setError(null);
@@ -30,35 +52,46 @@ const AdminCrearEvento = ({ salas, setEventos }) => {
             const response = await fetch(route('admin.crearEvento'), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
                 },
-                body: JSON.stringify(data),
+                body: formData,
             });
 
             if (!response.ok) {
-                throw new Error('Error al crear el evento');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al crear el evento');
             }
 
-            // Si el evento se crea con éxito, actualizamos la lista de eventos
-            const nuevoEvento = await response.json(); // Asumimos que el backend responde con el evento creado
-            setEventos(prevEventos => [...prevEventos, nuevoEvento]);
-
             alert('Evento creado exitosamente');
-            // Limpiar formulario después de crear el evento
             setNombreEvento('');
             setDescripcion('');
             setFechaEvento('');
             setHoraInicio('');
             setHoraFinal('');
             setCartel(null);
-            setSalaId(null);
-
+            setPrecioNormal('');
+            setPrecioVip('');
+            setPrecioPremium('');
         } catch (error) {
             setError(error.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Función para resaltar días ocupados y el día seleccionado
+    const resaltarDias = ({ date }) => {
+        const fecha = date.toISOString().split('T')[0]; // Convertir a formato YYYY-MM-DD
+        if (diasOcupados.includes(fecha)) return 'dia-ocupado'; // Día ocupado
+        if (fecha === fechaEvento) return 'dia-seleccionado'; // Día seleccionado
+        return null; // Días normales
+    };
+
+    // Deshabilitar días pasados
+    const deshabilitarDiasPasados = ({ date }) => {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // Ajustar la hora para comparar solo la fecha
+        return date < hoy || diasOcupados.includes(date.toISOString().split('T')[0]);
     };
 
     return (
@@ -86,12 +119,11 @@ const AdminCrearEvento = ({ salas, setEventos }) => {
                 </div>
                 <div>
                     <label htmlFor="fechaEvento">Fecha del Evento</label>
-                    <input
-                        type="date"
-                        id="fechaEvento"
-                        value={fechaEvento}
-                        onChange={(e) => setFechaEvento(e.target.value)}
-                        required
+                    <Calendar
+                        onChange={(date) => setFechaEvento(date.toISOString().split('T')[0])} // Actualizar la fecha seleccionada
+                        tileClassName={resaltarDias} // Aplicar clases a los días
+                        tileDisabled={deshabilitarDiasPasados} // Deshabilitar días pasados
+                        value={fechaEvento ? new Date(fechaEvento) : null} // Fecha seleccionada
                     />
                 </div>
                 <div>
@@ -123,20 +155,32 @@ const AdminCrearEvento = ({ salas, setEventos }) => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="salaId">Sala</label>
-                    <select
-                        id="salaId"
-                        value={salaId}
-                        onChange={(e) => setSalaId(e.target.value)}
+                    <label htmlFor="precioNormal">Precio Normal</label>
+                    <input
+                        type="number"
+                        id="precioNormal"
+                        value={precioNormal}
+                        onChange={(e) => setPrecioNormal(e.target.value)}
                         required
-                    >
-                        <option value="">Seleccione una Sala</option>
-                        {salas && salas.map(sala => (
-                            <option key={sala.id} value={sala.id}>
-                                {sala.tipo_sala} - Capacidad: {sala.capacidad}
-                            </option>
-                        ))}
-                    </select>
+                    />
+                </div>
+                <div>
+                    <label htmlFor="precioVip">Precio VIP (opcional)</label>
+                    <input
+                        type="number"
+                        id="precioVip"
+                        value={precioVip}
+                        onChange={(e) => setPrecioVip(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label htmlFor="precioPremium">Precio Premium (opcional)</label>
+                    <input
+                        type="number"
+                        id="precioPremium"
+                        value={precioPremium}
+                        onChange={(e) => setPrecioPremium(e.target.value)}
+                    />
                 </div>
                 <button type="submit" disabled={loading}>
                     {loading ? 'Creando Evento...' : 'Crear Evento'}

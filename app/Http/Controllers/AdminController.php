@@ -70,9 +70,6 @@ public function eliminarUsuario($id)
 
 public function crearEvento(Request $request)
 {
-    // Verifica los datos que llegan en la solicitud
-    \Log::info('Datos recibidos para crear evento:', $request->all());
-
     // Validación de los datos
     $request->validate([
         'nombre_evento' => 'required|string',
@@ -80,35 +77,64 @@ public function crearEvento(Request $request)
         'fecha_evento' => 'required|date',
         'hora_inicio' => 'required|date_format:H:i',
         'hora_final' => 'required|date_format:H:i',
-        'sala_id' => 'required|exists:salas,id',
+        'cartel' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'precio_normal' => 'required|numeric|min:0',
+        'precio_vip' => 'nullable|numeric|min:0',
+        'precio_premium' => 'nullable|numeric|min:0',
     ]);
 
-    // Verifica si la validación pasó
-    \Log::info('Datos validados correctamente');
+    // Verificar si ya existe un evento en la misma fecha
+    $eventoExistente = Evento::where('fecha_evento', $request->fecha_evento)->first();
 
-    // Lógica para crear el evento
+    if ($eventoExistente) {
+        return response()->json([
+            'message' => 'Ya existe un evento programado para esta fecha. Por favor, elige otro día.',
+        ], 422);
+    }
+
+    // Obtener la sala "discoteca"
+    $sala = \App\Models\Sala::where('tipo_sala', 'discoteca')->firstOrFail();
+
+    // Crear el evento
     $evento = new Evento();
     $evento->nombre_evento = $request->nombre_evento;
     $evento->descripcion = $request->descripcion;
     $evento->fecha_evento = $request->fecha_evento;
     $evento->hora_inicio = $request->hora_inicio;
     $evento->hora_final = $request->hora_final;
-    $evento->sala_id = $request->sala_id;
-
+    $evento->sala_id = $sala->id;
 
     if ($request->hasFile('cartel')) {
         $cartelPath = $request->file('cartel')->store('carteles', 'public');
         $evento->cartel = $cartelPath;
     }
 
-
     $evento->save();
 
-    // verifica si el evento se guardó correctamente
-    \Log::info('Evento guardado con éxito:', $evento->toArray());
+    // Crear la entrada normal
+    $evento->entradas()->create([
+        'tipo' => 'normal',
+        'precio' => $request->precio_normal,
+    ]);
 
-    return response()->json(['message' => 'Evento creado exitosamente'], 201);
+    // Crear entradas VIP y Premium si existen precios
+    if ($request->filled('precio_vip')) {
+        $evento->entradas()->create([
+            'tipo' => 'vip',
+            'precio' => $request->precio_vip,
+        ]);
+    }
+
+    if ($request->filled('precio_premium')) {
+        $evento->entradas()->create([
+            'tipo' => 'premium',
+            'precio' => $request->precio_premium,
+        ]);
+    }
+
+    return response()->json($evento, 201);
 }
+
 
 
 public function mostrarEventos()

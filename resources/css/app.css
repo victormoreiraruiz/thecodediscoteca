@@ -1502,7 +1502,7 @@ h2 {
 }
 
 .flecha {
-  background: #007bff;
+  background: #860303;
   color: #fff;
   border: none;
   border-radius: 50%;
@@ -1516,10 +1516,43 @@ h2 {
 }
 
 .flecha:hover {
-  background: #0056b3;
+  background: #580202;
 }
 
 .flecha:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+.crear-evento-form label {
+  color: white; /* Cambia el color del texto a blanco */
+  font-size: 16px; /* Ajusta el tamaño del texto (opcional) */
+  font-weight: bold; /* Hace el texto más grueso (opcional) */
+  margin-bottom: 5px; /* Espaciado inferior para separación del campo */
+  display: block; /* Asegura que el texto esté en una línea separada */
+}
+
+.dia-ocupado {
+  background-color: #f44336 !important; /* Rojo para días ocupados */
+  color: white !important;
+  border-radius: 50%;
+}
+.react-calendar__tile--active {
+  background-color: transparent !important; /* Elimina el fondo azul predeterminado */
+  color: inherit !important; /* Mantiene el color del texto actual */
+  border: none !important; /* Elimina cualquier borde predeterminado */
+}
+
+.dia-seleccionado {
+  background-color: #4caf50 !important; /* Fondo verde para el día seleccionado */
+  color: white !important;
+  border-radius: 50%;
+}
+
+.modal textarea {
+  color: rgb(0, 0, 0); /* Cambia el color del texto a blanco */
+  font-size: 16px; /* Ajusta el tamaño del texto (opcional) */
+  font-weight: bold; /* Hace el texto más grueso (opcional) */
+  margin-bottom: 5px; /* Espaciado inferior para separación del campo */
+  display: block; /* Asegura que el texto esté en una línea separada */
 }

@@ -288,5 +288,10 @@ public function eventosProximos()
 
     return response()->json($eventos);
 }
+public function obtenerDiasOcupados()
+{
+    $diasOcupados = Evento::pluck('fecha_evento')->toArray(); // Obtener fechas de eventos
+    return response()->json($diasOcupados);
+}
 
 }

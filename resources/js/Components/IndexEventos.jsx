@@ -24,15 +24,15 @@ const IndexEventos = ({ eventos }) => {
 
     return (
         <div className="index-eventos">
-            <h2>PRÓXIMOS EVENTOS</h2>
+           <h2>PRÓXIMOS EVENTOS</h2>
+           <br></br>
             <div className="carrusel-container">
-                <button
-                    className="flecha flecha-izquierda"
-                    onClick={retroceder}
-                    disabled={indiceInicial === 0}
-                >
-                    &#9664; {/* Flecha izquierda */}
-                </button>
+               
+                {indiceInicial > 0 && (
+                    <button className="flecha" onClick={retroceder}>
+                        &lt; 
+                    </button>
+                )}
 
                 <div className="eventos-grid">
                     {eventosAprobados.slice(indiceInicial, indiceInicial + eventosVisibles).map(evento => (
@@ -55,13 +55,12 @@ const IndexEventos = ({ eventos }) => {
                     ))}
                 </div>
 
-                <button
-                    className="flecha flecha-derecha"
-                    onClick={avanzar}
-                    disabled={indiceInicial + eventosVisibles >= eventosAprobados.length}
-                >
-                    &#9654; {/* Flecha derecha */}
-                </button>
+              
+                {indiceInicial + eventosVisibles < eventosAprobados.length && (
+                    <button className="flecha" onClick={avanzar}>
+                        &gt; 
+                    </button>
+                )}
             </div>
         </div>
     );
