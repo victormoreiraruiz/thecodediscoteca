@@ -114,6 +114,9 @@ Route::post('/confirmar-compra', [CompraController::class, 'confirmarCompra'])->
 Route::get('/historial-compras', [ProfileController::class, 'historialDeCompras'])->name('historial.compras')->middleware('auth');
 Route::get('/mi-cuenta/compras/{compraId}/descargar-pdf', [CompraController::class, 'descargarQrsPdf'])->name('compras.descargar-pdf');
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'obtenerEntradas']);
+Route::get('/eventos-proximos', [EventoController::class, 'eventosProximos'])->name('eventos.proximos');
+Route::get('/eventos/dias-ocupados', [EventoController::class, 'obtenerDiasOcupados'])->name('eventos.diasOcupados');
+
 
 
 Route::get('/index', function () {

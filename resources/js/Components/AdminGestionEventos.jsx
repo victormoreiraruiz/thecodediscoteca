@@ -53,10 +53,6 @@ const AdminGestionEventos = ({ eventos }) => {
             return;
         }
 
-        if (!confirm('¿Estás seguro de que deseas eliminar este evento?')) {
-            return;
-        }
-
         setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: true }));
         setError(null);
 
@@ -77,6 +73,7 @@ const AdminGestionEventos = ({ eventos }) => {
             const updatedEventos = eventosList.filter(evento => evento.id !== eventoAEliminar.id);
             setEventos(updatedEventos);
             setMotivoCancelacion("");
+            setEventoAEliminar(null);
 
             alert('Evento eliminado exitosamente!');
         } catch (error) {
@@ -85,6 +82,11 @@ const AdminGestionEventos = ({ eventos }) => {
         } finally {
             setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: false }));
         }
+    };
+
+    const cancelarEliminacion = () => {
+        setEventoAEliminar(null);
+        setMotivoCancelacion("");
     };
 
     const ordenarEventos = (campo) => {
@@ -123,10 +125,9 @@ const AdminGestionEventos = ({ eventos }) => {
             <h3>Gestión de Eventos</h3>
             {error && <div className="error">{error}</div>}
 
-            {/* Barra de búsqueda */}
-           
-
-            <div className="usuarios-table"> <div className="busqueda-texto">
+    
+            <div className="usuarios-table">
+            <div className="busqueda-texto">
                 <input
                     type="text"
                     placeholder="Buscar por nombre, sala o estado"
@@ -140,7 +141,8 @@ const AdminGestionEventos = ({ eventos }) => {
                         width: '100%',
                     }}
                 />
-                <div className="filtro-fechas">
+            </div>
+            <div className="filtro-fechas">
                     <label>
                         Desde:
                         <input
@@ -158,22 +160,13 @@ const AdminGestionEventos = ({ eventos }) => {
                         />
                     </label>
                 </div>
-            </div>
                 <table>
                     <thead>
                         <tr>
-                            <th onClick={() => ordenarEventos('nombre_evento')}>
-                                Nombre del Evento {orden.campo === 'nombre_evento' && (orden.asc ? '▲' : '▼')}
-                            </th>
-                            <th onClick={() => ordenarEventos('fecha_evento')}>
-                                Fecha {orden.campo === 'fecha_evento' && (orden.asc ? '▲' : '▼')}
-                            </th>
-                            <th onClick={() => ordenarEventos('sala')}>
-                                Sala {orden.campo === 'sala' && (orden.asc ? '▲' : '▼')}
-                            </th>
-                            <th onClick={() => ordenarEventos('estado')}>
-                                Estado {orden.campo === 'estado' && (orden.asc ? '▲' : '▼')}
-                            </th>
+                            <th onClick={() => ordenarEventos('nombre_evento')}>Nombre</th>
+                            <th onClick={() => ordenarEventos('fecha_evento')}>Fecha</th>
+                            <th onClick={() => ordenarEventos('sala')}>Sala</th>
+                            <th onClick={() => ordenarEventos('estado')}>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -181,11 +174,9 @@ const AdminGestionEventos = ({ eventos }) => {
                         {eventosFiltrados.length > 0 ? (
                             eventosFiltrados.map(evento => (
                                 <tr key={evento.id}>
-                                    <td>
-                                        <a href={`/eventos/${evento.id}`}>{evento.nombre_evento}</a>
-                                    </td>
+                                    <td>{evento.nombre_evento}</td>
                                     <td>{evento.fecha_evento}</td>
-                                    <td>{evento.sala ? evento.sala.tipo_sala : 'Sin sala'}</td>
+                                    <td>{evento.sala?.tipo_sala || 'Sin sala'}</td>
                                     <td>
                                         <select
                                             value={evento.estado || 'pendiente'}
@@ -206,13 +197,10 @@ const AdminGestionEventos = ({ eventos }) => {
                                     </td>
                                     <td>
                                         <button
-                                            onClick={() => {
-                                                setEventoAEliminar(evento);
-                                                setMotivoCancelacion("");
-                                            }}
+                                            onClick={() => setEventoAEliminar(evento)}
                                             disabled={loading && loading[evento.id]}
                                         >
-                                            {loading && loading[evento.id] ? 'Eliminando...' : 'Eliminar Evento'}
+                                            {loading && loading[evento.id] ? 'Eliminando...' : 'Eliminar'}
                                         </button>
                                     </td>
                                 </tr>
@@ -223,8 +211,24 @@ const AdminGestionEventos = ({ eventos }) => {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </table>{eventoAEliminar && (
+                <div className="modal">
+                    <h4>Motivo de la cancelación</h4>
+                    <textarea
+                        value={motivoCancelacion}
+                        onChange={handleMotivoChange}
+                        placeholder="Escribe el motivo de la cancelación"
+                        rows="4"
+                        cols="50"
+                    ></textarea>
+                    <br />
+                    <button onClick={eliminarEvento}>Confirmar Eliminación</button>
+                    <button onClick={cancelarEliminacion}>Cancelar</button>
+                </div>
+            )}
             </div>
+
+            
         </div>
     );
 };
