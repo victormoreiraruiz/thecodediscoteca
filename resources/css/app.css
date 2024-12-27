@@ -1450,3 +1450,76 @@ h2 {
   background-color: #444;
 }
 
+.index-eventos {
+  text-align: center;
+  margin: 20px;
+}
+
+
+.carrusel-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.eventos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Cambia el número según los elementos visibles */
+  gap: 20px;
+  flex-grow: 1;
+  margin: 0 10px;
+}
+
+.evento-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.3s ease;
+  max-width: 100%;
+  height: auto;
+}
+
+.evento-card:hover {
+  transform: scale(1.05);
+}
+
+.evento-cartel {
+  width: 100%; /* El ancho se adapta al contenedor */
+  height: auto; /* Mantener la proporción de la imagen */
+  aspect-ratio: 2 / 3; /* Proporción vertical (ancho:alto) */
+  object-fit: cover; /* Asegura que la imagen se ajuste sin deformarse */
+  border-bottom: 1px solid #ddd; /* Línea separadora opcional */
+}
+
+
+.evento-info {
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.flecha {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.flecha:hover {
+  background: #0056b3;
+}
+
+.flecha:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

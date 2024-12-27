@@ -278,5 +278,15 @@ public function obtenerEventosUsuario(Request $request)
     return response()->json($eventos);
 }
 
+public function eventosProximos()
+{
+    // Obtener solo los eventos aprobados (estado: apto)
+    $eventos = Evento::where('estado', 'apto')
+        ->orderBy('fecha_evento', 'asc') // Ordenar por fecha
+        ->take(10) // Opcional: Limitar el número de eventos
+        ->get();
+
+    return response()->json($eventos);
+}
 
 }
