@@ -31,19 +31,17 @@ class AdminController extends Controller
     
     public function actualizarEstadoEvento(Request $request, $id)
     {
-        // Encuentra el evento por ID o lanza un error 404 si no existe
+        // encuentra el evento por id o muestra error si no
         $evento = Evento::findOrFail($id);
 
-        // Valida el estado recibido
+    
         $validated = $request->validate([
             'estado' => 'required|in:pendiente,apto,denegado',
         ]);
 
-        // Actualiza el estado del evento
         $evento->estado = $validated['estado'];
         $evento->save();
 
-        // Retorna una respuesta JSON
         return response()->json(['message' => 'Estado del evento actualizado correctamente']);
     }
     
@@ -70,7 +68,7 @@ public function eliminarUsuario($id)
 
 public function crearEvento(Request $request)
 {
-    // Validación de los datos
+
     $request->validate([
         'nombre_evento' => 'required|string',
         'descripcion' => 'nullable|string',
@@ -83,7 +81,7 @@ public function crearEvento(Request $request)
         'precio_premium' => 'nullable|numeric|min:0',
     ]);
 
-    // Verificar si ya existe un evento en la misma fecha
+    // mira si existe un evento para esa fecha
     $eventoExistente = Evento::where('fecha_evento', $request->fecha_evento)->first();
 
     if ($eventoExistente) {
@@ -92,10 +90,10 @@ public function crearEvento(Request $request)
         ], 422);
     }
 
-    // Obtener la sala "discoteca"
+    // sala "discoteca"
     $sala = \App\Models\Sala::where('tipo_sala', 'discoteca')->firstOrFail();
 
-    // Crear el evento
+    // crear el evento
     $evento = new Evento();
     $evento->nombre_evento = $request->nombre_evento;
     $evento->descripcion = $request->descripcion;
@@ -111,13 +109,13 @@ public function crearEvento(Request $request)
 
     $evento->save();
 
-    // Crear la entrada normal
+    // crear la entrada normal
     $evento->entradas()->create([
         'tipo' => 'normal',
         'precio' => $request->precio_normal,
     ]);
 
-    // Crear entradas VIP y Premium si existen precios
+    // crear entradas VIP y Premium si las pongo
     if ($request->filled('precio_vip')) {
         $evento->entradas()->create([
             'tipo' => 'vip',
@@ -150,16 +148,16 @@ public function mostrarEventos()
 public function eliminarEvento(Request $request, $id)
 {
     $evento = Evento::findOrFail($id);
-    $motivoCancelacion = $request->input('motivo_cancelacion'); // Obtener el motivo de cancelación de la solicitud
+    $motivoCancelacion = $request->input('motivo_cancelacion'); //  motivo de cancelación de la solicitud
 
     try {
-        // Buscar la reserva asociada al evento
+        // nusca la reserva asociada al evento
         $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
             ->where('fecha_reserva', $evento->fecha_evento)
             ->first();
 
         if ($reserva) {
-            // Verifica si es el mismo día y no permite eliminar si aplica
+            // verifica si es el mismo día y no permite eliminar si aplica
             $hoy = now()->startOfDay();
             $fechaReserva = Carbon::parse($reserva->fecha_reserva);
 
@@ -167,7 +165,7 @@ public function eliminarEvento(Request $request, $id)
                 return response()->json(['error' => 'No se puede eliminar un evento para el mismo día.'], 403);
             }
 
-            // Devolver el 30% del precio al usuario que hizo la reserva
+            // devuelve el 30% del precio al usuario que hizo la reserva
             $usuarioReserva = $reserva->usuario;
             $sala = $reserva->sala;
             $reembolso = $sala->precio * 0.3;
@@ -175,18 +173,18 @@ public function eliminarEvento(Request $request, $id)
             $usuarioReserva->saldo += $reembolso;
             $usuarioReserva->save();
 
-            // Crear una notificación para el usuario de la reserva
+            // crear una notificación para el usuario de la reserva
             Notificacion::create([
                 'usuario_id' => $usuarioReserva->id,
                 'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el 30% del importe de tu reserva. Motivo de la cancelación: {$motivoCancelacion}",
                 'leido' => false,
             ]);
 
-            // Eliminar la reserva
+          
             $reserva->delete();
         }
 
-        // Procesar reembolsos si el evento tiene compras asociadas
+        // hce reembolsos si el evento tiene compras asociadas
         $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
             $query->where('evento_id', $evento->id);
         })->with('entradas')->get();
@@ -196,18 +194,17 @@ public function eliminarEvento(Request $request, $id)
 
             foreach ($compra->entradas as $entrada) {
                 if ($entrada->evento_id == $evento->id) {
-                    // Accede a la cantidad de la tabla pivote
                     $cantidad = $entrada->pivot->cantidad ?? 0;
                     $totalReembolso += $entrada->precio * $cantidad;
                 }
             }
 
             if ($totalReembolso > 0) {
-                // Reembolsar al usuario
+                // reembokso al usuario
                 $compra->usuario->saldo += $totalReembolso;
                 $compra->usuario->save();
 
-                // Crear notificación para el comprador
+                // crea notificación para el comprador
                 Notificacion::create([
                     'usuario_id' => $compra->usuario->id,
                     'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra. Motivo de la cancelación: {$motivoCancelacion}",
@@ -215,15 +212,15 @@ public function eliminarEvento(Request $request, $id)
                 ]);
             }
 
-            // Eliminar la relación con las entradas
+            // elimina la relación con las entradas
             $compra->entradas()->detach();
 
-            // Eliminar la compra
+            // elimina la compra
             $compra->delete();
         }
 
-        // Actualizar los ingresos del creador del evento
-        $creador = $evento->creador; // Accedemos al creador a través del evento
+        // actualizar los ingresos del creador del evento
+        $creador = $evento->creador; 
         if ($creador) {
             $totalReembolsado = $compras->sum(function ($compra) {
                 return $compra->entradas->sum(function ($entrada) {
@@ -234,7 +231,7 @@ public function eliminarEvento(Request $request, $id)
             $creador->ingresos -= $totalReembolsado;
             $creador->save();
 
-            // Crear una notificación para el creador del evento
+            // crear una notificación para el creador del evento
             Notificacion::create([
                 'usuario_id' => $creador->id,
                 'mensaje' => "Tu evento '{$evento->nombre_evento}' ha sido cancelado. Motivo de la cancelación: {$motivoCancelacion}",
@@ -242,7 +239,6 @@ public function eliminarEvento(Request $request, $id)
             ]);
         }
 
-        // Eliminar el evento
         $evento->delete();
 
     } catch (\Exception $e) {
@@ -261,23 +257,23 @@ public function eliminarEvento(Request $request, $id)
 
 public function actualizarSaldo(Request $request)
 {
-    // Validar los datos de entrada
+   
     $validated = $request->validate([
-        'id' => 'required|exists:users,id', // El ID debe existir en la tabla de usuarios
-        'saldo' => 'required|numeric|min:0', // El saldo debe ser un número mayor o igual a 0
-        'mensaje' => 'nullable|string', // Mensaje opcional
+        'id' => 'required|exists:users,id', 
+        'saldo' => 'required|numeric|min:0', 
+        'mensaje' => 'nullable|string', 
     ]);
 
     try {
-        // Buscar el usuario
+       
         $user = User::findOrFail($validated['id']);
 
-        // Incrementar el saldo
+     
         $nuevoSaldo = $user->saldo + $validated['saldo'];
         $user->saldo = $nuevoSaldo;
         $user->save();
 
-        // Crear la notificación
+       
         Notificacion::create([
             'usuario_id' => $user->id,
             'mensaje' => $validated['mensaje'] ?? 'Tu saldo ha sido actualizado.',

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class NotificacionController extends Controller
 {
-    // Obtener todas las notificaciones del usuario autenticado
+    
     public function index()
 {
     \Log::info('Usuario autenticado: ' . auth()->id());
@@ -29,11 +29,11 @@ public function marcarTodasLeidas()
 }
 
 
-    // Crear una nueva notificación
+ 
     public function crearNotificacion(Request $request)
     {
         $request->validate([
-            'usuario_id' => 'nullable|exists:usuarios,id', // Asegurarse de que 'usuarios' es la tabla correcta
+            'usuario_id' => 'nullable|exists:usuarios,id', 
             'mensaje' => 'required|string',
         ]);
 
@@ -42,12 +42,12 @@ public function marcarTodasLeidas()
         return response()->json($notificacion, 201);
     }
 
-    // Obtener todas las notificaciones de un usuario autenticado
+  
     public function obtenerNotificaciones(Request $request)
     {
-        $usuario = auth()->user(); // Usuario autenticado
+        $usuario = auth()->user(); 
 
-        // Usar la relación 'notificaciones' configurada en el modelo Usuario
+       
         $notificaciones = $usuario->notificaciones()->orderBy('created_at', 'desc')->get();
 
         return response()->json($notificaciones);
