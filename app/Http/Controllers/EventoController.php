@@ -9,6 +9,7 @@ use App\Models\Entrada;
 use App\Models\Compra;
 use App\Models\ReservaDiscoteca;
 use App\Models\Notificacion;
+use App\Models\User;
 use Carbon\Carbon;
 
 class EventoController extends Controller
@@ -302,6 +303,8 @@ public function cancelarEvento($id)
 {
     $evento = Evento::findOrFail($id);
 
+    $admin = User::where('rol', 'admin')->firstOrFail();
+            $admin->refresh();
     // Obtener la reserva asociada al evento
     $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
         ->where('fecha_reserva', $evento->fecha_evento)
@@ -364,6 +367,8 @@ public function cancelarEvento($id)
         $usuario->saldo += $reembolso;
         $usuario->save();
 
+        $admin->ingresos -= $reembolso;
+        $admin->save();
         // Notificar al creador del evento sobre la cancelación y el reembolso
         Notificacion::create([
             'usuario_id' => $usuario->id,

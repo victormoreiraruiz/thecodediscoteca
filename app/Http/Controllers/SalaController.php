@@ -14,6 +14,7 @@ use App\Models\Compra;
 use App\Models\Notificacion;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 
 class SalaController extends Controller
@@ -43,6 +44,11 @@ class SalaController extends Controller
                 'redirect_to' => route('convertir-promotor') . '?redirect_to=' . urlencode($redirectUrl),
             ], 403);
         }
+
+        $admin = User::where('rol', 'admin')->first();
+        if (!$admin) {
+            return response()->json(['error' => 'No se encontró un administrador para recibir el pago.'], 500);
+        }
     
         // Validar los datos enviados por el usuario
         $validatedData = $request->validate([
@@ -64,11 +70,14 @@ class SalaController extends Controller
         if ($usuario->saldo < $sala->precio) {
             return response()->json(['error' => 'Saldo insuficiente para realizar la reserva.'], 403);
         }
-    
+        
+        
         // Descontar el precio de la sala del saldo del usuario
         $usuario->saldo -= $sala->precio;
         $usuario->save();
-    
+        
+        $admin->ingresos += $sala->precio;
+        $admin->save();
         // Crear la reserva en la base de datos
         $reserva = ReservaDiscoteca::create([
             'usuario_id' => $usuario->id,
@@ -142,99 +151,122 @@ class SalaController extends Controller
         return response()->json(['message' => 'Reserva creada exitosamente.'], 201);
     }
     
-
-public function cancelarReserva($id)
-{
-    $reserva = ReservaDiscoteca::findOrFail($id);
-
-   
-    $evento = Evento::where('sala_id', $reserva->sala_id)
-        ->where('fecha_evento', $reserva->fecha_reserva)
-        ->first();
-
-    if ($reserva->tipo_reserva === 'concierto') {
-        if (!$evento) {
-            return response()->json(['error' => 'Evento no encontrado.'], 404);
-        }
-
+    public function cancelarReserva($id)
+    {
+        DB::beginTransaction();
         try {
-            // obtiene las compras asociadas al evento
-            $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
-                $query->where('evento_id', $evento->id);
-            })->with('entradas')->get();
-
-            // hace reembolso y notifica
-            foreach ($compras as $compra) {
-                $totalReembolso = 0;
-
-                foreach ($compra->entradas as $entrada) {
-                    if ($entrada->evento_id == $evento->id) {
-                        $cantidad = $entrada->pivot->cantidad ?? 0;
-                        $totalReembolso += $entrada->precio * $cantidad;
+            $reserva = ReservaDiscoteca::findOrFail($id);
+            $usuario = $reserva->usuario;
+            $sala = $reserva->sala;
+            $admin = User::where('rol', 'admin')->lockForUpdate()->first(); // Bloqueo de fila para evitar inconsistencia
+    
+            if (!$admin) {
+                return response()->json(['error' => 'No se encontró un administrador para procesar el reembolso.'], 500);
+            }
+    
+            $hoy = now()->startOfDay();
+            $fechaReserva = Carbon::parse($reserva->fecha_reserva);
+    
+            // No permitir cancelación el mismo día de la reserva
+            if ($fechaReserva->isSameDay($hoy)) {
+                return response()->json(['error' => 'No se puede cancelar una reserva para el mismo día.'], 403);
+            }
+    
+            // Calcular el reembolso (30% del precio de la sala)
+            $reembolso = $sala->precio * 0.3;
+    
+            // **Forzar actualización del saldo del administrador antes de restarlo**
+            $admin = User::where('rol', 'admin')->firstOrFail();
+            $admin->refresh(); // Forzar actualización desde la base de datos
+    
+            // Verificar si el administrador tiene suficientes ingresos para cubrir el reembolso
+            if ($admin->ingresos < $reembolso) {
+                return response()->json(['error' => 'El administrador no tiene fondos suficientes para el reembolso.'], 500);
+            }
+    
+            // **Caso especial: Si es un concierto, manejar reembolsos a los compradores**
+            if ($reserva->tipo_reserva === 'concierto') {
+                $evento = Evento::where('sala_id', $reserva->sala_id)
+                    ->where('fecha_evento', $reserva->fecha_reserva)
+                    ->first();
+    
+                if (!$evento) {
+                    return response()->json(['error' => 'Evento no encontrado.'], 404);
+                }
+    
+                // Obtener compras asociadas al evento
+                $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
+                    $query->where('evento_id', $evento->id);
+                })->with('entradas')->get();
+    
+                foreach ($compras as $compra) {
+                    $totalReembolso = 0;
+    
+                    foreach ($compra->entradas as $entrada) {
+                        if ($entrada->evento_id == $evento->id) {
+                            $cantidad = $entrada->pivot->cantidad ?? 0;
+                            $totalReembolso += $entrada->precio * $cantidad;
+                        }
+                    }
+    
+                    if ($totalReembolso > 0) {
+                        // Reembolso a los compradores
+                        $compra->usuario->saldo += $totalReembolso;
+                        $compra->usuario->save();
+    
+                        // Notificación al comprador
+                        Notificacion::create([
+                            'usuario_id' => $compra->usuario->id,
+                            'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra.",
+                            'leido' => false,
+                        ]);
+    
+                        // Eliminar entradas de la compra
+                        $compra->entradas()->detach();
                     }
                 }
-
-                if ($totalReembolso > 0) {
-                    // reembolso
-                    $compra->usuario->saldo += $totalReembolso;
-                    $compra->usuario->save();
-
-                    // notifica al comprador
-                    Notificacion::create([
-                        'usuario_id' => $compra->usuario->id,
-                        'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra.",
-                        'leido' => false,
-                    ]);
-
-                  
-                    $compra->entradas()->detach();
-                }
-            }
-
-            // borra las compras después de procesar el reembolso
-            Compra::whereHas('entradas', function ($query) use ($evento) {
-                $query->where('evento_id', $evento->id);
-            })->delete();
-
-            // actualiza los ingresos del creador del evento
-            $totalRecibido = $compras->sum(function ($compra) use ($evento) {
-                return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) {
-                    return $entrada->precio * ($entrada->pivot->cantidad ?? 0);
+    
+                // Eliminar las compras después del reembolso
+                Compra::whereHas('entradas', function ($query) use ($evento) {
+                    $query->where('evento_id', $evento->id);
+                })->delete();
+    
+                // Actualizar los ingresos del creador del evento
+                $totalRecibido = $compras->sum(function ($compra) use ($evento) {
+                    return $compra->entradas->where('evento_id', $evento->id)->sum(function ($entrada) {
+                        return $entrada->precio * ($entrada->pivot->cantidad ?? 0);
+                    });
                 });
-            });
-
-            $creador = $reserva->usuario;
-            $creador->ingresos -= $totalRecibido;
-            $creador->save();
-
-           
-            $evento->delete();
+    
+                $creador = $reserva->usuario;
+                $creador->ingresos -= $totalRecibido;
+                $creador->save();
+    
+                // Eliminar el evento
+                $evento->delete();
+            }
+    
+            // **1️⃣ Descontar el reembolso de los ingresos del administrador**
+            $admin->ingresos -= $reembolso;
+            $admin->save();
+    
+            // **2️⃣ Reembolsar al usuario**
+            $usuario->saldo += $reembolso;
+            $usuario->save();
+    
+            // **3️⃣ Eliminar la reserva**
+            $reserva->delete();
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Reserva cancelada con éxito y reembolso procesado.']);
         } catch (\Exception $e) {
-            \Log::error('Error al procesar reembolsos para el evento: ' . $e->getMessage());
-            return response()->json(['error' => 'Hubo un problema al procesar los reembolsos.'], 500);
+            DB::rollBack();
+            \Log::error('Error al procesar el reembolso de la reserva:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Hubo un problema al procesar el reembolso.'], 500);
         }
     }
-
-    // comprueba si se puede cancelar la reserva (no el mismo día)
-    $usuario = $reserva->usuario;
-    $sala = $reserva->sala;
-    $hoy = now()->startOfDay();
-    $fechaReserva = Carbon::parse($reserva->fecha_reserva);
-
-    if ($fechaReserva->isSameDay($hoy)) {
-        return response()->json(['error' => 'No se puede cancelar una reserva para el mismo día.'], 403);
-    }
-
-    // devuelve el 30% del precio al saldo del usuario
-    $reembolso = $sala->precio * 0.3;
-    $usuario->saldo += $reembolso;
-    $usuario->save();
-
-    $reserva->delete();
-
-    return response()->json(['message' => 'Reserva cancelada con éxito y reembolsos procesados.']);
-}
-
+    
 
 public function descargarFactura($id)
 {
