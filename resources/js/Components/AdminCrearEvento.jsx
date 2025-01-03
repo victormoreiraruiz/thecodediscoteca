@@ -15,15 +15,15 @@ const AdminCrearEvento = () => {
     const [precioPremium, setPrecioPremium] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [diasOcupados, setDiasOcupados] = useState([]); // Días ocupados desde el servidor
+    const [diasOcupados, setDiasOcupados] = useState([]); 
 
     // Fetch para obtener los días ocupados
     useEffect(() => {
         const fetchDiasOcupados = async () => {
             try {
-                const response = await fetch(route('eventos.diasOcupados')); // Ruta del backend para obtener días ocupados
+                const response = await fetch(route('eventos.diasOcupados')); // obtiene dias ocupados
                 const data = await response.json();
-                setDiasOcupados(data); // Suponemos que el backend devuelve un array de fechas ocupadas
+                setDiasOcupados(data);
             } catch (err) {
                 console.error('Error al obtener los días ocupados:', err);
             }
@@ -79,7 +79,7 @@ const AdminCrearEvento = () => {
         }
     };
 
-    // Función para resaltar días ocupados y el día seleccionado
+    // marca dias ocupados y seleccionado
     const resaltarDias = ({ date }) => {
         const fecha = date.toISOString().split('T')[0]; // Convertir a formato YYYY-MM-DD
         if (diasOcupados.includes(fecha)) return 'dia-ocupado'; // Día ocupado

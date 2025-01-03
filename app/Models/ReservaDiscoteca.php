@@ -32,7 +32,9 @@ class ReservaDiscoteca extends Model
     }
 
     public function evento()
-{
-    return $this->hasOne(\App\Models\Evento::class, 'sala_id', 'sala_id');
-}
+    {
+        return $this->hasOne(\App\Models\Evento::class, 'sala_id', 'sala_id')
+                    ->where('fecha_evento', $this->fecha_reserva); // Compara el valor de la reserva con la fecha del evento
+    }
+    
 }

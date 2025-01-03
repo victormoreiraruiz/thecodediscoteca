@@ -24,6 +24,10 @@ class User extends Authenticatable
         'saldo',
         'puntos_totales',
         'rol',  // Agrega el campo rol aquí
+        'documento_fiscal',
+        'direccion',
+        'telefono',
+        'informacion_bancaria', // Agrega el campo información bancaria
     ];
     
 

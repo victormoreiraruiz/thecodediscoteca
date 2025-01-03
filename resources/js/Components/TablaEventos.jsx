@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const TablaEventos = ({ eventos, onCancelEvent }) => {
+const TablaEventos = ({ eventos }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [eventosPaginados, setEventosPaginados] = useState([]);
-    const [orden, setOrden] = useState({ campo: 'fecha_evento', ascendente: true });
-    const [filtroNombre, setFiltroNombre] = useState('');
-    const [filtroFecha, setFiltroFecha] = useState({ desde: '', hasta: '' });
+    const [orden, setOrden] = useState({ campo: "fecha_evento", ascendente: true });
+    const [filtroNombre, setFiltroNombre] = useState("");
+    const [filtroFecha, setFiltroFecha] = useState({ desde: "", hasta: "" });
     const eventosPorPagina = 10;
 
     // Filtrar eventos por rango de fechas
@@ -16,7 +17,7 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
         const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);
         const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);
 
-        return eventos.filter(evento => {
+        return eventos.filter((evento) => {
             const fechaEvento = new Date(evento.fecha_evento).getTime();
             return fechaEvento >= fechaDesde && fechaEvento <= fechaHasta;
         });
@@ -25,7 +26,9 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
     // Filtrar eventos por nombre
     const filtrarPorNombre = (eventos) => {
         if (!filtroNombre) return eventos;
-        return eventos.filter(evento => evento.nombre_evento.toLowerCase().includes(filtroNombre.toLowerCase()));
+        return eventos.filter((evento) =>
+            evento.nombre_evento.toLowerCase().includes(filtroNombre.toLowerCase())
+        );
     };
 
     // Ordenar eventos
@@ -34,11 +37,11 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
         setOrden({ campo, ascendente: esAscendente });
 
         const eventosOrdenados = [...eventos].sort((a, b) => {
-            if (campo === 'fecha_evento') {
+            if (campo === "fecha_evento") {
                 return esAscendente
                     ? new Date(a.fecha_evento) - new Date(b.fecha_evento)
                     : new Date(b.fecha_evento) - new Date(a.fecha_evento);
-            } else if (campo === 'nombre_evento') {
+            } else if (campo === "nombre_evento") {
                 return esAscendente
                     ? a.nombre_evento.localeCompare(b.nombre_evento)
                     : b.nombre_evento.localeCompare(a.nombre_evento);
@@ -57,11 +60,11 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
 
         const eventosFiltrados = filtrarPorNombre(filtrarPorFecha(eventos));
         const eventosOrdenados = [...eventosFiltrados].sort((a, b) => {
-            if (orden.campo === 'fecha_evento') {
+            if (orden.campo === "fecha_evento") {
                 return orden.ascendente
                     ? new Date(a.fecha_evento) - new Date(b.fecha_evento)
                     : new Date(b.fecha_evento) - new Date(a.fecha_evento);
-            } else if (orden.campo === 'nombre_evento') {
+            } else if (orden.campo === "nombre_evento") {
                 return orden.ascendente
                     ? a.nombre_evento.localeCompare(b.nombre_evento)
                     : b.nombre_evento.localeCompare(a.nombre_evento);
@@ -76,6 +79,22 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
         setPaginaActual(nuevaPagina);
     };
 
+    const handleEliminarEvento = async (eventoId) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    try {
+        const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
+        alert(response.data.message || 'Evento eliminado con éxito.');
+        location.reload();
+    } catch (error) {
+        console.error('Error al eliminar el evento:', error);
+        alert(error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.');
+    }
+};
+
+    
     return (
         <div className="tabla-compras-container">
             {/* Barra de búsqueda */}
@@ -98,7 +117,9 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
                     <input
                         type="date"
                         value={filtroFecha.desde}
-                        onChange={(e) => setFiltroFecha({ ...filtroFecha, desde: e.target.value })}
+                        onChange={(e) =>
+                            setFiltroFecha({ ...filtroFecha, desde: e.target.value })
+                        }
                     />
                 </label>
                 <label>
@@ -106,7 +127,9 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
                     <input
                         type="date"
                         value={filtroFecha.hasta}
-                        onChange={(e) => setFiltroFecha({ ...filtroFecha, hasta: e.target.value })}
+                        onChange={(e) =>
+                            setFiltroFecha({ ...filtroFecha, hasta: e.target.value })
+                        }
                     />
                 </label>
             </div>
@@ -115,11 +138,27 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
             <table className="tabla-compras">
                 <thead>
                     <tr>
-                        <th onClick={() => ordenarEventos('nombre_evento')} className="tabla-compras-header">
-                            Nombre {orden.campo === 'nombre_evento' ? (orden.ascendente ? '▲' : '▼') : ''}
+                        <th
+                            onClick={() => ordenarEventos("nombre_evento")}
+                            className="tabla-compras-header"
+                        >
+                            Nombre{" "}
+                            {orden.campo === "nombre_evento"
+                                ? orden.ascendente
+                                    ? "▲"
+                                    : "▼"
+                                : ""}
                         </th>
-                        <th onClick={() => ordenarEventos('fecha_evento')} className="tabla-compras-header">
-                            Fecha {orden.campo === 'fecha_evento' ? (orden.ascendente ? '▲' : '▼') : ''}
+                        <th
+                            onClick={() => ordenarEventos("fecha_evento")}
+                            className="tabla-compras-header"
+                        >
+                            Fecha{" "}
+                            {orden.campo === "fecha_evento"
+                                ? orden.ascendente
+                                    ? "▲"
+                                    : "▼"
+                                : ""}
                         </th>
                         <th className="tabla-compras-header">Acciones</th>
                     </tr>
@@ -134,16 +173,24 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
                                     <a
                                         href={`/mi-cuenta/eventos/${evento.id}`}
                                         className="tabla-compras-btn"
+                                        style={{ marginRight: "10px" }}
                                     >
                                         Ver Detalles
                                     </a>
-                                    <button
-                                        onClick={() => onCancelEvent(evento)}
-                                        className="tabla-compras-btn"
-                                        style={{ marginLeft: '10px' }}
-                                    >
-                                        Cancelar
-                                    </button>
+                                    <a
+  href={`/api/reservas/${evento.reserva_id}/factura`}
+  className="tabla-compras-btn"
+  style={{ marginRight: "10px" }}
+>
+  Descargar Factura
+</a>
+
+<button
+    onClick={() => handleEliminarEvento(evento.id)}
+    className="tabla-compras-btn"
+>
+    Eliminar Evento
+</button>
                                 </td>
                             </tr>
                         ))
@@ -159,11 +206,17 @@ const TablaEventos = ({ eventos, onCancelEvent }) => {
 
             {/* Controles de paginación */}
             <div className="tabla-compras-paginacion">
-                {Array.from({ length: Math.ceil(filtrarPorNombre(filtrarPorFecha(eventos)).length / eventosPorPagina) }).map((_, index) => (
+                {Array.from({
+                    length: Math.ceil(
+                        filtrarPorNombre(filtrarPorFecha(eventos)).length / eventosPorPagina
+                    ),
+                }).map((_, index) => (
                     <button
                         key={index}
                         onClick={() => cambiarPagina(index + 1)}
-                        className={`paginacion-btn ${paginaActual === index + 1 ? 'activo' : ''}`}
+                        className={`paginacion-btn ${
+                            paginaActual === index + 1 ? "activo" : ""
+                        }`}
                     >
                         {index + 1}
                     </button>

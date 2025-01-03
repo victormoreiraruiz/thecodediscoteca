@@ -6,19 +6,22 @@ import axios from 'axios';
 const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
-  const [tipoReserva, setTipoReserva] = useState('privada'); // Estado para el tipo de reserva
-  const [precioEntrada, setPrecioEntrada] = useState(''); // Precio para entradas de concierto
-  const [nombreConcierto, setNombreConcierto] = useState(''); // Nombre del concierto
-  const [horaInicio, setHoraInicio] = useState(''); // Hora de inicio del concierto
-  const [horaFin, setHoraFin] = useState(''); // Hora de fin del concierto
-  const [cartel, setCartel] = useState(null); // Archivo del cartel
+  const [tipoReserva, setTipoReserva] = useState('privada');
+  const [precioEntrada, setPrecioEntrada] = useState('');
+  const [nombreConcierto, setNombreConcierto] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [horaFin, setHoraFin] = useState('');
+  const [cartel, setCartel] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
+  const [acceptPolicies, setAcceptPolicies] = useState(false); // Estado para aceptar las políticas
+  const [loading, setLoading] = useState(false); // Estado de carga para la reserva
 
   const fetchBookedDates = async () => {
     try {
       const response = await axios.get('/api/salas/1/reservas');
       setBookedDates(response.data);
+      
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
     }
@@ -44,6 +47,11 @@ const EventosSalaPrivada = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!acceptPolicies) {
+      alert('Debes aceptar las políticas de la sala antes de continuar.');
+      return;
+    }
 
     if (!selectedDate) {
       alert('Por favor, selecciona una fecha disponible en el calendario.');
@@ -76,11 +84,14 @@ const EventosSalaPrivada = () => {
     }
 
     try {
-      await axios.post('/api/salas/1/reservar', formData, {
+      setLoading(true);
+
+      const response = await axios.post('/api/salas/1/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      alert('Reserva creada exitosamente');
+
+      alert('Reserva creada exitosamente. Se ha generado la factura.');
       setMotivo('');
       setNumeroPersonas(30);
       setTipoReserva('privada');
@@ -90,24 +101,15 @@ const EventosSalaPrivada = () => {
       setHoraFin('');
       setCartel(null);
       setSelectedDate(null);
+      setAcceptPolicies(false);
       fetchBookedDates();
     } catch (error) {
-      if (error.response && error.response.status === 403) {
-          // Si el error es por falta de permisos, mostrar un alert y redirigir
-          if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
-              const confirmRedirect = window.confirm(
-                  'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
-              );
-              if (confirmRedirect) {
-                  window.location.href = '/convertir-promotor';
-              }
-          }
-      } else {
-          console.error('Error al crear la reserva:', error);
-          alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
-      }
-  }
-};
+      console.error('Error al crear la reserva o generar la factura:', error);
+      alert('Hubo un error al crear la reserva o generar la factura. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -131,7 +133,8 @@ const EventosSalaPrivada = () => {
 
       <form onSubmit={handleSubmit} className="event-form">
         <label>
-          Número de personas:
+          <h3>Número de personas:</h3>
+          
           <select
             value={numeroPersonas}
             onChange={(e) => setNumeroPersonas(Number(e.target.value))}
@@ -146,7 +149,7 @@ const EventosSalaPrivada = () => {
         </label>
 
         <label>
-          Tipo de reserva:
+        <h3>Tipo de reserva:</h3> 
           <select
             value={tipoReserva}
             onChange={(e) => setTipoReserva(e.target.value)}
@@ -160,7 +163,8 @@ const EventosSalaPrivada = () => {
         {tipoReserva === 'concierto' && (
           <>
             <label>
-              <h3>Nombre del concierto:</h3>
+            <h3>Nombre del concierto:</h3>
+              
               <input
                 type="text"
                 value={nombreConcierto}
@@ -171,7 +175,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              <h3>Hora de inicio:</h3>
+            <h3>Hora de inicio:</h3>
               <input
                 type="time"
                 value={horaInicio}
@@ -181,7 +185,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              <h3>Hora de fin:</h3>
+            <h3> Hora de fin:</h3>
               <input
                 type="time"
                 value={horaFin}
@@ -191,12 +195,12 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-              <h3>Cartel del concierto:</h3>
+            <h3>Cartel del concierto:</h3>
               <input type="file" onChange={handleCartelChange} accept="image/*" required />
             </label>
 
             <label>
-              <h3>Precio de entrada (€):</h3>
+            <h3>Precio de entrada (€):</h3>
               
               <input
                 type="number"
@@ -212,8 +216,8 @@ const EventosSalaPrivada = () => {
         )}
 
         <label>
-          <h3>Describa en que consite el evento:</h3>
-          
+        <h3> Describa en qué consiste el evento:</h3>
+         
           <textarea
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
@@ -223,7 +227,19 @@ const EventosSalaPrivada = () => {
           />
         </label>
 
-        <button type="submit" className="event-submit-button">RESERVAR</button>
+        <label className="accept-policies">
+          <input
+            type="checkbox"
+            checked={acceptPolicies}
+            onChange={(e) => setAcceptPolicies(e.target.checked)}
+          />
+          <h3>He leído y acepto las políticas de la sala</h3>
+          
+        </label>
+
+        <button type="submit" className="event-submit-button" disabled={loading}>
+          {loading ? 'Reservando...' : 'RESERVAR'}
+        </button>
       </form>
     </div>
   );

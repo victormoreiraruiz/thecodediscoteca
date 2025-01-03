@@ -6,7 +6,7 @@ use App\Models\Compra;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
-use SimpleSoftwareIO\QrCode\Facades\QrCode; // Importar librería para QR
+use SimpleSoftwareIO\QrCode\Facades\QrCode; 
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\Support\Facades\Cookie;
@@ -48,7 +48,6 @@ class CompraController extends Controller
             'nombre' => $user->name,
             'correo' => $user->email,
             'saldo' => $user->saldo,
-                // Confirmar aquí que el saldo es correcto
         ] : null,
     ]);
 }
@@ -74,14 +73,13 @@ public function confirmarCompra(Request $request)
 
     DB::beginTransaction();
     try {
-        // Crea la compra
         $compra = Compra::create([
             'usuario_id' => $user->id,
             'total' => $total,
             'fecha_compra' => now(),
         ]);
 
-        // Asocia entradas y genera QRs
+        // asocia entradas y genera QRs
         foreach ($carrito as $item) {
             if (isset($item['id']) && isset($item['cantidad'])) {
                 $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
@@ -96,21 +94,21 @@ public function confirmarCompra(Request $request)
             $user->saldo -= $total;
         }
 
-        // Incrementar puntos
-        $puntosGanados = round($total * 0.10); // Redondeamos a un número entero
-        $user->puntos_totales += intval($puntosGanados); // Aseguramos que sea un entero
+        // incrementar puntos
+        $puntosGanados = round($total * 0.10); // redondeo a numero entero pq puse en a base de datos q el numero era integr xd
+        $user->puntos_totales += intval($puntosGanados); // aseguramos que sea un entero
 
-        // Actualizar membresía
+
         $user->actualizarMembresia();
 
         $user->save();
 
         DB::commit();
 
-        // Eliminar carrito de la sesión
+
         session()->forget('carrito');
 
-        // Eliminar la cookie del carrito
+
         Cookie::queue(Cookie::forget('carrito'));
 
         return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
@@ -151,12 +149,12 @@ public function confirmarCompra(Request $request)
     
         DB::beginTransaction();
         try {
-            // Verifica si el usuario tiene saldo suficiente
+            // verifica si el usuario tiene saldo suficiente
             if ($user->saldo < $total) {
                 return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
             }
     
-            // Crea el registro de la compra
+            // crea el registro de la compra
             $compra = Compra::create([
                 'usuario_id' => $user->id,
                 'total' => $total,
@@ -164,7 +162,7 @@ public function confirmarCompra(Request $request)
             ]);
     
             foreach ($carrito as $item) {
-                // Procesar solo las entradas de concierto
+                // procesar solo las entradas de concierto
                 if ($item['tipo'] === 'concierto') {
                     $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
                         ->where('id', $item['id'])
@@ -174,25 +172,25 @@ public function confirmarCompra(Request $request)
                         throw new \Exception("La entrada no es válida para el concierto seleccionado.");
                     }
     
-                    // Asocia las entradas compradas a la compra
+                    // asocia las entradas compradas a la compra
                     $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
     
-                    // Generar un QR por cada unidad de la entrada comprada
+                    // generar un QR por cada unidad de la entrada comprada
                     for ($i = 1; $i <= $item['cantidad']; $i++) {
                         $this->generarQr($compra, $entrada->id, $i);
                     }
                 }
             }
     
-            // Resta el saldo del usuario comprador
+            // resta el saldo del usuario comprador
             $user->saldo -= $total;
             $user->save();
     
-            // Incrementa los ingresos del usuario creador del evento
+            // incrementa los ingresos del usuario creador del evento
             $evento = \App\Models\Evento::find($eventoId);
     
             if ($evento) {
-                $creador = $evento->promotor; // Usuario que creó el evento
+                $creador = $evento->promotor; 
                 $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) {
                     return $sum + ($item['precio'] * $item['cantidad']);
                 }, 0);
@@ -233,7 +231,7 @@ public function confirmarCompra(Request $request)
         }
     }
 
-    // Filtrar rutas inválidas
+    // filtrar rutas inválidas
     $qrPaths = array_filter($qrPaths, fn($path) => is_file($path));
     $qrPaths = array_unique($qrPaths);
 

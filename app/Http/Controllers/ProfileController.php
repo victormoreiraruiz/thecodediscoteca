@@ -175,32 +175,53 @@ public function obtenerIngresos(Request $request)
 
 public function convertToPromotor(Request $request)
 {
-    $request->validate([
-        'nombre_completo' => 'required|string',
-        'documento_fiscal' => 'required|string',
-        'direccion' => 'required|string',
-        'telefono' => 'required|string',
-        'informacion_bancaria' => 'nullable|string',
+    // Validar los datos del formulario
+    $validatedData = $request->validate([
+        'nombre_completo' => 'required|string|max:255',
+        'documento_fiscal' => 'required|string|max:255',
+        'direccion' => 'required|string|max:255',
+        'telefono' => 'required|string|regex:/^\d{9}$/', // Validación para un número de 9 dígitos
+        'informacion_bancaria' => 'nullable|string|max:255',
     ]);
 
-    $user = Auth::user();
-    $user->update([
-        'documento_fiscal' => $request->documento_fiscal,
-        'direccion' => $request->direccion,
-        'telefono' => $request->telefono,
-        'informacion_bancaria' => $request->informacion_bancaria,
-        'rol' => 'promotor',
-    ]);
+    try {
+        $user = Auth::user();
 
-    Auth::user()->refresh();
+        // Actualizar los datos del usuario
+        $user->update([
+            'documento_fiscal' => $validatedData['documento_fiscal'],
+            'direccion' => $validatedData['direccion'],
+            'telefono' => $validatedData['telefono'],
+            'informacion_bancaria' => $validatedData['informacion_bancaria'] ?? null,
+            'rol' => 'promotor', // Cambiar el rol del usuario
+        ]);
 
-    // Usar el parámetro redirect_to o la URL almacenada en la sesión
-    $redirectUrl = $request->query('redirect_to', session('url.intended', route('eventos')));
+        // Actualizar el nombre completo, si es necesario
+        $user->name = $validatedData['nombre_completo'];
+        $user->save();
 
-    Log::info('Redirigiendo a:', ['url' => $redirectUrl]);
+        // Refrescar la información del usuario autenticado
+        Auth::user()->refresh();
 
-    return redirect($redirectUrl)->with('message', '¡Ahora eres promotor!');
+        // Obtener la URL de redirección (por defecto a la lista de eventos)
+        $redirectUrl = $request->query('redirect_to', session('url.intended', route('eventos')));
+
+        Log::info('Usuario convertido en promotor:', [
+            'user_id' => $user->id,
+            'redirect_url' => $redirectUrl,
+        ]);
+
+        return redirect($redirectUrl)->with('message', '¡Ahora eres promotor!');
+    } catch (\Exception $e) {
+        // Manejo de errores y registro del problema
+        Log::error('Error al convertir al usuario en promotor:', [
+            'error' => $e->getMessage(),
+        ]);
+
+        return back()->withErrors('Hubo un error al procesar tu solicitud. Por favor, intenta de nuevo.');
+    }
 }
+
 
 
 

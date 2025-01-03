@@ -6,6 +6,10 @@ use App\Models\Evento;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Entrada;
+use App\Models\Compra;
+use App\Models\ReservaDiscoteca;
+use App\Models\Notificacion;
+use Carbon\Carbon;
 
 class EventoController extends Controller
 {
@@ -270,7 +274,7 @@ public function obtenerEventosUsuario(Request $request)
 {
     $user = $request->user();
 
-    // Obtener eventos asociados a las reservas del usuario
+    // obtiene los  eventos asociados a las reservas del usuario
     $eventos = Evento::whereHas('sala.reservas', function ($query) use ($user) {
         $query->where('usuario_id', $user->id);
     })->get();
@@ -280,18 +284,102 @@ public function obtenerEventosUsuario(Request $request)
 
 public function eventosProximos()
 {
-    // Obtener solo los eventos aprobados (estado: apto)
+    // solo eventos aprobaos
     $eventos = Evento::where('estado', 'apto')
-        ->orderBy('fecha_evento', 'asc') // Ordenar por fecha
-        ->take(10) // Opcional: Limitar el número de eventos
+        ->orderBy('fecha_evento', 'asc')
+        ->take(10) 
         ->get();
 
     return response()->json($eventos);
 }
 public function obtenerDiasOcupados()
 {
-    $diasOcupados = Evento::pluck('fecha_evento')->toArray(); // Obtener fechas de eventos
+    $diasOcupados = Evento::pluck('fecha_evento')->toArray(); 
     return response()->json($diasOcupados);
+}
+
+public function cancelarEvento($id)
+{
+    $evento = Evento::findOrFail($id);
+
+    // Obtener la reserva asociada al evento
+    $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
+        ->where('fecha_reserva', $evento->fecha_evento)
+        ->first();
+
+    if (!$reserva) {
+        return response()->json(['error' => 'No se encontró la reserva asociada a este evento.'], 404);
+    }
+
+    try {
+        // Obtener todas las compras relacionadas con este evento
+        $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
+            $query->where('evento_id', $evento->id);
+        })->with('entradas')->get();
+
+        // Procesar reembolsos para los compradores de entradas
+        foreach ($compras as $compra) {
+            $totalReembolso = 0;
+
+            foreach ($compra->entradas as $entrada) {
+                if ($entrada->evento_id == $evento->id) {
+                    $cantidad = $entrada->pivot->cantidad ?? 0;
+                    $totalReembolso += $entrada->precio * $cantidad;
+                }
+            }
+
+            if ($totalReembolso > 0) {
+                // Realizar reembolso al usuario
+                $compra->usuario->saldo += $totalReembolso;
+                $compra->usuario->save();
+
+                // Notificar al comprador
+                Notificacion::create([
+                    'usuario_id' => $compra->usuario->id,
+                    'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el importe de tu compra.",
+                    'leido' => false,
+                ]);
+
+                // Desvincular las entradas de la compra
+                $compra->entradas()->detach();
+            }
+        }
+
+        // Eliminar las compras después de procesar los reembolsos
+        Compra::whereHas('entradas', function ($query) use ($evento) {
+            $query->where('evento_id', $evento->id);
+        })->delete();
+
+        // Reembolsar el 30% del costo de la reserva al creador del evento
+        $usuario = $reserva->usuario;
+        $sala = $reserva->sala;
+        $hoy = now()->startOfDay();
+        $fechaReserva = Carbon::parse($reserva->fecha_reserva);
+
+        if ($fechaReserva->isSameDay($hoy)) {
+            return response()->json(['error' => 'No se puede cancelar un evento el mismo día.'], 403);
+        }
+
+        $reembolso = $sala->precio * 0.3;
+        $usuario->saldo += $reembolso;
+        $usuario->save();
+
+        // Notificar al creador del evento sobre la cancelación y el reembolso
+        Notificacion::create([
+            'usuario_id' => $usuario->id,
+            'mensaje' => "Has cancelado el evento '{$evento->nombre_evento}'. Se ha reembolsado el 30% del precio de la reserva.",
+            'leido' => false,
+        ]);
+
+        // Eliminar el evento y la reserva asociada
+        $evento->delete();
+        $reserva->delete();
+
+        return response()->json(['message' => 'Evento cancelado con éxito y reembolsos procesados.']);
+    } catch (\Exception $e) {
+        \Log::error('Error al cancelar el evento: ' . $e->getMessage());
+        return response()->json(['error' => 'Hubo un problema al cancelar el evento.'], 500);
+    }
 }
 
 }
