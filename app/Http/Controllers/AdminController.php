@@ -299,7 +299,7 @@ public function mostrarIngresos()
     }
 
     return response()->json([
-        'saldo' => $admin->saldo,
+        'ingresos' => $admin->ingresos,
     ]);
 }
 

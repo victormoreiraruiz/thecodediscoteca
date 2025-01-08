@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 
 const IndexEventos = ({ eventos }) => {
+    const hoy = new Date().setHours(0, 0, 0, 0); // Obtiene la fecha de hoy sin la hora para comparar correctamente.
+
     const eventosAprobados = eventos
-        .filter(evento => evento.estado === 'apto')
-        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento));
+        .filter(evento => evento.estado === 'apto' && new Date(evento.fecha_evento).setHours(0, 0, 0, 0) >= hoy) // Filtra eventos futuros
+        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento)); // Ordena por fecha
 
     const [indiceInicial, setIndiceInicial] = useState(0);
-
     const eventosVisibles = 4; // Mostrar 4 eventos a la vez
 
     const avanzar = () => {
@@ -25,7 +26,7 @@ const IndexEventos = ({ eventos }) => {
     return (
         <div className="index-eventos">
            <h2>PRÓXIMOS EVENTOS</h2>
-           <br></br>
+           <br />
             <div className="carrusel-container">
                
                 {indiceInicial > 0 && (
@@ -55,7 +56,6 @@ const IndexEventos = ({ eventos }) => {
                     ))}
                 </div>
 
-              
                 {indiceInicial + eventosVisibles < eventosAprobados.length && (
                     <button className="flecha" onClick={avanzar}>
                         &gt; 
