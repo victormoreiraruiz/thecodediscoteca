@@ -148,8 +148,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/actualizarSaldo', [AdminController::class, 'actualizarSaldo'])->name('admin.actualizarSaldo');
     Route::get('/admin/eventos/{evento}/editar', [EventoController::class, 'show'])->name('admin.evento.show')->middleware('can:admin');
     Route::get('/eventos/{id}', [EventoController::class, 'show'])->name('eventos.show');
-    Route::put('/admin/eventos/{id}/actualizar-estado', [AdminController::class, 'actualizarEstadoEvento'])
-    ->name('admin.actualizarEstadoEvento');
+    Route::put('/admin/eventos/{id}/actualizar-estado', [AdminController::class, 'actualizarEstadoEvento'])->name('admin.actualizarEstadoEvento');
+    Route::get('/admin/ingresos', [AdminController::class, 'mostrarIngresos'])->middleware('auth')->name('admin.ingresos');
+
     
 
 });

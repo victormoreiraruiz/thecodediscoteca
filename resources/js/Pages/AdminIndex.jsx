@@ -4,10 +4,12 @@ import AdminUsuarios from '../Components/AdminUsuarios';
 import AdminCrearEvento from '../Components/AdminCrearEvento';
 import AdminGestionEventos from '../Components/AdminGestionEventos';  
 import AdminSorteos from '../Components/AdminSorteos';
+import AdminIngresos from '../Components/AdminIngresos'; 
 const AdminIndex = ({ usuarios, salas, eventos }) => {  
     return (
         <div>
             <AdministradorIndex />
+            <AdminIngresos />
             <AdminUsuarios usuarios={usuarios} />
             <AdminCrearEvento salas={salas} />
             <AdminGestionEventos eventos={eventos} /> 

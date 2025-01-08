@@ -290,6 +290,19 @@ public function actualizarSaldo(Request $request)
     }
 }
 
+public function mostrarIngresos()
+{
+    $admin = auth()->user();
+
+    if ($admin->rol !== 'admin') {
+        return response()->json(['error' => 'Acceso no autorizado.'], 403);
+    }
+
+    return response()->json([
+        'ingresos' => $admin->ingresos,
+    ]);
+}
+
 
 
 

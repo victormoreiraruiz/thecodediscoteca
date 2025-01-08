@@ -140,73 +140,87 @@ public function confirmarCompra(Request $request)
     }
     
     public function comprarEntradasConcierto(Request $request, $eventoId)
-    {
-        $user = $request->user();
-        $carrito = $request->input('carrito', []);
-        $total = collect($carrito)->reduce(function ($sum, $item) {
-            return $sum + ($item['precio'] * $item['cantidad']);
-        }, 0);
-    
-        DB::beginTransaction();
-        try {
-            // verifica si el usuario tiene saldo suficiente
-            if ($user->saldo < $total) {
-                return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
+{
+    $user = $request->user();
+    $carrito = $request->input('carrito', []);
+    $total = collect($carrito)->reduce(function ($sum, $item) {
+        return $sum + ($item['precio'] * $item['cantidad']);
+    }, 0);
+
+    DB::beginTransaction();
+    try {
+        // Verifica si el usuario tiene saldo suficiente
+        if ($user->saldo < $total) {
+            return response()->json(['error' => 'Saldo insuficiente para realizar la compra.'], 403);
+        }
+
+        // Crea el registro de la compra
+        $compra = Compra::create([
+            'usuario_id' => $user->id,
+            'total' => $total,
+            'fecha_compra' => now(),
+        ]);
+
+        foreach ($carrito as $item) {
+            // Obtener la entrada y el evento asociado
+            $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
+                ->where('id', $item['id'])
+                ->first();
+
+            if (!$entrada) {
+                throw new \Exception("La entrada no es válida para el evento seleccionado.");
             }
-    
-            // crea el registro de la compra
-            $compra = Compra::create([
-                'usuario_id' => $user->id,
-                'total' => $total,
-                'fecha_compra' => now(),
-            ]);
-    
-            foreach ($carrito as $item) {
-                // procesar solo las entradas de concierto
-                if ($item['tipo'] === 'concierto') {
-                    $entrada = \App\Models\Entrada::where('evento_id', $eventoId)
-                        ->where('id', $item['id'])
-                        ->first();
-    
-                    if (!$entrada) {
-                        throw new \Exception("La entrada no es válida para el concierto seleccionado.");
-                    }
-    
-                    // asocia las entradas compradas a la compra
-                    $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
-    
-                    // generar un QR por cada unidad de la entrada comprada
-                    for ($i = 1; $i <= $item['cantidad']; $i++) {
-                        $this->generarQr($compra, $entrada->id, $i);
-                    }
+
+            // Asocia las entradas compradas a la compra
+            $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+
+            // Generar un QR por cada unidad de la entrada comprada
+            for ($i = 1; $i <= $item['cantidad']; $i++) {
+                $this->generarQr($compra, $entrada->id, $i);
+            }
+        }
+
+        // Resta el saldo del usuario comprador
+        $user->saldo -= $total;
+        $user->save();
+
+        // Obtener el evento y la sala asociada
+        $evento = \App\Models\Evento::find($eventoId);
+
+        if ($evento) {
+            $sala = \App\Models\Sala::find($evento->sala_id);
+            $creador = $evento->promotor; // Usuario que creó el evento
+            $admin = \App\Models\User::where('rol', 'admin')->first(); // Usuario administrador
+
+            // Calcular el total ingresado por la compra de entradas
+            $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) {
+                return $sum + ($item['precio'] * $item['cantidad']);
+            }, 0);
+
+            // Si la sala es de tipo "discoteca", el dinero va al admin
+            if ($sala && $sala->tipo_sala === 'discoteca') {
+                if ($admin) {
+                    $admin->ingresos += $ingresoTotal;
+                    $admin->save();
                 }
-            }
-    
-            // resta el saldo del usuario comprador
-            $user->saldo -= $total;
-            $user->save();
-    
-            // incrementa los ingresos del usuario creador del evento
-            $evento = \App\Models\Evento::find($eventoId);
-    
-            if ($evento) {
-                $creador = $evento->promotor; 
-                $ingresoTotal = collect($carrito)->reduce(function ($sum, $item) {
-                    return $sum + ($item['precio'] * $item['cantidad']);
-                }, 0);
+            } else {
+                // Si el evento no es en "discoteca", el dinero va al creador del evento
                 $creador->ingresos += $ingresoTotal;
                 $creador->save();
             }
-    
-            DB::commit();
-    
-            return response()->json(['message' => 'Compra realizada con éxito.', 'compra_id' => $compra->id], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error al comprar entradas de concierto:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'No se pudo completar la compra.'], 500);
         }
+
+        DB::commit();
+
+        return response()->json(['message' => 'Compra realizada con éxito.', 'compra_id' => $compra->id], 201);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error al comprar entradas:', ['error' => $e->getMessage()]);
+        return response()->json(['error' => 'No se pudo completar la compra.'], 500);
     }
+}
+
+    
     
     public function descargarQrsPdf($compraId)
 {
