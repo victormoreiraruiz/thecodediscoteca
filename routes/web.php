@@ -8,6 +8,7 @@ use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificacionController;
 
+
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Middleware\PromotorOAdmin;
 
@@ -150,6 +151,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/eventos/{id}', [EventoController::class, 'show'])->name('eventos.show');
     Route::put('/admin/eventos/{id}/actualizar-estado', [AdminController::class, 'actualizarEstadoEvento'])->name('admin.actualizarEstadoEvento');
     Route::get('/admin/ingresos', [AdminController::class, 'mostrarIngresos'])->middleware('auth')->name('admin.ingresos');
+    Route::post('/admin/productos', [AdminController::class, 'crearProducto'])->name('admin.crearProducto');
+    Route::post('/admin/categorias', [AdminController::class, 'crearCategoria'])->name('admin.crearCategoria');
+    Route::get('/admin/categorias', [AdminController::class, 'listarCategorias'])->name('admin.listarCategoria');
+    Route::get('/admin/productos', [AdminController::class, 'listarProductos']);
+    Route::put('/admin/productos/{id}', [AdminController::class, 'actualizarProducto']);
+    Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto']);
+
 
     
 
