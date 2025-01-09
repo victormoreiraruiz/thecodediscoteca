@@ -27,4 +27,10 @@ public function eventos()
     return $this->hasMany(Evento::class, 'sala_id');
 }
 
+public function mesas()
+{
+    return $this->hasMany(Mesa::class);
+}
+
+
 }

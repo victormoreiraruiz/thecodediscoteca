@@ -10,6 +10,8 @@ use App\Models\Evento;
 use App\Models\Notificacion;
 use App\Models\Compra;
 use App\Models\ReservaDiscoteca;
+use App\Models\Producto;
+use App\Models\Categoria;
 use Carbon\Carbon;
 
 
@@ -303,7 +305,66 @@ public function mostrarIngresos()
     ]);
 }
 
+public function crearCategoria(Request $request)
+{
+    $request->validate([
+        'nombre' => 'required|string|max:255|unique:categorias,nombre',
+    ]);
 
+    $categoria = Categoria::create(['nombre' => $request->nombre]);
+
+    return response()->json(['message' => 'Categoría creada correctamente', 'categoria' => $categoria], 201);
+}
+
+public function listarCategorias()
+{
+    return response()->json(Categoria::all());
+}
+
+public function crearProducto(Request $request)
+{
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'precio' => 'required|numeric|min:0',
+        'descripcion' => 'required|string',
+        'stock' => 'required|integer|min:0',
+        'categoria_id' => 'nullable|exists:categorias,id',
+    ]);
+
+    $producto = Producto::create($request->all());
+
+    return response()->json(['message' => 'Producto creado correctamente', 'producto' => $producto], 201);
+}
+
+
+public function listarProductos()
+{
+    return response()->json(Producto::with('categoria')->get());
+}
+
+
+public function actualizarProducto(Request $request, $id)
+{
+    $producto = Producto::findOrFail($id);
+
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'precio' => 'required|numeric|min:0',
+        'descripcion' => 'required|string',
+        'stock' => 'required|integer|min:0',
+        'categoria_id' => 'nullable|exists:categorias,id',
+    ]);
+
+    $producto->update($request->all());
+
+    return response()->json(['message' => 'Producto actualizado correctamente', 'producto' => $producto]);
+}
+
+public function eliminarProducto($id)
+{
+    Producto::destroy($id);
+    return response()->json(['message' => 'Producto eliminado correctamente']);
+}
 
 
 }

@@ -13,14 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('productos', function (Blueprint $table) {
+        Schema::create('mesas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->decimal('precio',10,2);
-            $table->string('descripcion');
-            $table->integer('stock');
-            $table->time('horario_disponible_inicio')->nullable();
-            $table->time('horario_disponible_fin')->nullable();;
+            $table->foreignId('sala_id')->constrained()->onDelete('cascade');
+            $table->integer('numero')->unique();
             $table->timestamps();
         });
     }
@@ -32,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('productos');
+        Schema::dropIfExists('mesas');
     }
 };
