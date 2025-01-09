@@ -7,6 +7,10 @@ use App\Http\Controllers\SalaController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\ComandaController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\CategoriaController;
+
 
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -166,6 +170,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/notificaciones', [NotificacionController::class, 'index']);
     Route::put('/notificaciones/marcar-todas-leidas', [NotificacionController::class, 'marcarTodasLeidas'])->middleware('auth');
+    Route::post('/comandas', [ComandaController::class, 'crearComanda']); // Crear comanda
+    Route::get('/comandas/activas', [ComandaController::class, 'listarComandasActivas']); // Ver comandas activas
+    Route::put('/comandas/{id}/estado', [ComandaController::class, 'actualizarEstadoComanda']); // Actualizar estado
+    Route::delete('/comandas/{id}', [ComandaController::class, 'eliminarComanda']); // Eliminar comanda
+    Route::get('/productos', [ProductoController::class, 'listarProductos']);
+    Route::get('/categorias', [CategoriaController::class, 'listarCategorias']);
 
 });
 

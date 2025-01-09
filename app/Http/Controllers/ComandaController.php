@@ -3,103 +3,134 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comanda;
+use App\Models\Producto;
+use App\Models\Evento;
+use App\Models\Mesa;
+use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;  
 class ComandaController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Constructor para asegurar que los usuarios estén autenticados
      */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware('auth'); 
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Crear una nueva comanda.
      */
-    public function create()
+    public function crearComanda(Request $request)
     {
-        //
-    }
+        \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-{
-    $request->validate([
-        'mesa_id' => 'required|exists:mesas,id',
-        'evento_id' => 'required|exists:eventos,id',
-        'productos' => 'required|array', // Lista de productos
-        'productos.*.id' => 'exists:productos,id',
-        'productos.*.cantidad' => 'integer|min:1'
-    ]);
+        // 🔹 Asegurar que el usuario está autenticado
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Usuario no autenticado'], 403);
+        }
 
-    $comanda = Comanda::create([
-        'user_id' => auth()->id(),
-        'mesa_id' => $request->mesa_id,
-        'evento_id' => $request->evento_id,
-        'estado' => 'pendiente',
-    ]);
+        $usuario = Auth::user();
 
-    foreach ($request->productos as $producto) {
-        $comanda->productos()->attach($producto['id'], ['cantidad' => $producto['cantidad']]);
-    }
+        // 🔹 Validar los datos de la comanda
+        $request->validate([
+            'evento_id' => 'required|exists:eventos,id',
+            'mesa_id' => 'required|exists:mesas,id',
+            'productos' => 'required|array',
+            'productos.*.id' => 'required|exists:productos,id',
+            'productos.*.cantidad' => 'required|integer|min:1',
+        ]);
 
-    return response()->json(['message' => 'Comanda creada con productos correctamente', 'comanda' => $comanda]);
+        $evento = Evento::findOrFail($request->evento_id);
+        $hora_actual = Carbon::now();
+$hora_inicio = Carbon::parse($evento->hora_inicio);
+$hora_fin = Carbon::parse($evento->hora_fin);
+
+\Log::info("Hora actual: {$hora_actual}");
+\Log::info("Hora inicio: {$hora_inicio}");
+\Log::info("Hora final: {$hora_fin}");
+
+if (!$hora_actual->between($hora_inicio, $hora_fin)) {
+    return response()->json(['error' => 'El evento no está activo en este momento'], 403);
 }
 
+        $total = 0;
+        foreach ($request->productos as $producto) {
+            $item = Producto::findOrFail($producto['id']);
+            $total += $item->precio * $producto['cantidad'];
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Comanda  $comanda
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Comanda $comanda)
-    {
-        //
+        // 🔹 Verificar si el usuario tiene saldo suficiente
+        if ($usuario->saldo < $total) {
+            return response()->json(['error' => 'Saldo insuficiente para realizar el pedido'], 403);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 🔹 Restar saldo al usuario
+            $usuario->decrement('saldo', $total);
+
+            // 🔹 Crear la comanda
+            $comanda = Comanda::create([
+                'user_id' => $usuario->id,
+                'evento_id' => $request->evento_id,
+                'mesa_id' => $request->mesa_id,
+                'estado' => 'pendiente',
+            ]);
+
+            // 🔹 Agregar productos a la comanda
+            foreach ($request->productos as $producto) {
+                $comanda->productos()->attach($producto['id'], ['cantidad' => $producto['cantidad']]);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Comanda creada con éxito', 'comanda' => $comanda], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al crear la comanda:', ['error' => $e->getMessage()]);
+
+            return response()->json(['error' => 'Ocurrió un error al procesar la comanda'], 500);
+        }
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Comanda  $comanda
-     * @return \Illuminate\Http\Response
+     * Obtener todas las comandas activas (pendientes o en preparación).
      */
-    public function edit(Comanda $comanda)
+    public function listarComandasActivas()
     {
-        //
+        $comandas = Comanda::whereIn('estado', ['pendiente', 'preparando'])
+            ->with(['mesa', 'usuario', 'productos'])
+            ->get();
+
+        return response()->json($comandas);
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Comanda  $comanda
-     * @return \Illuminate\Http\Response
+     * Actualizar el estado de una comanda.
      */
-    public function update(Request $request, Comanda $comanda)
+    public function actualizarEstadoComanda(Request $request, $id)
     {
-        //
+        $request->validate([
+            'estado' => 'required|in:pendiente,preparando,entregado',
+        ]);
+
+        $comanda = Comanda::findOrFail($id);
+        $comanda->update(['estado' => $request->estado]);
+
+        return response()->json(['message' => 'Estado actualizado correctamente', 'comanda' => $comanda]);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Comanda  $comanda
-     * @return \Illuminate\Http\Response
+     * Eliminar una comanda.
      */
-    public function destroy(Comanda $comanda)
+    public function eliminarComanda($id)
     {
-        //
+        Comanda::destroy($id);
+        return response()->json(['message' => 'Comanda eliminada correctamente']);
     }
 }

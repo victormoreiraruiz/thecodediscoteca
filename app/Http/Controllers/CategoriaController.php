@@ -82,4 +82,9 @@ class CategoriaController extends Controller
     {
         //
     }
+
+    public function listarCategorias()
+    {
+        return response()->json(Categoria::all());
+    }
 }

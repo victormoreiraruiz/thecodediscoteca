@@ -9,6 +9,8 @@ class Mesa extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['sala_id', 'numero'];
+
     public function sala()
 {
     return $this->belongsTo(Sala::class);
