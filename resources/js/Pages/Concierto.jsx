@@ -6,6 +6,9 @@ import CompraEntradaConcierto from "../Components/CompraEntradaConcierto";
 import Carrito from "../Components/Carrito";
 import HacerComanda from "../Components/HacerComanda"; // Importar el componente de pedidos
 import dayjs from "dayjs"; // Para manejar fechas
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 export default function Concierto({ concierto }) {
     const [carrito, setCarrito] = useState([]);
@@ -15,37 +18,28 @@ export default function Concierto({ concierto }) {
     useEffect(() => {
         if (concierto) {
             console.log("Datos del concierto:", concierto);
-    
-            const ahora = dayjs();
-            const horaInicioStr = concierto.hora_inicio ? String(concierto.hora_inicio).trim() : null;
-            const horaFinalStr = concierto.hora_final ? String(concierto.hora_final).trim() : null;
-    
-            if (!horaInicioStr || !horaFinalStr) {
-                console.log("Error: hora_inicio o hora_final es null o undefined");
+
+            const ahora = dayjs(); // Fecha y hora actual
+
+            // Convertir fecha y hora del evento a un objeto de Day.js
+            const fechaEvento = concierto.fecha_evento ? dayjs(concierto.fecha_evento, "YYYY-MM-DD") : null;
+            const horaInicio = concierto.hora_inicio ? dayjs(`${concierto.fecha_evento} ${concierto.hora_inicio}`, "YYYY-MM-DD HH:mm:ss") : null;
+            const horaFinal = concierto.hora_final ? dayjs(`${concierto.fecha_evento} ${concierto.hora_final}`, "YYYY-MM-DD HH:mm:ss") : null;
+
+            console.log("Fecha del evento:", fechaEvento?.format("YYYY-MM-DD"));
+            console.log("Hora inicio (convertida):", horaInicio?.format("YYYY-MM-DD HH:mm:ss"));
+            console.log("Hora final (convertida):", horaFinal?.format("YYYY-MM-DD HH:mm:ss"));
+
+            if (!fechaEvento || !horaInicio || !horaFinal || !horaInicio.isValid() || !horaFinal.isValid()) {
+                console.log("Error: La fecha u horas del evento no son válidas.");
                 return;
             }
-    
-            console.log("Hora inicio (string):", horaInicioStr);
-            console.log("Hora final (string):", horaFinalStr);
-    
-            // Forzar el formato correcto "HH:mm:ss"
-            const horaInicio = dayjs(`2025-01-09 ${horaInicioStr}`, "YYYY-MM-DD HH:mm:ss");
-            const horaFinal = dayjs(`2025-01-09 ${horaFinalStr}`, "YYYY-MM-DD HH:mm:ss");
-    
-            console.log("Hora inicio (convertida):", horaInicio.format("YYYY-MM-DD HH:mm:ss"));
-            console.log("Hora final (convertida):", horaFinal.format("YYYY-MM-DD HH:mm:ss"));
-    
-            if (!horaInicio.isValid() || !horaFinal.isValid()) {
-                console.log("Error: `dayjs` no pudo convertir las horas.");
-                return;
-            }
-    
+
+            // Comprobar si la hora actual está dentro del rango del evento
             setEventoActivo(ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
             console.log("Evento activo:", ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
         }
     }, [concierto]);
-    
-    
 
     return (
         <div>

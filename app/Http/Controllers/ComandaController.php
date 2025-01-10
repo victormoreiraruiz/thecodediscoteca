@@ -113,17 +113,6 @@ if (!$hora_actual->between($hora_inicio, $hora_fin)) {
     /**
      * Actualizar el estado de una comanda.
      */
-    public function actualizarEstadoComanda(Request $request, $id)
-    {
-        $request->validate([
-            'estado' => 'required|in:pendiente,preparando,entregado',
-        ]);
-
-        $comanda = Comanda::findOrFail($id);
-        $comanda->update(['estado' => $request->estado]);
-
-        return response()->json(['message' => 'Estado actualizado correctamente', 'comanda' => $comanda]);
-    }
 
     /**
      * Eliminar una comanda.
@@ -133,4 +122,31 @@ if (!$hora_actual->between($hora_inicio, $hora_fin)) {
         Comanda::destroy($id);
         return response()->json(['message' => 'Comanda eliminada correctamente']);
     }
+
+    public function actualizarEstadoComanda(Request $request, $id)
+{
+    $request->validate([
+        'estado' => 'required|in:pendiente,preparando,entregado',
+    ]);
+
+    $comanda = Comanda::findOrFail($id);
+    $comanda->update(['estado' => $request->estado]);
+
+    return response()->json([
+        'message' => 'Estado actualizado correctamente',
+        'comanda' => $comanda
+    ]);
+}
+
+public function listarComandasEntregadas()
+{
+    $comandas = Comanda::where('estado', 'entregado')
+        ->with(['mesa', 'usuario', 'productos'])
+        ->orderBy('updated_at', 'desc') // Ordenar por la última actualización
+        ->get();
+
+    return response()->json($comandas);
+}
+
+
 }

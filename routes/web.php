@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\ComandaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\CamareroController;
 
 
 
@@ -162,8 +163,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/admin/productos/{id}', [AdminController::class, 'actualizarProducto']);
     Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto']);
 
+});
 
-    
+Route::middleware(['auth', 'camarero'])->group(function () {
+    Route::get('/camarero', [CamareroController::class, 'index'])->name('camarero.index');
+    Route::put('/comandas/{id}/estado', [ComandaController::class, 'actualizarEstadoComanda']);
+    Route::get('/comandas/historial', [ComandaController::class, 'listarComandasEntregadas']);
+
 
 });
 
