@@ -114,11 +114,11 @@ class EventoController extends Controller
 
 
  
-    public function mostrarConcierto($id)
+public function mostrarConcierto($id)
 {
     $concierto = Evento::with(['sala', 'entradas'])->findOrFail($id);
 
-    return inertia('Concierto', [
+    return Inertia::render('Concierto', [
         'concierto' => $concierto,
     ]);
 }
@@ -131,10 +131,11 @@ public function listarConciertos()
     ->with(['sala', 'entradas']) // incluye sala y entradas relacionadas
     ->get();
 
-    return inertia('Conciertos', [
+    return Inertia::render('Conciertos', [
         'conciertos' => $conciertos,
     ]);
 }
+
 
 public function show($id)
 {

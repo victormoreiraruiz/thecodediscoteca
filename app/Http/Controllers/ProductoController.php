@@ -82,4 +82,16 @@ class ProductoController extends Controller
     {
         //
     }
+
+    public function listarProductos(Request $request)
+    {
+        $query = Producto::query();
+
+        // Si se pasa un ID de categoría, filtrar los productos
+        if ($request->has('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+
+        return response()->json($query->get());
+    }
 }
