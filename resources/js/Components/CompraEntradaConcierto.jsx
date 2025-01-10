@@ -69,20 +69,21 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
     };
 
     return (
-        <div className="compra-entrada-concierto">
-            <div className="tienda">
-                <h2>ENTRADAS</h2>
+        <div className="w-full flex justify-center">
+            <div className="bg-[#860303] text-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
+                <h2 className="text-2xl font-bold text-center mb-6">ENTRADAS</h2>
 
                 {entradas.map((entrada) => (
-                    <div key={entrada.id} className="entrada">
-                        <h3>{entrada.tipo.charAt(0).toUpperCase() + entrada.tipo.slice(1)}</h3>
-                        <br></br>
-                        <div className="precio">Precio: {entrada.precio}€</div>
+                    <div key={entrada.id} className="bg-gray-800 p-4 rounded-lg mb-4 flex flex-col md:flex-row justify-between items-center">
+                        <div className="text-center md:text-left">
+                            <h3 className="text-lg font-semibold">{entrada.tipo.charAt(0).toUpperCase() + entrada.tipo.slice(1)}</h3>
+                            <p className="text-gray-300 mt-2">Precio: {entrada.precio}€</p>
+                        </div>
                         <button
-                            className="reservar"
+                            className="bg-yellow-500 text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-transform hover:scale-105 mt-4 md:mt-0"
                             onClick={() => agregarAlCarrito(entrada)}
                         >
-                            Comprar
+                            Añadir
                         </button>
                     </div>
                 ))}
