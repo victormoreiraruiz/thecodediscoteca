@@ -15,6 +15,7 @@ use App\Models\Notificacion;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use App\Models\HistorialIngresos; 
 
 
 class SalaController extends Controller

@@ -13,6 +13,7 @@ use App\Models\ReservaDiscoteca;
 use App\Models\Producto;
 use App\Models\Categoria;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 
 class AdminController extends Controller
@@ -364,6 +365,15 @@ public function eliminarProducto($id)
 {
     Producto::destroy($id);
     return response()->json(['message' => 'Producto eliminado correctamente']);
+}
+
+public function historialIngresos()
+{
+    $ingresos = DB::table('historial_ingresos')
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    return response()->json($ingresos);
 }
 
 

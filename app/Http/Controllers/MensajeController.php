@@ -53,7 +53,7 @@ class MensajeController extends Controller
                 ->get()
         );
     }
-    
+
     /**
      * Display the specified resource.
      *

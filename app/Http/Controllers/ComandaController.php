@@ -82,6 +82,13 @@ class ComandaController extends Controller
     
             // 🔹 Sumar la cantidad al campo `ingresos` del administrador
             $admin->increment('ingresos', $total);
+
+            DB::table('historial_ingresos')->insert([
+                'cantidad' => $total,
+                'motivo' => "Venta de productos en evento {$evento->nombre}",
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
     
             // 🔹 Registrar la transacción en el log
             \Log::info("Transacción realizada: Usuario {$usuario->id} pagó {$total}€, ahora el ingreso total del admin ({$admin->id}) es {$admin->ingresos}€");
