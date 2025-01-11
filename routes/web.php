@@ -11,6 +11,7 @@ use App\Http\Controllers\ComandaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CamareroController;
+use App\Http\Controllers\MensajeController;
 
 
 
@@ -99,8 +100,9 @@ Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcu
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
 Route::delete('/eventos/{id}/cancelar', [EventoController::class, 'cancelarEvento'])->middleware('auth');
 Route::get('/api/reservas/{id}/factura', [SalaController::class, 'descargarFactura'])->name('reservas.factura');
-Route::post('/mensajes', [MensajeController::class, 'store']);
-Route::get('/mensajes', [MensajeController::class, 'index']);
+Route::post('/mensajes', [MensajeController::class, 'store'])->name('mensajes.store');
+Route::get('/mensajes', [MensajeController::class, 'index'])->name('mensajes.index');
+Route::delete('/mensajes/{id}', [MensajeController::class, 'destroy'])->name('mensajes.destroy');
 
 
 Route::middleware([])->group(function () {

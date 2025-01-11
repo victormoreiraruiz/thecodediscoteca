@@ -47,9 +47,13 @@ class MensajeController extends Controller
 
     public function index()
     {
-        return response()->json(Mensaje::all());
+        return response()->json(
+            Mensaje::select('id', 'nombre', 'apellidos', 'email', 'telefono', 'asunto', 'mensaje', 'created_at')
+                ->orderBy('created_at', 'desc') 
+                ->get()
+        );
     }
-
+    
     /**
      * Display the specified resource.
      *
@@ -90,8 +94,13 @@ class MensajeController extends Controller
      * @param  \App\Models\Mensaje  $mensaje
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Mensaje $mensaje)
+    public function destroy($id)
     {
-        //
+        $mensaje = Mensaje::find($id);
+        if (!$mensaje) {
+            return response()->json(['error' => 'Mensaje no encontrado'], 404);
+        }
+        $mensaje->delete();
+        return response()->json(['message' => 'Mensaje eliminado con éxito']);
     }
 }
