@@ -99,7 +99,8 @@ Route::get('/api/salas/{id}/reservas', [SalaController::class, 'obtenerFechasOcu
 Route::delete('/api/reservas/{id}', [SalaController::class, 'cancelarReserva'])->name('reservas.cancelar');
 Route::delete('/eventos/{id}/cancelar', [EventoController::class, 'cancelarEvento'])->middleware('auth');
 Route::get('/api/reservas/{id}/factura', [SalaController::class, 'descargarFactura'])->name('reservas.factura');
-
+Route::post('/mensajes', [MensajeController::class, 'store']);
+Route::get('/mensajes', [MensajeController::class, 'index']);
 
 
 Route::middleware([])->group(function () {

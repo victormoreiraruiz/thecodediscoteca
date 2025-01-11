@@ -17,7 +17,10 @@ class CamareroMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->user() && auth()->user()->esCamarero()) {
+        $user = Auth::user();
+
+        // Permitir acceso si el usuario es camarero o admin
+        if ($user && ($user->esCamarero() || $user->esAdmin())) {
             return $next($request);
         }
 

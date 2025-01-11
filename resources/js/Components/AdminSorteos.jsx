@@ -14,7 +14,7 @@ const AdminSorteos = ({ usuarios = [] }) => {
     setLoading(true);
     setError(null);
 
-    // filtra usuarios por nivel de miembro
+    // Filtra usuarios por nivel de membresía
     const usuariosFiltrados = usuarios.filter(user => user.membresia === nivel);
 
     if (usuariosFiltrados.length === 0) {
@@ -23,13 +23,13 @@ const AdminSorteos = ({ usuarios = [] }) => {
       return;
     }
 
-    // selecciona un ganador random
+    // Selecciona un ganador aleatorio
     const ganador = usuariosFiltrados[Math.floor(Math.random() * usuariosFiltrados.length)];
 
     try {
       console.log('Ganador seleccionado:', ganador);
 
-      // actuaiza saldo del ganador y envia la ntfcn
+      // Actualiza saldo del ganador y envía la notificación
       const response = await fetch(route('admin.actualizarSaldo'), {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ const AdminSorteos = ({ usuarios = [] }) => {
         },
         body: JSON.stringify({
           id: ganador.id,
-          saldo: premio, // envia premio
+          saldo: premio, // Enviar premio
           mensaje: `¡Felicidades ${ganador.name}! Has ganado el sorteo mensual y tu saldo ha sido incrementado en ${premio} euros.`,
         }),
       });
@@ -61,25 +61,48 @@ const AdminSorteos = ({ usuarios = [] }) => {
   };
 
   return (
-    <div>
-      <h3>Gestión de Sorteos</h3>
-      {error && <div className="error">{error}</div>}
+    <div className="container mx-auto px-6 py-8 text-center">
+      <h3 className="text-3xl font-bold text-[#e5cc70] mb-6">Gestión de Sorteos</h3>
+
+      {/* Mensaje de error */}
+      {error && <div className="text-red-500 font-semibold mb-4">{error}</div>}
+
+      {/* Resultado del sorteo */}
       {resultado && (
-        <div className="resultado">
-          <p>
-            Ganador del sorteo para <strong>{resultado.nivel}</strong>: <strong>{resultado.ganador.name}</strong> 
-            ({resultado.ganador.email}) ha ganado {resultado.premio} euros.
+        <div className="bg-[#e5cc70] text-[#860303] p-4 rounded-lg shadow-lg mb-6">
+          <p className="font-semibold">
+            Ganador del sorteo para <strong>{resultado.nivel}</strong>: 
+            <strong> {resultado.ganador.name}</strong> ({resultado.ganador.email}) ha ganado {resultado.premio}€.
           </p>
         </div>
       )}
-      <div className="sorteos">
-        <button onClick={() => realizarSorteo('plata', 10)} disabled={loading}>
+
+      {/* Botones de sorteos */}
+      <div className="flex flex-col md:flex-row justify-center gap-4">
+        <button
+          onClick={() => realizarSorteo('plata', 10)}
+          disabled={loading}
+          className="w-full md:w-1/3 bg-[#860303] text-[#e5cc70] font-semibold py-2 px-6 rounded-lg 
+                     hover:bg-red-700 hover:text-yellow-500 transition-transform hover:scale-105"
+        >
           {loading ? 'Realizando sorteo...' : 'Sorteo para Plata (10€)'}
         </button>
-        <button onClick={() => realizarSorteo('oro', 20)} disabled={loading}>
+
+        <button
+          onClick={() => realizarSorteo('oro', 20)}
+          disabled={loading}
+          className="w-full md:w-1/3 bg-[#860303] text-[#e5cc70] font-semibold py-2 px-6 rounded-lg 
+                     hover:bg-red-700 hover:text-yellow-500 transition-transform hover:scale-105"
+        >
           {loading ? 'Realizando sorteo...' : 'Sorteo para Oro (20€)'}
         </button>
-        <button onClick={() => realizarSorteo('diamante', 30)} disabled={loading}>
+
+        <button
+          onClick={() => realizarSorteo('diamante', 30)}
+          disabled={loading}
+          className="w-full md:w-1/3 bg-[#860303] text-[#e5cc70] font-semibold py-2 px-6 rounded-lg 
+                     hover:bg-red-700 hover:text-yellow-500 transition-transform hover:scale-105"
+        >
           {loading ? 'Realizando sorteo...' : 'Sorteo para Diamante (30€)'}
         </button>
       </div>

@@ -15,6 +15,8 @@ const AdminGestionProductos = () => {
     categoria_id: "",
   });
 
+  const [orden, setOrden] = useState({ campo: "nombre", ascendente: true });
+
   useEffect(() => {
     cargarProductos();
     cargarCategorias();
@@ -44,6 +46,8 @@ const AdminGestionProductos = () => {
       text: "Esta acción eliminará el producto permanentemente.",
       icon: "warning",
       showCancelButton: true,
+      confirmButtonColor: "#e5cc70",
+      cancelButtonColor: "#860303",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then(async (result) => {
@@ -84,75 +88,82 @@ const AdminGestionProductos = () => {
     }
   };
 
+  const ordenarPor = (campo) => {
+    const esAscendente = orden.campo === campo ? !orden.ascendente : true;
+    setOrden({ campo, ascendente: esAscendente });
+
+    const productosOrdenados = [...productos].sort((a, b) => {
+      if (a[campo] < b[campo]) return esAscendente ? -1 : 1;
+      if (a[campo] > b[campo]) return esAscendente ? 1 : -1;
+      return 0;
+    });
+
+    setProductos(productosOrdenados);
+  };
+
   return (
-    <div className="container mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">Gestión de Productos</h2>
+    <div className="container mx-auto px-6 py-8">
+      <h2 className="text-3xl font-bold text-center text-[#e5cc70] mb-6">Gestión de Productos</h2>
 
       {productoSeleccionado ? (
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <h3 className="text-xl font-semibold mb-4">Editar Producto</h3>
+        <div className="bg-[#860303] p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+          <h3 className="text-xl font-semibold text-[#e5cc70] mb-4">Editar Producto</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block font-medium">Nombre:</label>
-              <input type="text" name="nombre" value={productoEditado.nombre} onChange={handleChange} required className="w-full border rounded p-2" />
+              <label className="block text-[#e5cc70] font-semibold">Nombre:</label>
+              <input type="text" name="nombre" value={productoEditado.nombre} onChange={handleChange} required className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
             </div>
             <div>
-              <label className="block font-medium">Precio (€):</label>
-              <input type="number" step="0.01" name="precio" value={productoEditado.precio} onChange={handleChange} required className="w-full border rounded p-2" />
+              <label className="block text-[#e5cc70] font-semibold">Precio (€):</label>
+              <input type="number" step="0.01" name="precio" value={productoEditado.precio} onChange={handleChange} required className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
             </div>
             <div>
-              <label className="block font-medium">Descripción:</label>
-              <textarea name="descripcion" value={productoEditado.descripcion} onChange={handleChange} required className="w-full border rounded p-2" />
+              <label className="block text-[#e5cc70] font-semibold">Descripción:</label>
+              <textarea name="descripcion" value={productoEditado.descripcion} onChange={handleChange} required className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
             </div>
             <div>
-              <label className="block font-medium">Stock:</label>
-              <input type="number" name="stock" value={productoEditado.stock} onChange={handleChange} required className="w-full border rounded p-2" />
-            </div>
-            <div>
-              <label className="block font-medium">Categoría:</label>
-              <select name="categoria_id" value={productoEditado.categoria_id} onChange={handleChange} required className="w-full border rounded p-2">
+              <label className="block text-[#e5cc70] font-semibold">Categoría:</label>
+              <select name="categoria_id" value={productoEditado.categoria_id} onChange={handleChange} required className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white">
                 <option value="">Selecciona una categoría</option>
                 {categorias.map((categoria) => (
                   <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
                 ))}
               </select>
             </div>
-            <div className="flex gap-2">
-              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Guardar Cambios</button>
-              <button type="button" onClick={cancelarEdicion} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>
-            </div>
+            <button type="submit" className="w-full bg-[#e5cc70] text-[#860303] font-semibold py-2 rounded-lg hover:bg-yellow-500">Guardar Cambios</button>
+            <button type="button" onClick={cancelarEdicion} className="w-full bg-gray-600 text-white font-semibold py-2 mt-2 rounded-lg hover:bg-gray-500">Cancelar</button>
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <h3 className="text-xl font-semibold mb-4">Lista de Productos</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="py-2 px-4 border">Nombre</th>
-                  <th className="py-2 px-4 border">Precio (€)</th>
-                  <th className="py-2 px-4 border">Stock</th>
-                  <th className="py-2 px-4 border">Categoría</th>
-                  <th className="py-2 px-4 border">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productos.map((producto) => (
-                  <tr key={producto.id} className="border-t">
-                    <td className="py-2 px-4 border">{producto.nombre}</td>
-                    <td className="py-2 px-4 border">{producto.precio} €</td>
-                    <td className="py-2 px-4 border">{producto.stock}</td>
-                    <td className="py-2 px-4 border">{producto.categoria ? producto.categoria.nombre : "Sin categoría"}</td>
-                    <td className="py-2 px-4 border flex gap-2">
-                      <button onClick={() => seleccionarProductoParaEditar(producto)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Editar</button>
-                      <button onClick={() => eliminarProducto(producto.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>
-                    </td>
-                  </tr>
+        <div className="overflow-x-auto bg-[#860303] p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold text-[#e5cc70] mb-4">Lista de Productos</h3>
+          <table className="w-full text-[#e5cc70]">
+            <thead>
+              <tr className="bg-[#e5cc70] text-[#860303] font-bold">
+                {["nombre", "precio", "stock", "categoria_id"].map((campo) => (
+                  <th key={campo} onClick={() => ordenarPor(campo)} className="py-3 px-4 cursor-pointer text-left">
+                    {campo.charAt(0).toUpperCase() + campo.slice(1)}
+                    {orden.campo === campo && (orden.ascendente ? " ▲" : " ▼")}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+                <th className="py-3 px-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productos.map((producto) => (
+                <tr key={producto.id} className="border-b border-[#e5cc70] text-white">
+                  <td className="py-3 px-4">{producto.nombre}</td>
+                  <td className="py-3 px-4">{producto.precio} €</td>
+                  <td className="py-3 px-4">{producto.stock}</td>
+                  <td className="py-3 px-4">{producto.categoria?.nombre || "Sin categoría"}</td>
+                  <td className="py-3 px-4 flex gap-2">
+                    <button onClick={() => seleccionarProductoParaEditar(producto)} className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Editar</button>
+                    <button onClick={() => eliminarProducto(producto.id)} className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">Eliminar</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
