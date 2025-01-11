@@ -5,92 +5,83 @@ import "chart.js/auto";
 
 const AdminIngresos = () => {
     const [historial, setHistorial] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [totalIngresos, setTotalIngresos] = useState(0); // Estado para almacenar la cantidad total
 
     useEffect(() => {
         const obtenerHistorialIngresos = async () => {
             try {
                 const response = await axios.get("/admin/historial-ingresos");
+                const data = response.data;
 
-                // Asegurar que los datos sean numéricos
-                const datosHistorial = response.data.map(item => ({
-                    fecha: new Date(item.created_at).toLocaleString(), // Convertir fecha
-                    cantidad: parseFloat(item.cantidad), // Convertir a número
-                    motivo: item.motivo
-                }));
+                let acumulado = 0;
+                const historialAcumulado = data.map((ingreso) => {
+                    acumulado += parseFloat(ingreso.cantidad);
+                    return { 
+                        ...ingreso, 
+                        acumulado, 
+                        fecha: new Date(ingreso.created_at).toLocaleString() 
+                    };
+                });
 
-                setHistorial(datosHistorial);
+                setHistorial(historialAcumulado);
+                setTotalIngresos(acumulado); // Guardamos la cantidad total
             } catch (error) {
                 console.error("Error al obtener el historial de ingresos:", error);
-            } finally {
-                setLoading(false);
+                setHistorial([]);
+                setTotalIngresos(0);
             }
         };
 
         obtenerHistorialIngresos();
     }, []);
 
-    // 📊 Datos para la gráfica
+    // Datos para la gráfica
     const data = {
-        labels: historial.map(item => item.fecha), // Etiquetas con fechas
+        labels: historial.map((ingreso) => ingreso.fecha),
         datasets: [
             {
-                label: "Ingresos (€)",
-                data: historial.map(item => item.cantidad), // Cantidad en cada fecha
+                label: "Ingresos Totales (€)",
+                data: historial.map((ingreso) => ingreso.acumulado),
                 fill: false,
-                borderColor: "rgb(134, 3, 3)", // Color de la línea
+                borderColor: "rgb(75, 192, 192)",
                 tension: 0.1,
-                pointBackgroundColor: "rgb(229, 204, 112)", // Color de los puntos
-                pointRadius: 5, // Tamaño de los puntos
-            }
-        ]
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            },
+        ],
     };
 
-    // 🛠️ Opciones para la gráfica
+    // Configuración de las opciones para los tooltips
     const options = {
-        responsive: true,
         plugins: {
             tooltip: {
                 callbacks: {
-                    label: function (tooltipItem) {
-                        const index = tooltipItem.dataIndex;
-                        return `€${tooltipItem.raw} - ${historial[index].motivo}`;
-                    }
-                }
-            }
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: "Fecha y Hora",
-                    color: "#860303",
-                    font: { size: 14, weight: "bold" }
-                }
+                    label: function (context) {
+                        const ingreso = historial[context.dataIndex];
+                        return [
+                            `💰 Ingreso: ${ingreso.cantidad}€`,
+                            `📅 Fecha: ${ingreso.fecha}`,
+                            `📝 Motivo: ${ingreso.motivo}`,
+                            `📊 Total acumulado: ${ingreso.acumulado.toFixed(2)}€`
+                        ];
+                    },
+                },
             },
-            y: {
-                title: {
-                    display: true,
-                    text: "Ingresos (€)",
-                    color: "#860303",
-                    font: { size: 14, weight: "bold" }
-                }
-            }
-        }
+        },
     };
 
     return (
-        <div className="p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-[#860303] mb-4">
-                Ingresos de la Discoteca
-            </h2>
+        <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <h3 className="text-xl font-semibold text-[#860303]">📈 Historial de Ingresos</h3>
+            <p className="text-lg mb-4">Esta gráfica muestra los ingresos acumulados a lo largo del tiempo.</p>
 
-            {loading ? (
-                <p className="text-center text-gray-500">Cargando datos...</p>
-            ) : historial.length === 0 ? (
-                <p className="text-center text-gray-500">No hay ingresos registrados.</p>
-            ) : (
+            {/* Mostrar la cantidad total de ingresos */}
+            <h2 className="text-2xl font-bold text-[#008000] mb-4">💰 Total ingresos: {totalIngresos.toFixed(2)}€</h2>
+
+            {historial.length > 0 ? (
                 <Line data={data} options={options} />
+            ) : (
+                <p className="text-center text-gray-500">No hay datos de ingresos aún.</p>
             )}
         </div>
     );
