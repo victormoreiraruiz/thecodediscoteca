@@ -20,15 +20,9 @@ export default function Concierto({ concierto }) {
             console.log("Datos del concierto:", concierto);
 
             const ahora = dayjs(); // Fecha y hora actual
-
-            // Convertir fecha y hora del evento a un objeto de Day.js
             const fechaEvento = concierto.fecha_evento ? dayjs(concierto.fecha_evento, "YYYY-MM-DD") : null;
             const horaInicio = concierto.hora_inicio ? dayjs(`${concierto.fecha_evento} ${concierto.hora_inicio}`, "YYYY-MM-DD HH:mm:ss") : null;
             const horaFinal = concierto.hora_final ? dayjs(`${concierto.fecha_evento} ${concierto.hora_final}`, "YYYY-MM-DD HH:mm:ss") : null;
-
-            console.log("Fecha del evento:", fechaEvento?.format("YYYY-MM-DD"));
-            console.log("Hora inicio (convertida):", horaInicio?.format("YYYY-MM-DD HH:mm:ss"));
-            console.log("Hora final (convertida):", horaFinal?.format("YYYY-MM-DD HH:mm:ss"));
 
             if (!fechaEvento || !horaInicio || !horaFinal || !horaInicio.isValid() || !horaFinal.isValid()) {
                 console.log("Error: La fecha u horas del evento no son válidas.");
@@ -37,7 +31,6 @@ export default function Concierto({ concierto }) {
 
             // Comprobar si la hora actual está dentro del rango del evento
             setEventoActivo(ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
-            console.log("Evento activo:", ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
         }
     }, [concierto]);
 
@@ -45,28 +38,39 @@ export default function Concierto({ concierto }) {
         <div>
             <Navigation />
             <Header />
-            <div className="fiesta">
-                <img
-                    src={concierto.cartel ? `/storage/${concierto.cartel}` : "/imagenes/cartel1.png"}
-                    alt={`Cartel del concierto ${concierto.nombre_evento}`}
-                    className="fiestacartel"
-                />
-                <div className="fiestatexto">
-                    <h2>Concierto de {concierto.nombre_evento}</h2>
-                    <h3>{concierto.descripcion}</h3>
-                    <h3>Fecha: {concierto.fecha_evento}</h3>
-                    <h3>Hora: {concierto.hora_inicio} - {concierto.hora_final}</h3>
-                    <h3>Sala: {concierto.sala?.descripcion || "No especificada"}</h3>
+
+            {/* Contenedor con cartel e información */}
+            <div className="container mx-auto px-6 py-8 flex flex-col md:flex-row items-center gap-8">
+                {/* Imagen del cartel */}
+                <div className="w-full md:w-1/2 flex justify-center">
+                    <img
+                        src={concierto.cartel ? `/storage/${concierto.cartel}` : "/imagenes/cartel1.png"}
+                        alt={`Cartel del concierto ${concierto.nombre_evento}`}
+                        className="w-full max-w-md rounded-lg shadow-lg"
+                    />
+                </div>
+
+                {/* Información del evento */}
+                <div className="w-full md:w-1/2 text-center md:text-left">
+                    <h2 className="text-4xl font-bold text-[#860303]">Concierto de {concierto.nombre_evento}</h2>
+                    <p className="text-lg text-gray-200 mt-4">{concierto.descripcion}</p>
+                    <p className="text-lg text-gray-300 mt-2">📅 <strong>Fecha:</strong> {concierto.fecha_evento}</p>
+                    <p className="text-lg text-gray-300">⏰ <strong>Hora:</strong> {concierto.hora_inicio} - {concierto.hora_final}</p>
+                    <p className="text-lg text-gray-300">📍 <strong>Sala:</strong> {concierto.sala?.descripcion || "No especificada"}</p>
                 </div>
             </div>
 
-            {/* Componente para comprar entradas */}
-            <CompraEntradaConcierto eventoId={concierto.id} carrito={carrito} setCarrito={setCarrito} />
+            {/* Cuadrado de compra de entradas */}
+            <div className="flex justify-center mt-8">
+                <div className="bg-[#860303] text-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
+                    <CompraEntradaConcierto eventoId={concierto.id} carrito={carrito} setCarrito={setCarrito} />
+                </div>
+            </div>
 
             {/* Mostrar la opción de hacer pedidos solo si el evento está activo */}
             {eventoActivo && (
-                <div className="mt-6">
-                    <h2 className="text-center text-xl font-bold text-green-600">📢 El evento está en curso, ¡haz tu pedido desde la mesa!</h2>
+                <div className="mt-12 text-center">
+                    <h2 className="text-2xl font-bold text-white-500">📢 El evento está en curso, ¡haz tu pedido desde la mesa!</h2>
                     <HacerComanda eventoId={concierto.id} />
                 </div>
             )}

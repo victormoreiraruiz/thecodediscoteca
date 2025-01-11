@@ -12,8 +12,7 @@ import axios from 'axios';
 
 const Evento = () => {
     const { evento, estadisticas = {} } = usePage().props;
-
-    const { entradas_vendidas = 0, aforo_total = 0, porcentaje_ocupado = 0 } = estadisticas;
+    const { entradas_vendidas = 0, aforo_total = 0 } = estadisticas;
 
     const COLORS = ['#0088FE', '#FF8042'];
 
@@ -53,67 +52,67 @@ const Evento = () => {
         fetchEstadisticasVentas();
     }, [evento.id]);
 
-    
     return (
         <div>
             <Navigation />
             <HeaderSinFoto />
-            <div className="evento-detalles">
-                <h2>Editar Evento: {evento.nombre_evento}</h2>
+            <div className="container mx-auto px-6 py-8">
+                <h2 className="text-3xl font-bold text-center text-[#e5cc70] mb-6">
+                    Editar Evento: {evento.nombre_evento}
+                </h2>
 
-                <form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <div className="form-group">
-                        <label htmlFor="nombre_evento">Nombre del Evento</label>
-                        <input
-                            type="text"
-                            id="nombre_evento"
-                            value={formData.nombre_evento}
-                            onChange={(e) => setData('nombre_evento', e.target.value)}
-                            className={errors.nombre_evento ? 'input-error' : ''}
-                        />
-                        {errors.nombre_evento && <p className="error">{errors.nombre_evento}</p>}
-                    </div>
+                <div className="bg-[#860303] p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+                    <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
+                        <div>
+                            <label className="block text-[#e5cc70] font-semibold">Nombre del Evento:</label>
+                            <input
+                                type="text"
+                                value={formData.nombre_evento}
+                                onChange={(e) => setData('nombre_evento', e.target.value)}
+                                className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+                                required
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label htmlFor="descripcion">Descripción</label>
-                        <textarea
-                            id="descripcion"
-                            value={formData.descripcion}
-                            onChange={(e) => setData('descripcion', e.target.value)}
-                            className={errors.descripcion ? 'input-error' : ''}
-                        ></textarea>
-                        {errors.descripcion && <p className="error">{errors.descripcion}</p>}
-                    </div>
+                        <div>
+                            <label className="block text-[#e5cc70] font-semibold">Descripción:</label>
+                            <textarea
+                                value={formData.descripcion}
+                                onChange={(e) => setData('descripcion', e.target.value)}
+                                className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+                                required
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label htmlFor="cartel">Cartel del Evento</label>
-                        <img
-                            src={evento.cartel ? `/storage/${evento.cartel}` : '/imagenes/cartel1.png'}
-                            alt={`Cartel del evento ${evento.nombre_evento}`}
-                            className="fiestacartel"
-                        />
-                        <input
-                            type="file"
-                            id="cartel"
-                            onChange={handleFileChange}
-                            className={errors.cartel ? 'input-error' : ''}
-                        />
-                        {errors.cartel && <p className="error">{errors.cartel}</p>}
-                    </div>
+                        <div>
+                            <label className="block text-[#e5cc70] font-semibold">Cartel del Evento:</label>
+                            <img
+                                src={evento.cartel ? `/storage/${evento.cartel}` : '/imagenes/cartel1.png'}
+                                alt={`Cartel del evento ${evento.nombre_evento}`}
+                                className="w-full rounded-lg shadow-md"
+                            />
+                            <input
+                                type="file"
+                                onChange={handleFileChange}
+                                className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white mt-2"
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <button type="submit" disabled={processing}>
+                        <button
+                            type="submit"
+                            className="w-full bg-[#e5cc70] text-[#860303] font-semibold py-2 rounded-lg hover:bg-yellow-500"
+                            disabled={processing}
+                        >
                             {processing ? 'Actualizando...' : 'Actualizar Evento'}
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
 
-                <h3>Estadísticas del Evento</h3>
+                <h3 className="text-2xl font-bold text-center text-[#e5cc70] mt-10">Estadísticas del Evento</h3>
 
-                {/* Contenedor para alinear gráficas horizontalmente */}
-                <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px' }}>
-                    <div>
-                        <h2>Distribución de Entradas</h2>
+                <div className="flex flex-wrap justify-center gap-8 mt-6">
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <h2 className="text-center text-[#e5cc70] font-semibold mb-4">Distribución de Entradas</h2>
                         <PieChart width={400} height={400}>
                             <Pie
                                 data={data}
@@ -133,8 +132,8 @@ const Evento = () => {
                         </PieChart>
                     </div>
 
-                    <div>
-                        <h2>Ingresos Acumulativos</h2>
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <h2 className="text-center text-[#e5cc70] font-semibold mb-4">Ingresos Acumulativos</h2>
                         <LineChart width={600} height={300} data={estadisticasVentas}>
                             <CartesianGrid stroke="#ccc" />
                             <XAxis dataKey="fecha" />
@@ -144,8 +143,8 @@ const Evento = () => {
                         </LineChart>
                     </div>
 
-                    <div>
-                        <h2>Ventas de Entradas por Día</h2>
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <h2 className="text-center text-[#e5cc70] font-semibold mb-4">Ventas de Entradas por Día</h2>
                         <BarChart width={600} height={300} data={estadisticasVentas}>
                             <CartesianGrid stroke="#ccc" />
                             <XAxis dataKey="fecha" />
@@ -157,6 +156,7 @@ const Evento = () => {
                     </div>
                 </div>
             </div>
+
             <Footer />
         </div>
     );

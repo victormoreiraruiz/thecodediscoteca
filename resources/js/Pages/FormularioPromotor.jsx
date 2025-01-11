@@ -127,6 +127,8 @@ const FormularioPromotor = ({ onComplete }) => {
                 {loading ? 'Procesando...' : 'Convertirme en Promotor'}
             </button>
         </form>
+        
+        
 
 
 // Agregar el botón en el JSX
