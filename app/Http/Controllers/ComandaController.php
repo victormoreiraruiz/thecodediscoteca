@@ -25,98 +25,103 @@ class ComandaController extends Controller
      * Crear una nueva comanda.
      */
     public function crearComanda(Request $request)
-{
-    \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
-
-    // 🔹 Asegurar que el usuario está autenticado
-    if (!Auth::check()) {
-        return response()->json(['error' => 'Usuario no autenticado'], 403);
-    }
-
-    $usuario = Auth::user();
-
-    // 🔹 Validar los datos de la comanda
-    $request->validate([
-        'evento_id' => 'required|exists:eventos,id',
-        'mesa_id' => 'required|exists:mesas,id',
-        'productos' => 'required|array',
-        'productos.*.id' => 'required|exists:productos,id',
-        'productos.*.cantidad' => 'required|integer|min:1',
-    ]);
-
-    $evento = Evento::findOrFail($request->evento_id);
-    $hora_actual = Carbon::now();
-    $hora_inicio = Carbon::parse($evento->hora_inicio);
-    $hora_fin = Carbon::parse($evento->hora_fin);
-
-    \Log::info("Hora actual: {$hora_actual}");
-    \Log::info("Hora inicio: {$hora_inicio}");
-    \Log::info("Hora final: {$hora_fin}");
-
-    if (!$hora_actual->between($hora_inicio, $hora_fin)) {
-        return response()->json(['error' => 'El evento no está activo en este momento'], 403);
-    }
-
-    $total = 0;
-    foreach ($request->productos as $producto) {
-        $item = Producto::findOrFail($producto['id']);
-        $total += $item->precio * $producto['cantidad'];
-    }
-
-    // 🔹 Verificar si el usuario tiene saldo suficiente
-    if ($usuario->saldo < $total) {
-        return response()->json(['error' => 'Saldo insuficiente para realizar el pedido'], 403);
-    }
-
-    DB::beginTransaction();
-
-    try {
-        // 🔹 Restar saldo al usuario
-        $usuario->decrement('saldo', $total);
-
-        // 🔹 Crear la comanda
-        $comanda = Comanda::create([
-            'user_id' => $usuario->id,
-            'evento_id' => $request->evento_id,
-            'mesa_id' => $request->mesa_id,
-            'estado' => 'pendiente',
+    {
+        \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
+    
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Usuario no autenticado'], 403);
+        }
+    
+        $usuario = Auth::user();
+    
+        $request->validate([
+            'evento_id' => 'required|exists:eventos,id',
+            'mesa_id' => 'required|exists:mesas,id',
+            'productos' => 'required|array',
+            'productos.*.id' => 'required|exists:productos,id',
+            'productos.*.cantidad' => 'required|integer|min:1',
         ]);
-
-        // 🔹 Agregar productos a la comanda y reducir stock
+    
+        $evento = Evento::findOrFail($request->evento_id);
+        $hora_actual = Carbon::now();
+        $hora_inicio = Carbon::parse($evento->hora_inicio);
+        $hora_fin = Carbon::parse($evento->hora_fin);
+    
+        \Log::info("Hora actual: {$hora_actual}");
+        \Log::info("Hora inicio: {$hora_inicio}");
+        \Log::info("Hora final: {$hora_fin}");
+    
+        if (!$hora_actual->between($hora_inicio, $hora_fin)) {
+            return response()->json(['error' => 'El evento no está activo en este momento'], 403);
+        }
+    
+        $total = 0;
         foreach ($request->productos as $producto) {
             $item = Producto::findOrFail($producto['id']);
-
-            // Registrar stock antes de la reducción
-            \Log::info("Stock antes de reducir ({$item->nombre}): {$item->stock}");
-
-            // Verificar si hay suficiente stock
-            if ($item->stock < $producto['cantidad']) {
-                DB::rollBack();
-                \Log::error("Stock insuficiente para {$item->nombre}. Cantidad solicitada: {$producto['cantidad']}, stock disponible: {$item->stock}");
-                return response()->json(['error' => "Stock insuficiente para {$item->nombre}"], 400);
-            }
-
-            // Reducir el stock del producto
-            $item->decrement('stock', $producto['cantidad']);
-
-            // Registrar stock después de la reducción
-            \Log::info("Stock después de reducir ({$item->nombre}): {$item->stock}");
-
-            // Asociar productos a la comanda
-            $comanda->productos()->attach($producto['id'], ['cantidad' => $producto['cantidad']]);
+            $total += $item->precio * $producto['cantidad'];
         }
-
-        DB::commit();
-
-        return response()->json(['message' => 'Comanda creada con éxito', 'comanda' => $comanda], 201);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Error al crear la comanda:', ['error' => $e->getMessage()]);
-
-        return response()->json(['error' => 'Ocurrió un error al procesar la comanda'], 500);
+    
+        if ($usuario->saldo < $total) {
+            return response()->json(['error' => 'Saldo insuficiente para realizar el pedido'], 403);
+        }
+    
+        DB::beginTransaction();
+    
+        try {
+            // 🔹 Obtener al administrador
+            $admin = User::where('rol', 'admin')->first();
+    
+            if (!$admin) {
+                DB::rollBack();
+                \Log::error("No se encontró un usuario con rol de admin.");
+                return response()->json(['error' => 'No se encontró un administrador para procesar la transacción'], 500);
+            }
+    
+            // 🔹 Restar saldo al usuario comprador
+            $usuario->decrement('saldo', $total);
+    
+            // 🔹 Sumar la cantidad al campo `ingresos` del administrador
+            $admin->increment('ingresos', $total);
+    
+            // 🔹 Registrar la transacción en el log
+            \Log::info("Transacción realizada: Usuario {$usuario->id} pagó {$total}€, ahora el ingreso total del admin ({$admin->id}) es {$admin->ingresos}€");
+    
+            // 🔹 Crear la comanda
+            $comanda = Comanda::create([
+                'user_id' => $usuario->id,
+                'evento_id' => $request->evento_id,
+                'mesa_id' => $request->mesa_id,
+                'estado' => 'pendiente',
+            ]);
+    
+            foreach ($request->productos as $producto) {
+                $item = Producto::findOrFail($producto['id']);
+    
+                \Log::info("Stock antes de reducir ({$item->nombre}): {$item->stock}");
+    
+                if ($item->stock < $producto['cantidad']) {
+                    DB::rollBack();
+                    \Log::error("Stock insuficiente para {$item->nombre}. Cantidad solicitada: {$producto['cantidad']}, stock disponible: {$item->stock}");
+                    return response()->json(['error' => "Stock insuficiente para {$item->nombre}"], 400);
+                }
+    
+                $item->decrement('stock', $producto['cantidad']);
+                \Log::info("Stock después de reducir ({$item->nombre}): {$item->stock}");
+    
+                $comanda->productos()->attach($producto['id'], ['cantidad' => $producto['cantidad']]);
+            }
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Comanda creada con éxito', 'comanda' => $comanda], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al crear la comanda:', ['error' => $e->getMessage()]);
+    
+            return response()->json(['error' => 'Ocurrió un error al procesar la comanda'], 500);
+        }
     }
-}
-
+    
 
     /**
      * Obtener todas las comandas activas (pendientes o en preparación).
