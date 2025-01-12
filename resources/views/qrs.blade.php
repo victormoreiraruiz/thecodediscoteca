@@ -5,87 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entradas de Compra</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
+            color: #333;
         }
         .container {
             background-color: #fff;
             padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
         .summary {
-            background-color: #860303;
+            background-color: #870000;
             color: #fff;
             padding: 15px;
             border-radius: 10px;
             text-align: center;
             margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
         }
         .summary p {
             margin: 5px 0;
-            font-size: 16px;
         }
         .entrada {
             margin: 20px auto;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            max-width: 450px;
+            background-color: #fff;
+            padding-bottom: 20px;
         }
         .header {
-            background-color: #860303;
+            background-color: #870000;
             color: #fff;
             padding: 15px;
             text-align: center;
-        }
-        .header p {
-            margin: 0;
-            font-size: 14px;
-        }
-        .header span {
             font-weight: bold;
+            font-size: 14px;
         }
         .event-name {
             background-color: #e5cc70;
             text-align: center;
             padding: 20px;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            color: #000000;
+            color: #000;
         }
         .qr-block {
             background-color: #fff;
             padding: 20px;
             text-align: center;
             position: relative;
+            border-bottom: 2px solid #870000;
         }
         .qr-block img {
-            max-width: 150px;
+            max-width: 160px;
             height: auto;
+            padding: 10px;
+            background: #fff;
+            border: 3px solid #870000;
+            border-radius: 10px;
         }
         .qr-code-label {
             font-size: 14px;
             margin-top: 10px;
-            color: #333;
+            color: #444;
+            font-weight: bold;
         }
         .conditions {
             margin-top: 30px;
             padding: 20px;
             background-color: #f9f9f9;
-            border-top: 2px solid #860303;
+            border-top: 3px solid #870000;
             font-size: 14px;
             line-height: 1.6;
         }
         .conditions h2 {
-            color: #860303;
+            color: #870000;
             text-align: center;
             margin-bottom: 15px;
         }
-        .conditions p {
+        .conditions p, .conditions ul {
             margin: 5px 0;
         }
         .conditions ul {
@@ -110,9 +118,10 @@
         @for ($i = 0; $i < $entrada->pivot->cantidad; $i++)
         <div class="entrada">
             <div class="header">
-                <p><span>Entrada {{ $entrada->tipo }} {{ $i + 1 }}</span> | {{ \Carbon\Carbon::parse($entrada->evento->fecha_evento)->format('d M. Y') }} | 
+                Entrada {{ $entrada->tipo }} {{ $i + 1 }} |
+                {{ \Carbon\Carbon::parse($entrada->evento->fecha_evento)->format('d M. Y') }} |
                 {{ \Carbon\Carbon::parse($entrada->evento->hora_inicio)->format('H:i A') }} - 
-                {{ \Carbon\Carbon::parse($entrada->evento->hora_final)->format('H:i A') }}</p>
+                {{ \Carbon\Carbon::parse($entrada->evento->hora_final)->format('H:i A') }}
             </div>
             <div class="event-name">
                 {{ strtoupper($entrada->evento->nombre_evento) }}
@@ -120,6 +129,7 @@
             <div class="qr-block">
                 @if (isset($qrPaths[$qrIndex]) && is_file($qrPaths[$qrIndex]))
                     <img src="data:image/png;base64,{{ base64_encode(file_get_contents($qrPaths[$qrIndex])) }}" alt="QR Code">
+                    <p class="qr-code-label">Escanea para validar tu entrada</p>
                     @php $qrIndex++; @endphp
                 @else
                     <p>Error: QR no disponible</p>

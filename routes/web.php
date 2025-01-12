@@ -129,6 +129,8 @@ Route::get('/mi-cuenta/compras/{compraId}/descargar-pdf', [CompraController::cla
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'obtenerEntradas']);
 Route::get('/eventos-proximos', [EventoController::class, 'eventosProximos'])->name('eventos.proximos');
 Route::get('/eventos/dias-ocupados', [EventoController::class, 'obtenerDiasOcupados'])->name('eventos.diasOcupados');
+Route::get('/eventos/proximos', [EventoController::class, 'eventosProximos'])->name('eventos.proximos');
+Route::get('/', [EventoController::class, 'eventosProximos'])->name('index');
 
 
 
@@ -162,9 +164,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/productos', [AdminController::class, 'crearProducto'])->name('admin.crearProducto');
     Route::post('/admin/categorias', [AdminController::class, 'crearCategoria'])->name('admin.crearCategoria');
     Route::get('/admin/categorias', [AdminController::class, 'listarCategorias'])->name('admin.listarCategoria');
-    Route::get('/admin/productos', [AdminController::class, 'listarProductos']);
-    Route::put('/admin/productos/{id}', [AdminController::class, 'actualizarProducto']);
-    Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto']);
+    Route::get('/admin/productos', [AdminController::class, 'listarProductos'])->name('admin.listarProducto');
+    Route::put('/admin/productos/{id}', [AdminController::class, 'actualizarProducto'])->name('admin.actualizaProducto');
+    Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto'])->name('admin.eliminarProducto');
+    Route::get('/admin/historial-ingresos', [AdminController::class, 'historialIngresos'])->name('admin.historial.ingresos');
 
 });
 

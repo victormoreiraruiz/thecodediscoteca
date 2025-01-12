@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 
 const AdminGestionEventos = ({ eventos }) => {
-    const [loading, setLoading] = useState(null); // Carga por evento
+    const [loading, setLoading] = useState(null);
     const [error, setError] = useState(null);
     const [eventosList, setEventos] = useState(eventos);
-    const [motivoCancelacion, setMotivoCancelacion] = useState(""); // Estado para el motivo
-    const [eventoAEliminar, setEventoAEliminar] = useState(null); // Evento seleccionado para eliminar
-    const [orden, setOrden] = useState({ campo: 'fecha_evento', asc: true }); // Estado para la ordenación
-    const [search, setSearch] = useState(''); // Estado para la búsqueda por texto
-    const [filtroFecha, setFiltroFecha] = useState({ desde: '', hasta: '' }); // Estado para el filtro por rango de fechas
+    const [motivoCancelacion, setMotivoCancelacion] = useState("");
+    const [eventoAEliminar, setEventoAEliminar] = useState(null);
+    const [orden, setOrden] = useState({ campo: 'fecha_evento', asc: true });
+    const [search, setSearch] = useState('');
+    const [filtroFecha, setFiltroFecha] = useState({ desde: '', hasta: '' });
 
     const handleMotivoChange = (e) => {
         setMotivoCancelacion(e.target.value);
@@ -113,7 +113,6 @@ const AdminGestionEventos = ({ eventos }) => {
         });
     };
 
-    // Filtrar eventos por texto y rango de fechas
     const eventosFiltrados = filtrarPorFecha(eventosList).filter(evento =>
         evento.nombre_evento.toLowerCase().includes(search.toLowerCase()) ||
         (evento.sala?.tipo_sala.toLowerCase().includes(search.toLowerCase()) || '') ||
@@ -121,28 +120,18 @@ const AdminGestionEventos = ({ eventos }) => {
     );
 
     return (
-        <div>
-            <h3>Gestión de Eventos</h3>
-            {error && <div className="error">{error}</div>}
+        <div className="admin-gestion-eventos">
+            {error && <div className="mensaje-error">{error}</div>}
 
-    
-            <div className="usuarios-table">
-            <div className="busqueda-texto">
+            <div className="contenedor-filtros">
                 <input
                     type="text"
                     placeholder="Buscar por nombre, sala o estado"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    style={{
-                        marginBottom: '10px',
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        width: '100%',
-                    }}
+                    className="input-busqueda border border-gray-300 rounded px-3 py-2 w-full"
                 />
-            </div>
-            <div className="filtro-fechas">
+                <div className="filtro-fechas">
                     <label>
                         Desde:
                         <input
@@ -160,58 +149,56 @@ const AdminGestionEventos = ({ eventos }) => {
                         />
                     </label>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th onClick={() => ordenarEventos('nombre_evento')}>Nombre</th>
-                            <th onClick={() => ordenarEventos('fecha_evento')}>Fecha</th>
-                            <th onClick={() => ordenarEventos('sala')}>Sala</th>
-                            <th onClick={() => ordenarEventos('estado')}>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {eventosFiltrados.length > 0 ? (
-                            eventosFiltrados.map(evento => (
-                                <tr key={evento.id}>
-                                    <td>{evento.nombre_evento}</td>
-                                    <td>{evento.fecha_evento}</td>
-                                    <td>{evento.sala?.tipo_sala || 'Sin sala'}</td>
-                                    <td>
-                                        <select
-                                            value={evento.estado || 'pendiente'}
-                                            onChange={(e) => actualizarEstadoEvento(evento.id, e.target.value)}
-                                            disabled={loading && loading[evento.id]}
-                                            style={{
-                                                backgroundColor: '#f0f0f0',
-                                                color: '#000',
-                                                padding: '5px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                            }}
-                                        >
-                                            <option value="pendiente">Pendiente</option>
-                                            <option value="apto">Apto</option>
-                                            <option value="denegado">Denegado</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <button
-                                            onClick={() => setEventoAEliminar(evento)}
-                                            disabled={loading && loading[evento.id]}
-                                        >
-                                            {loading && loading[evento.id] ? 'Eliminando...' : 'Eliminar'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5">No hay eventos disponibles.</td>
+            </div>
+
+            <table className="tabla-eventos w-full border-collapse">
+                <thead>
+                    <tr className="bg-[#860303] text-white">
+                        <th onClick={() => ordenarEventos('nombre_evento')} className="p-3 cursor-pointer">Nombre</th>
+                        <th onClick={() => ordenarEventos('fecha_evento')} className="p-3 cursor-pointer">Fecha</th>
+                        <th onClick={() => ordenarEventos('sala.tipo_sala')} className="p-3 cursor-pointer">Sala</th>
+                        <th onClick={() => ordenarEventos('estado')} className="p-3 cursor-pointer">Estado</th>
+                        <th className="p-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {eventosFiltrados.length > 0 ? (
+                        eventosFiltrados.map(evento => (
+                            <tr key={evento.id} className="border-b bg-[#e5cc70] hover:bg-yellow-500">
+                                <td className="p-3">
+                                    <a href={`/mi-cuenta/eventos/${evento.id}`} className="text-[#860303] font-semibold underline">
+                                        {evento.nombre_evento}
+                                    </a>
+                                </td>
+                                <td className="p-3">{evento.fecha_evento}</td>
+                                <td className="p-3">{evento.sala?.tipo_sala || 'Sin sala'}</td>
+                                <td className="p-3">
+                                    <select
+                                        value={evento.estado || 'pendiente'}
+                                        onChange={(e) => actualizarEstadoEvento(evento.id, e.target.value)}
+                                        disabled={loading && loading[evento.id]}
+                                        className="select-estado bg-white border border-gray-300 rounded px-2 py-1"
+                                    >
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="apto">Apto</option>
+                                        <option value="denegado">Denegado</option>
+                                    </select>
+                                </td>
+                                <td className="p-3">
+                                    <button onClick={() => setEventoAEliminar(evento)} className="btn-eliminar bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
+                                        Eliminar
+                                    </button>
+                                </td>
                             </tr>
-                        )}
-                    </tbody>
-                </table>{eventoAEliminar && (
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="5" className="p-3 text-center">No hay eventos disponibles.</td>
+                        </tr>
+                    )}
+                    
+                </tbody>
+            </table>{eventoAEliminar && (
                 <div className="modal">
                     <h4>Motivo de la cancelación</h4>
                     <textarea
@@ -222,13 +209,10 @@ const AdminGestionEventos = ({ eventos }) => {
                         cols="50"
                     ></textarea>
                     <br />
-                    <button onClick={eliminarEvento}>Confirmar Eliminación</button>
-                    <button onClick={cancelarEliminacion}>Cancelar</button>
+                    <button onClick={eliminarEvento} className="btn-confirmar">Confirmar Eliminación</button>
+                    <button onClick={cancelarEliminacion} className="btn-cancelar">Cancelar</button>
                 </div>
             )}
-            </div>
-
-            
         </div>
     );
 };

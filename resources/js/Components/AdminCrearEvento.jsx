@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
-
 const AdminCrearEvento = () => {
     const [nombreEvento, setNombreEvento] = useState('');
     const [descripcion, setDescripcion] = useState('');
@@ -15,13 +14,12 @@ const AdminCrearEvento = () => {
     const [precioPremium, setPrecioPremium] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [diasOcupados, setDiasOcupados] = useState([]); 
+    const [diasOcupados, setDiasOcupados] = useState([]);
 
-    // Fetch para obtener los días ocupados
     useEffect(() => {
         const fetchDiasOcupados = async () => {
             try {
-                const response = await fetch(route('eventos.diasOcupados')); // obtiene dias ocupados
+                const response = await fetch(route('eventos.diasOcupados'));
                 const data = await response.json();
                 setDiasOcupados(data);
             } catch (err) {
@@ -79,110 +77,124 @@ const AdminCrearEvento = () => {
         }
     };
 
-    // marca dias ocupados y seleccionado
     const resaltarDias = ({ date }) => {
-        const fecha = date.toISOString().split('T')[0]; // Convertir a formato YYYY-MM-DD
-        if (diasOcupados.includes(fecha)) return 'dia-ocupado'; // Día ocupado
-        if (fecha === fechaEvento) return 'dia-seleccionado'; // Día seleccionado
-        return null; // Días normales
+        const fecha = date.toISOString().split('T')[0];
+        if (diasOcupados.includes(fecha)) return 'dia-ocupado';
+        if (fecha === fechaEvento) return 'dia-seleccionado';
+        return null;
     };
 
-    // Deshabilitar días pasados
     const deshabilitarDiasPasados = ({ date }) => {
         const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); // Ajustar la hora para comparar solo la fecha
+        hoy.setHours(0, 0, 0, 0);
         return date < hoy || diasOcupados.includes(date.toISOString().split('T')[0]);
     };
 
     return (
         <div className="crear-evento-form">
-            <h3>Crear Nuevo Evento</h3>
+            <h3 className="text-[#860303] font-bold text-2xl mb-4">Crear Nuevo Evento</h3>
             {error && <div className="error">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="nombreEvento">Nombre del Evento</label>
+                    <label htmlFor="nombreEvento" style={{ color: 'black', fontWeight: 'bold' }}>Nombre del Evento</label>
                     <input
                         type="text"
                         id="nombreEvento"
                         value={nombreEvento}
                         onChange={(e) => setNombreEvento(e.target.value)}
                         required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="descripcion">Descripción</label>
+                    <label htmlFor="descripcion" style={{ color: 'black', fontWeight: 'bold' }}>Descripción</label>
                     <textarea
                         id="descripcion"
                         value={descripcion}
                         onChange={(e) => setDescripcion(e.target.value)}
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="fechaEvento">Fecha del Evento</label>
+                    <label htmlFor="fechaEvento" style={{ color: 'black', fontWeight: 'bold' }}>Fecha del Evento</label>
                     <Calendar
-                        onChange={(date) => setFechaEvento(date.toISOString().split('T')[0])} // Actualizar la fecha seleccionada
-                        tileClassName={resaltarDias} // Aplicar clases a los días
-                        tileDisabled={deshabilitarDiasPasados} // Deshabilitar días pasados
-                        value={fechaEvento ? new Date(fechaEvento) : null} // Fecha seleccionada
+                        onChange={(date) => setFechaEvento(date.toISOString().split('T')[0])}
+                        tileClassName={resaltarDias}
+                        tileDisabled={deshabilitarDiasPasados}
+                        value={fechaEvento ? new Date(fechaEvento) : null}
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="horaInicio">Hora de Inicio</label>
+                    <label htmlFor="horaInicio" style={{ color: 'black', fontWeight: 'bold' }}>Hora de Inicio</label>
                     <input
                         type="time"
                         id="horaInicio"
                         value={horaInicio}
                         onChange={(e) => setHoraInicio(e.target.value)}
                         required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="horaFinal">Hora de Finalización</label>
+                    <label htmlFor="horaFinal" style={{ color: 'black', fontWeight: 'bold' }}>Hora de Finalización</label>
                     <input
                         type="time"
                         id="horaFinal"
                         value={horaFinal}
                         onChange={(e) => setHoraFinal(e.target.value)}
                         required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="cartel">Cartel del Evento</label>
+                    <label htmlFor="cartel" style={{ color: 'black', fontWeight: 'bold' }}>Cartel del Evento</label>
                     <input
                         type="file"
                         id="cartel"
                         onChange={(e) => setCartel(e.target.files[0])}
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
                 <div>
-                    <label htmlFor="precioNormal">Precio Normal</label>
+                    <label htmlFor="precioNormal" style={{ color: 'black', fontWeight: 'bold' }}>Precio Normal</label>
                     <input
                         type="number"
                         id="precioNormal"
                         value={precioNormal}
                         onChange={(e) => setPrecioNormal(e.target.value)}
                         required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
+              
                 <div>
-                    <label htmlFor="precioVip">Precio VIP (opcional)</label>
+                    <label htmlFor="precioVip" style={{ color: 'black', fontWeight: 'bold' }}>Precio Vip</label>
                     <input
                         type="number"
                         id="precioVip"
                         value={precioVip}
                         onChange={(e) => setPrecioVip(e.target.value)}
+                        required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
-                </div>
+                </div>  
                 <div>
-                    <label htmlFor="precioPremium">Precio Premium (opcional)</label>
+                    <label htmlFor="precioPremium" style={{ color: 'black', fontWeight: 'bold' }}>Precio Premium</label>
                     <input
                         type="number"
                         id="precioPremium"
                         value={precioPremium}
                         onChange={(e) => setPrecioPremium(e.target.value)}
+                        required
+                        className="border border-gray-300 rounded px-3 py-2 w-full"
                     />
                 </div>
-                <button type="submit" disabled={loading}>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-[#860303] text-white font-semibold px-4 py-2 rounded hover:bg-red-700 mt-4 w-full"
+                >
                     {loading ? 'Creando Evento...' : 'Crear Evento'}
                 </button>
             </form>
