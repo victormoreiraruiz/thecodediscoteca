@@ -11,6 +11,7 @@ use App\Models\ReservaDiscoteca;
 use App\Models\Notificacion;
 use App\Models\User;
 use Carbon\Carbon;
+use Inertia\Response;
 
 class EventoController extends Controller
 {
@@ -284,16 +285,18 @@ public function obtenerEventosUsuario(Request $request)
     return response()->json($eventos);
 }
 
-public function eventosProximos()
+public function eventosProximos(): Response
 {
-    // solo eventos aprobaos
     $eventos = Evento::where('estado', 'apto')
         ->orderBy('fecha_evento', 'asc')
-        ->take(10) 
+        ->take(10)
         ->get();
 
-    return response()->json($eventos);
+    return Inertia::render('Index', [
+        'eventos' => $eventos
+    ]);
 }
+
 public function obtenerDiasOcupados()
 {
     $diasOcupados = Evento::pluck('fecha_evento')->toArray(); 

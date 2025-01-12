@@ -129,6 +129,8 @@ Route::get('/mi-cuenta/compras/{compraId}/descargar-pdf', [CompraController::cla
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'obtenerEntradas']);
 Route::get('/eventos-proximos', [EventoController::class, 'eventosProximos'])->name('eventos.proximos');
 Route::get('/eventos/dias-ocupados', [EventoController::class, 'obtenerDiasOcupados'])->name('eventos.diasOcupados');
+Route::get('/eventos/proximos', [EventoController::class, 'eventosProximos'])->name('eventos.proximos');
+Route::get('/', [EventoController::class, 'eventosProximos'])->name('index');
 
 
 
