@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 
-const IndexEventos = ({ eventos }) => {
-    const hoy = new Date().setHours(0, 0, 0, 0); // Obtiene la fecha de hoy sin la hora para comparar correctamente.
+const IndexEventos = ({ eventos = [] }) => { // 👈 Valor predeterminado para evitar errores
+    const hoy = new Date().setHours(0, 0, 0, 0);
 
     const eventosAprobados = eventos
-        .filter(evento => evento.estado === 'apto' && new Date(evento.fecha_evento).setHours(0, 0, 0, 0) >= hoy) // Filtra eventos futuros
-        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento)); // Ordena por fecha
+        .filter(evento => evento.estado === 'apto' && new Date(evento.fecha_evento).setHours(0, 0, 0, 0) >= hoy)
+        .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento));
 
     const [indiceInicial, setIndiceInicial] = useState(0);
-    const eventosVisibles = 4; // Mostrar 4 eventos a la vez
+    const eventosVisibles = 4;
 
     const avanzar = () => {
         if (indiceInicial + eventosVisibles < eventosAprobados.length) {
@@ -28,7 +28,6 @@ const IndexEventos = ({ eventos }) => {
            <h2>PRÓXIMOS EVENTOS</h2>
            <br />
             <div className="carrusel-container">
-               
                 {indiceInicial > 0 && (
                     <button className="flecha" onClick={retroceder}>
                         &lt; 
@@ -44,7 +43,7 @@ const IndexEventos = ({ eventos }) => {
                                     alt={`Cartel del evento ${evento.nombre_evento}`}
                                     className="evento-cartel"
                                     onError={(e) => {
-                                        e.target.src = '/imagenes/cartel1.png'; // Imagen por defecto
+                                        e.target.src = '/imagenes/cartel1.png';
                                     }}
                                 />
                             </Link>

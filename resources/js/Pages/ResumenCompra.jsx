@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
-import Cookies from 'js-cookie';
+import React, { useState, useEffect } from "react";
+import { usePage } from "@inertiajs/react";
+import { Inertia } from "@inertiajs/inertia";
+import Cookies from "js-cookie";
+import Swal from "sweetalert2";
 
 const ResumenCompra = () => {
     const props = usePage().props;
-    const { carrito = [], total = 0, user = null } = props;
-    const [nombre, setNombre] = useState(user ? user.nombre : '');
-    const [correo, setCorreo] = useState(user ? user.correo : '');
+    const { carrito = [], total = 0, user = null, errors = {} } = props;
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
     const [pagoRealizado, setPagoRealizado] = useState(false);
 
@@ -15,50 +14,69 @@ const ResumenCompra = () => {
     const saldoRestante = pagarConSaldo ? saldoActual - total : saldoActual;
 
     const eliminarCarrito = () => {
-        // Forzar eliminación de la cookie de forma manual
-        document.cookie = "carrito=; path=/; domain=127.0.0.1; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-        document.cookie = "carrito=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    
-        // Intentar con js-cookie como respaldo
-        Cookies.remove('carrito', { path: '/', domain: '127.0.0.1' });
-        Cookies.remove('carrito', { path: '/' });
-    
-        console.log('Intentando eliminar cookie carrito');
-        console.log('Estado actual de las cookies:', document.cookie);
+        Cookies.remove("carrito", { path: "/" });
     };
-    
 
     const handleConfirmarCompra = () => {
         if (!user) {
-            alert('Debes iniciar sesión para confirmar tu compra.');
-            Inertia.visit('/login');
+            Swal.fire({
+                icon: "warning",
+                title: "¡Inicia sesión!",
+                text: "Debes iniciar sesión para confirmar tu compra.",
+                confirmButtonColor: "#860303",
+            });
+            Inertia.visit("/login");
             return;
         }
-    
+
         if (!pagarConSaldo && !pagoRealizado) {
-            alert('Debes seleccionar un método de pago para confirmar tu compra.');
+            Swal.fire({
+                icon: "warning",
+                title: "Selecciona un método de pago",
+                text: "Debes seleccionar un método de pago antes de continuar.",
+                confirmButtonColor: "#860303",
+            });
             return;
         }
-    
-        Inertia.post('/confirmar-compra', {
-            carrito,
-            total,
-            pagarConSaldo,
-        }, {
-            onSuccess: () => {
-                alert('¡Compra confirmada!');
-                eliminarCarrito(); // Llamamos a la función para eliminar la cookie
-            },
-            onError: (errors) => {
-                alert(errors.saldo || errors.error || 'Error al realizar la compra.');
-            },
-        });
+
+        Inertia.post(
+            "/confirmar-compra",
+            { carrito, total, pagarConSaldo },
+            {
+                onSuccess: () => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "¡Compra confirmada!",
+                        text: "Tu compra se ha realizado con éxito.",
+                        confirmButtonColor: "#e5cc70",
+                    });
+                    eliminarCarrito();
+                },
+                onError: (errors) => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error en la compra",
+                        text: errors.saldo || errors.error || "Ocurrió un problema al procesar la compra.",
+                        confirmButtonColor: "#860303",
+                    });
+                },
+            }
+        );
     };
-    
-    
 
     useEffect(() => {
-        const script = document.createElement('script');
+        if (errors.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error en la compra",
+                text: errors.error,
+                confirmButtonColor: "#860303",
+            });
+        }
+    }, [errors]);
+
+    useEffect(() => {
+        const script = document.createElement("script");
         script.src = `https://www.paypal.com/sdk/js?client-id=AYd5L69B51NLRWuwIDbxKLgC4eQy84SSb_7OSQwBxOBo_gRYowPqkBX5aNtjGxPqsa8Q4Y3ApHXEE2DK&currency=EUR&disable-funding=card`;
         script.async = true;
         script.onload = () => {
@@ -66,75 +84,96 @@ const ResumenCompra = () => {
                 window.paypal.Buttons({
                     createOrder: (data, actions) => {
                         return actions.order.create({
-                            purchase_units: [{
-                                amount: { value: total.toFixed(2) },
-                            }],
+                            purchase_units: [{ amount: { value: total.toFixed(2) } }],
                         });
                     },
                     onApprove: (data, actions) => {
-                        return actions.order.capture().then(details => {
-                            alert('¡Pago realizado con éxito por ' + details.payer.name.given_name + '!');
+                        return actions.order.capture().then((details) => {
+                            Swal.fire({
+                                icon: "success",
+                                title: "¡Pago realizado!",
+                                text: `Pago confirmado por ${details.payer.name.given_name}.`,
+                                confirmButtonColor: "#e5cc70",
+                            });
                             setPagoRealizado(true);
-                            Inertia.post('/confirmar-compra', { carrito, total, pagarConSaldo: false }, {
+                            Inertia.post("/confirmar-compra", { carrito, total, pagarConSaldo: false }, {
                                 onSuccess: () => {
-                                    eliminarCookieCarrito(); // Elimina la cookie aquí también
-                                }
+                                    eliminarCarrito();
+                                },
                             });
                         });
                     },
                     onError: (err) => {
-                        console.error('Error en el pago de PayPal:', err);
-                        alert('Hubo un error al procesar el pago con PayPal.');
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error en PayPal",
+                            text: "Hubo un problema al procesar el pago.",
+                            confirmButtonColor: "#860303",
+                        });
                     },
-                }).render('#paypal-button-container');
+                }).render("#paypal-button-container");
             }
         };
         document.body.appendChild(script);
-
         return () => {
             document.body.removeChild(script);
         };
     }, [total, carrito]);
 
     return (
-        <div className="resumen-compra">
-            <h2>Resumen de Compra</h2>
-            <div className="productos">
+        <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6 mt-6 border-4 border-[#e5cc70]">
+            <h2 className="text-2xl font-semibold text-[#860303] text-center mb-4">Resumen de Compra</h2>
+
+            <div className="space-y-4">
                 {carrito.map((item, index) => (
-                    <div key={index} className="producto">
-                        <h3>
-                            Entrada {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)} x {item.cantidad} 
-                            Precio: {(item.precio * item.cantidad).toFixed(2)}€
+                    <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                        <h3 className="text-lg font-medium text-gray-700">
+                            {item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)} x {item.cantidad}
                         </h3>
+                        <p className="text-gray-600">Precio: {(item.precio * item.cantidad).toFixed(2)}€</p>
                     </div>
                 ))}
             </div>
 
-            <h2>Total a Pagar: {total.toFixed(2)}€</h2>
+            <h2 className="text-xl font-semibold text-[#860303] mt-6">Total a Pagar: {total.toFixed(2)}€</h2>
 
-            <div className="opciones-pago">
-                <h3>Saldo Actual: {saldoActual.toFixed(2)}€</h3>
-                {pagarConSaldo && <h3>Saldo Restante: {saldoRestante.toFixed(2)}€</h3>}
-                <label>
+            <div className="mt-4 p-4 border rounded-lg bg-[#e5cc70]">
+                <h3 className="text-lg font-semibold text-[#860303]">Saldo Disponible: {saldoActual.toFixed(2)}€</h3>
+                {pagarConSaldo && <h3 className="text-md text-gray-700">Saldo Restante: {saldoRestante.toFixed(2)}€</h3>}
+
+                <label className="flex items-center mt-2">
                     <input
                         type="checkbox"
                         checked={pagarConSaldo}
                         onChange={(e) => setPagarConSaldo(e.target.checked)}
                         disabled={saldoActual < total}
+                        className="form-checkbox h-5 w-5 text-[#860303]"
                     />
-                    Pagar con saldo
+                    <span className="ml-2 text-gray-700">Pagar con saldo</span>
                 </label>
-                {saldoActual < total && <p style={{ color: 'red' }}>Saldo insuficiente para esta compra.</p>}
-                <button onClick={handleConfirmarCompra} className="confirmar-compra-boton">
+
+                {saldoActual < total && <p className="text-red-500 text-sm mt-2">Saldo insuficiente para esta compra.</p>}
+            </div>
+
+            <div className="mt-6 flex justify-center">
+                <button
+                    onClick={handleConfirmarCompra}
+                    className="bg-[#860303] text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-red-800 transition duration-200"
+                >
                     Confirmar Compra
                 </button>
-                <br />
-                <button onClick={() => window.history.back()} className="volver-atras-boton" style={{ marginTop: '10px' }}>
+            </div>
+
+            <div className="mt-4 flex justify-center">
+                <button
+                    onClick={() => window.history.back()}
+                    className="bg-[#e5cc70] text-black font-bold py-2 px-6 rounded-lg shadow hover:bg-yellow-500 transition duration-200"
+                >
                     Volver Atrás
                 </button>
             </div>
 
-            <div id="paypal-button-container" style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}></div>
+            <div id="paypal-button-container" className="mt-6 flex justify-center"></div>
         </div>
     );
 };

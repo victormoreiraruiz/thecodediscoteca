@@ -54,7 +54,7 @@ class RegisteredUserController extends Controller
             return redirect()->route('admin.index'); // Ruta del panel de administrador
         }
     
-        return redirect('/index'); // Ruta del panel de usuario
+        return redirect('/'); // Ruta del panel de usuario
     }
 
     
