@@ -60,9 +60,7 @@ public function confirmarCompra(Request $request)
 {
     $user = $request->user();
     $carrito = session('carrito', []);
-    $total = collect($carrito)->reduce(function ($sum, $item) {
-        return $sum + ($item['precio'] * $item['cantidad']);
-    }, 0);
+    $total = collect($carrito)->reduce(fn($sum, $item) => $sum + ($item['precio'] * $item['cantidad']), 0);
     $pagarConSaldo = $request->input('pagarConSaldo');
 
     \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
@@ -73,20 +71,38 @@ public function confirmarCompra(Request $request)
 
     DB::beginTransaction();
     try {
+        foreach ($carrito as $item) {
+            $evento = \App\Models\Evento::find($item['evento_id']);
+            $sala = \App\Models\Sala::find($evento->sala_id);
+            
+            if (!$sala) {
+                throw new \Exception("No se encontró la sala asociada al evento.");
+            }
+
+            // Obtener el total de entradas vendidas
+            $entradasVendidas = DB::table('compra_entradas')
+                ->whereIn('entrada_id', function ($query) use ($evento) {
+                    $query->select('id')->from('entradas')->where('evento_id', $evento->id);
+                })
+                ->sum('cantidad');
+
+            // Validar si hay espacio suficiente
+            if ($entradasVendidas + $item['cantidad'] > $sala->capacidad) {
+                return redirect()->back()->withErrors(['error' => 'No quedan suficientes entradas disponibles para este evento.']);
+            }
+        }
+
+        // Crear la compra
         $compra = Compra::create([
             'usuario_id' => $user->id,
             'total' => $total,
             'fecha_compra' => now(),
         ]);
 
-        // asocia entradas y genera QRs
         foreach ($carrito as $item) {
-            if (isset($item['id']) && isset($item['cantidad'])) {
-                $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
-
-                for ($i = 1; $i <= $item['cantidad']; $i++) {
-                    $this->generarQr($compra, $item['id'], $i);
-                }
+            $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+            for ($i = 1; $i <= $item['cantidad']; $i++) {
+                $this->generarQr($compra, $item['id'], $i);
             }
         }
 
@@ -94,21 +110,13 @@ public function confirmarCompra(Request $request)
             $user->saldo -= $total;
         }
 
-        // incrementar puntos
-        $puntosGanados = round($total * 0.10); // redondeo a numero entero pq puse en a base de datos q el numero era integr xd
-        $user->puntos_totales += intval($puntosGanados); // aseguramos que sea un entero
-
-
+        $puntosGanados = round($total * 0.10);
+        $user->puntos_totales += intval($puntosGanados);
         $user->actualizarMembresia();
-
         $user->save();
 
         DB::commit();
-
-
         session()->forget('carrito');
-
-
         Cookie::queue(Cookie::forget('carrito'));
 
         return redirect()->route('index')->with('success', 'Compra realizada con éxito. Has ganado ' . $puntosGanados . ' puntos.');
@@ -118,6 +126,7 @@ public function confirmarCompra(Request $request)
         return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
     }
 }
+
     
     private function generarQr($compra, $entradaId, $indice)
     {
@@ -258,11 +267,5 @@ public function confirmarCompra(Request $request)
     return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
 }
 
-    
-
-
-
-
 }
-
 

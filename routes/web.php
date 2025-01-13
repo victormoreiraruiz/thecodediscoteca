@@ -168,6 +168,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/admin/productos/{id}', [AdminController::class, 'actualizarProducto'])->name('admin.actualizaProducto');
     Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto'])->name('admin.eliminarProducto');
     Route::get('/admin/historial-ingresos', [AdminController::class, 'historialIngresos'])->name('admin.historial.ingresos');
+    Route::post('/admin/reponer-stock', [AdminController::class, 'reponerStock'])->name('admin.reponerStock');
+
 
 });
 

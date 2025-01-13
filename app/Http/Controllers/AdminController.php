@@ -12,6 +12,7 @@ use App\Models\Compra;
 use App\Models\ReservaDiscoteca;
 use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\HistorialIngresos;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -374,6 +375,56 @@ public function historialIngresos()
         ->get();
 
     return response()->json($ingresos);
+}
+
+public function reponerStock(Request $request)
+{
+    $admin = auth()->user();
+
+    if (!$admin || $admin->rol !== 'admin') {
+        return response()->json(['error' => 'No autorizado'], 403);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $totalCosto = 0;
+
+        foreach ($request->compras as $compra) {
+            $producto = Producto::findOrFail($compra['id']);
+            $costoCompra = $producto->precio * 0.3 * $compra['cantidad'];
+
+            // Verificar si el admin tiene suficiente saldo antes de continuar
+            if ($admin->ingresos < $costoCompra) {
+                DB::rollBack();
+                return response()->json(['error' => 'Fondos insuficientes para la reposición'], 400);
+            }
+
+            // Actualizar el stock del producto
+            $producto->increment('stock', $compra['cantidad']);
+
+            // Restar el costo de la compra de los ingresos del admin
+            $admin->decrement('ingresos', $costoCompra);
+
+            // Registrar en historial de ingresos
+            HistorialIngresos::create([
+                'cantidad' => -$costoCompra, // Se registra como un gasto
+                'motivo' => "Compra de {$compra['cantidad']} unidades de {$producto->nombre}",
+                'created_at' => now(),
+            ]);
+
+            $totalCosto += $costoCompra;
+        }
+
+        DB::commit();
+
+        return response()->json(['message' => 'Stock repuesto con éxito', 'costoTotal' => $totalCosto]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error("Error al reponer stock: " . $e->getMessage());
+        return response()->json(['error' => 'Ocurrió un error al procesar la reposición'], 500);
+    }
 }
 
 
