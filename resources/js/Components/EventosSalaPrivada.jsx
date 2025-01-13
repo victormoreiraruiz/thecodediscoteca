@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 
 const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState('');
@@ -14,14 +15,13 @@ const EventosSalaPrivada = () => {
   const [cartel, setCartel] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
-  const [acceptPolicies, setAcceptPolicies] = useState(false); // Estado para aceptar las políticas
-  const [loading, setLoading] = useState(false); // Estado de carga para la reserva
+  const [acceptPolicies, setAcceptPolicies] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchBookedDates = async () => {
     try {
       const response = await axios.get('/api/salas/1/reservas');
       setBookedDates(response.data);
-      
     } catch (error) {
       console.error('Error al cargar las fechas de reservas:', error);
     }
@@ -32,7 +32,9 @@ const EventosSalaPrivada = () => {
   }, []);
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
+    if (!isDateBooked(date)) {
+      setSelectedDate(date);
+    }
   };
 
   const isDateBooked = (date) => {
@@ -49,12 +51,20 @@ const EventosSalaPrivada = () => {
     e.preventDefault();
 
     if (!acceptPolicies) {
-      alert('Debes aceptar las políticas de la sala antes de continuar.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Políticas de la sala',
+        text: 'Debes aceptar las políticas de la sala antes de continuar.',
+      });
       return;
     }
 
     if (!selectedDate) {
-      alert('Por favor, selecciona una fecha disponible en el calendario.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha requerida',
+        text: 'Por favor, selecciona una fecha disponible en el calendario.',
+      });
       return;
     }
 
@@ -62,7 +72,11 @@ const EventosSalaPrivada = () => {
       tipoReserva === 'concierto' &&
       (!precioEntrada || !nombreConcierto || !horaInicio || !horaFin)
     ) {
-      alert('Por favor, completa todos los campos obligatorios para el concierto.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Por favor, completa todos los campos obligatorios para el concierto.',
+      });
       return;
     }
 
@@ -85,13 +99,16 @@ const EventosSalaPrivada = () => {
 
     try {
       setLoading(true);
-
-      const response = await axios.post('/api/salas/1/reservar', formData, {
+      await axios.post('/api/salas/1/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      Swal.fire({
+        icon: 'success',
+        title: 'Reserva creada',
+        text: 'Reserva creada exitosamente. Se ha generado la factura.',
+      });
 
-      alert('Reserva creada exitosamente. Se ha generado la factura.');
       setMotivo('');
       setNumeroPersonas(30);
       setTipoReserva('privada');
@@ -103,10 +120,17 @@ const EventosSalaPrivada = () => {
       setSelectedDate(null);
       setAcceptPolicies(false);
       fetchBookedDates();
-    } catch (error) {
-      console.error('Error al crear la reserva o generar la factura:', error);
-      alert('Hubo un error al crear la reserva o generar la factura. Inténtalo de nuevo.');
-    } finally {
+    }  catch (error) {
+      console.error('Error al crear la reserva:', error);
+      if (error.response) {
+         console.error('Detalles del error:', error.response.data);
+      }
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al crear la reserva o generar la factura. Inténtalo de nuevo.',
+      });
+   } finally {
       setLoading(false);
     }
   };
@@ -114,27 +138,34 @@ const EventosSalaPrivada = () => {
   return (
     <div>
       <h2>Sala Privada</h2>
-      <div className="info-container">
-        <img src="/imagenes/salaprivada.jpg" alt="Sala Privada" className="reservation-image" />
-        <h3 className="reservation-description">
-          El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
-          Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
-        </h3>
-      </div>
-
       <div className="calendar-container">
-        <Calendar
-          onChange={handleDateChange}
-          value={selectedDate}
-          minDate={new Date()}
-          tileClassName={({ date }) => (isDateBooked(date) ? 'booked-date' : null)}
-        />
+      <Calendar
+  onChange={handleDateChange}
+  value={selectedDate}
+  minDate={new Date()} // Evita que se seleccionen fechas pasadas
+  className="w-[380px] p-4 bg-[#e5cc70] rounded-lg shadow-lg border border-gray-300"
+  tileClassName={({ date }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (date < today) {
+      return 'text-gray-400 pointer-events-none'; // Días pasados en gris y no seleccionables
+    }
+    if (isDateBooked(date)) {
+      return 'bg-[#860303] text-white font-semibold rounded-md'; // Fechas ocupadas en rojo oscuro
+    }
+    if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+      return 'bg-black text-white font-semibold rounded-md'; // Fecha seleccionada en negro
+    }
+    return 'hover:bg-gray-200 rounded-md'; // Hover en días normales
+  }}
+/>
+
       </div>
 
       <form onSubmit={handleSubmit} className="event-form">
         <label>
           <h3>Número de personas:</h3>
-          
           <select
             value={numeroPersonas}
             onChange={(e) => setNumeroPersonas(Number(e.target.value))}
@@ -149,7 +180,7 @@ const EventosSalaPrivada = () => {
         </label>
 
         <label>
-        <h3>Tipo de reserva:</h3> 
+          <h3>Tipo de reserva:</h3>
           <select
             value={tipoReserva}
             onChange={(e) => setTipoReserva(e.target.value)}
@@ -163,8 +194,7 @@ const EventosSalaPrivada = () => {
         {tipoReserva === 'concierto' && (
           <>
             <label>
-            <h3>Nombre del concierto:</h3>
-              
+              <h3>Nombre del concierto:</h3>
               <input
                 type="text"
                 value={nombreConcierto}
@@ -175,7 +205,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-            <h3>Hora de inicio:</h3>
+              <h3>Hora de inicio:</h3>
               <input
                 type="time"
                 value={horaInicio}
@@ -185,7 +215,7 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-            <h3> Hora de fin:</h3>
+              <h3>Hora de fin:</h3>
               <input
                 type="time"
                 value={horaFin}
@@ -195,13 +225,12 @@ const EventosSalaPrivada = () => {
             </label>
 
             <label>
-            <h3>Cartel del concierto:</h3>
+              <h3>Cartel del concierto:</h3>
               <input type="file" onChange={handleCartelChange} accept="image/*" required />
             </label>
 
             <label>
-            <h3>Precio de entrada (€):</h3>
-              
+              <h3>Precio de entrada (€):</h3>
               <input
                 type="number"
                 value={precioEntrada}
@@ -212,20 +241,17 @@ const EventosSalaPrivada = () => {
                 required
               />
             </label>
-          </>
-        )}
-
-        <label>
-        <h3> Describa en qué consiste el evento:</h3>
-         
-          <textarea
+            <label>
+            <textarea
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             placeholder="Describa el evento o motivo"
             required
             className="event-textarea"
           />
-        </label>
+            </label>
+          </>
+        )}
 
         <label className="accept-policies">
           <input
@@ -233,8 +259,7 @@ const EventosSalaPrivada = () => {
             checked={acceptPolicies}
             onChange={(e) => setAcceptPolicies(e.target.checked)}
           />
-          <h3>He leído y acepto las políticas de la sala</h3>
-          
+          <h3>He leído y acepto las <a href="/politica-privacidad">políticas de la sala</a></h3>
         </label>
 
         <button type="submit" className="event-submit-button" disabled={loading}>

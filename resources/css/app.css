@@ -144,6 +144,19 @@ h2 {
     background-color: #e5cc70;
   }
 
+/* Color para los días ocupados */
+.booked-date {
+  background-color: red !important;
+  color: white !important;
+  border-radius: 50%; /* Para que se vea mejor */
+}
+
+/* Color para la fecha seleccionada */
+.selected-date {
+  background-color: #4caf50 !important; /* Verde */
+  color: white !important;
+  border-radius: 50%;
+}
 
 
   .rojo {
