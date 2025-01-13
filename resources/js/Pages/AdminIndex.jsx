@@ -8,6 +8,7 @@ import AdminIngresos from '../Components/AdminIngresos';
 import AdminCrearProducto from "../Components/AdminCrearProducto";
 import AdminCrearCategoria from "../Components/AdminCrearCategoria";
 import AdminGestionProductos from "../Components/AdminGestionProductos";
+import AdminReponerStock from "../Components/AdminReponerStock";  // 🔹 Nuevo Componente
 import Mensajes from "../Components/Mensajes";
 
 const paneles = [
@@ -19,6 +20,7 @@ const paneles = [
     { id: 'crearCategoria', nombre: 'Crear Categoría', componente: AdminCrearCategoria },
     { id: 'crearProducto', nombre: 'Crear Producto', componente: AdminCrearProducto },
     { id: 'gestionProductos', nombre: 'Gestionar Productos', componente: AdminGestionProductos },
+    { id: 'reponerStock', nombre: 'Reponer Stock', componente: AdminReponerStock }, // 🔹 Se añade la opción de reposición de stock
     { id: 'mensajes', nombre: 'Mensajes', componente: Mensajes },
 ];
 
