@@ -53,9 +53,6 @@ class CompraController extends Controller
 }
 
     
-
-    
-
 public function confirmarCompra(Request $request)
 {
     $user = $request->user();
@@ -71,27 +68,6 @@ public function confirmarCompra(Request $request)
 
     DB::beginTransaction();
     try {
-        foreach ($carrito as $item) {
-            $evento = \App\Models\Evento::find($item['evento_id']);
-            $sala = \App\Models\Sala::find($evento->sala_id);
-            
-            if (!$sala) {
-                throw new \Exception("No se encontró la sala asociada al evento.");
-            }
-
-            // Obtener el total de entradas vendidas
-            $entradasVendidas = DB::table('compra_entradas')
-                ->whereIn('entrada_id', function ($query) use ($evento) {
-                    $query->select('id')->from('entradas')->where('evento_id', $evento->id);
-                })
-                ->sum('cantidad');
-
-            // Validar si hay espacio suficiente
-            if ($entradasVendidas + $item['cantidad'] > $sala->capacidad) {
-                return redirect()->back()->withErrors(['error' => 'No quedan suficientes entradas disponibles para este evento.']);
-            }
-        }
-
         // Crear la compra
         $compra = Compra::create([
             'usuario_id' => $user->id,
@@ -100,16 +76,91 @@ public function confirmarCompra(Request $request)
         ]);
 
         foreach ($carrito as $item) {
-            $compra->entradas()->attach($item['id'], ['cantidad' => $item['cantidad']]);
+            // Verificar que cantidad y precio existan y sean válidos
+            if (!isset($item['cantidad']) || !isset($item['precio']) || $item['cantidad'] <= 0 || $item['precio'] <= 0) {
+                throw new \Exception("Cantidad o precio inválido para la entrada ID: " . ($item['id'] ?? 'Desconocido'));
+            }
+
+            // Obtener la entrada y el evento asociado
+            $entrada = \App\Models\Entrada::find($item['id']);
+            if (!$entrada) {
+                throw new \Exception("No se encontró la entrada con ID: " . $item['id']);
+            }
+
+            $evento = \App\Models\Evento::find($entrada->evento_id);
+            if (!$evento) {
+                throw new \Exception("No se encontró el evento asociado a la entrada.");
+            }
+
+            $sala = \App\Models\Sala::find($evento->sala_id);
+            if (!$sala) {
+                throw new \Exception("No se encontró la sala asociada al evento.");
+            }
+
+            // Identificar al creador del evento mediante ReservaDiscoteca
+            $reserva = \App\Models\ReservaDiscoteca::where('sala_id', $entrada->evento->sala_id)
+                ->where('fecha_reserva', $entrada->evento->fecha_evento)
+                ->first();
+
+            if ($reserva) {
+                $creador = $reserva->usuario;
+
+                if (!$creador) {
+                    throw new \Exception("No se encontró el usuario creador de la reserva.");
+                }
+
+                // Calcular el ingreso total basado en la reserva
+                $ingresoTotal = (int) collect($carrito)->reduce(function ($sum, $item) use ($reserva) {
+                    return $sum + ($item['cantidad'] * $reserva->precio_entrada);
+                }, 0);
+
+                // Asignar el dinero al creador
+                $creador->ingresos += $ingresoTotal;
+                $creador->save();
+            }
+
+            // Registrar la compra de entradas
+            $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);
+
+            // Generar QR por cada entrada comprada
             for ($i = 1; $i <= $item['cantidad']; $i++) {
-                $this->generarQr($compra, $item['id'], $i);
+                $this->generarQr($compra, $entrada->id, $i);
+            }
+
+            // **Registrar ingresos en historial si la sala es "discoteca"**
+            if ($sala->tipo_sala === 'discoteca') {
+                $admin = \App\Models\User::where('rol', 'admin')->first();
+
+                if ($admin) {
+                    // Calcular el ingreso total
+                    $ingresoAdmin = (float) ($item['precio'] * $item['cantidad']);
+
+                    // Validar que el ingreso sea mayor a 0
+                    if ($ingresoAdmin > 0) {
+                        // Registrar en historial de ingresos
+                        \App\Models\HistorialIngresos::create([
+                            'cantidad' => $ingresoAdmin,
+                            'motivo' => "Venta de entradas en Discoteca - Evento ID: {$evento->id}",
+                        ]);
+
+                        // Sumar el ingreso al saldo del admin
+                        $admin->ingresos += $ingresoAdmin;
+                        $admin->save();
+                    } else {
+                        \Log::warning("Intento de registrar ingreso inválido.", [
+                            'cantidad' => $ingresoAdmin,
+                        ]);
+                    }
+                }
             }
         }
 
+        // Restar saldo del comprador si paga con saldo
         if ($pagarConSaldo) {
             $user->saldo -= $total;
         }
 
+        // Otorgar puntos al usuario por la compra
         $puntosGanados = round($total * 0.10);
         $user->puntos_totales += intval($puntosGanados);
         $user->actualizarMembresia();
@@ -126,6 +177,8 @@ public function confirmarCompra(Request $request)
         return redirect()->back()->withErrors(['error' => 'Hubo un problema al procesar la compra.']);
     }
 }
+
+
 
     
     private function generarQr($compra, $entradaId, $indice)

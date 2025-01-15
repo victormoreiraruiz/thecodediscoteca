@@ -123,16 +123,22 @@ const EventosSalaCelebraciones = () => {
       setAcceptPolicies(false);
       fetchBookedDates();
     } catch (error) {
-      console.error('Error al crear la reserva:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al crear la reserva. Inténtalo de nuevo.',
-      });
-    } finally {
-      setLoading(false);
+      if (error.response && error.response.status === 403) {
+        // Si el error es por falta de permisos, mostrar un alert y redirigir
+        if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
+            const confirmRedirect = window.confirm(
+                'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
+            );
+            if (confirmRedirect) {
+                window.location.href = '/convertir-promotor';
+            }
+        }
+    } else {
+        console.error('Error al crear la reserva:', error);
+        alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
     }
-  };
+}
+};
 
   return (
     <div>

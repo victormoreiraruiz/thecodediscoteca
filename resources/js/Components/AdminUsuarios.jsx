@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 
 const AdminUsuarios = ({ usuarios }) => {
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,17 @@ const AdminUsuarios = ({ usuarios }) => {
     }
   };
 
-  const cambiarRol = async (userId, nuevoRol) => {
+  const cambiarRol = async (userId, nuevoRol, rolActual) => {
+    if (rolActual === 'admin') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Acción no permitida',
+        text: 'No se puede cambiar el rol de un administrador.',
+        confirmButtonColor: '#860303',
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -47,7 +58,13 @@ const AdminUsuarios = ({ usuarios }) => {
         user.id === userId ? { ...user, rol: nuevoRol } : user
       );
       setUsuarios(updatedUsers);
-      alert('Rol cambiado exitosamente!');
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Rol cambiado',
+        text: 'El rol del usuario se ha actualizado correctamente.',
+        confirmButtonColor: '#e5cc70',
+      });
     } catch (error) {
       setError(error.message);
     } finally {
@@ -56,29 +73,45 @@ const AdminUsuarios = ({ usuarios }) => {
   };
 
   const eliminarUsuario = async (userId) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#860303',
+      cancelButtonColor: '#e5cc70',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(route('admin.eliminarUsuario', { id: userId }), {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
+          },
+        });
 
-    try {
-      const response = await fetch(route('admin.eliminarUsuario', { id: userId }), {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
-        },
-      });
+        if (!response.ok) throw new Error('Error al eliminar el usuario');
 
-      if (!response.ok) throw new Error('Error al eliminar el usuario');
+        setUsuarios(usuariosList.filter(user => user.id !== userId));
 
-      setUsuarios(usuariosList.filter(user => user.id !== userId));
-      alert('Usuario eliminado exitosamente!');
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario eliminado',
+          text: 'El usuario ha sido eliminado correctamente.',
+          confirmButtonColor: '#e5cc70',
+        });
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   return (
@@ -94,7 +127,6 @@ const AdminUsuarios = ({ usuarios }) => {
           onChange={e => setSearch(e.target.value)}
           className="w-full md:w-1/2 px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-800 text-white"
         />
-        <p className="text-[#e5cc70]">Buscando: <strong>{search}</strong></p>
       </div>
 
       {/* Tabla de usuarios */}
@@ -129,7 +161,7 @@ const AdminUsuarios = ({ usuarios }) => {
                     {['admin', 'camarero', 'cliente', 'promotor'].map(rol => (
                       <button
                         key={rol}
-                        onClick={() => cambiarRol(user.id, rol)}
+                        onClick={() => cambiarRol(user.id, rol, user.rol)}
                         disabled={loading}
                         className="bg-[#e5cc70] text-[#860303] px-4 py-2 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
                       >

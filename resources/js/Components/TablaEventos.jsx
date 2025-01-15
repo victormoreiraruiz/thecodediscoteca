@@ -9,7 +9,6 @@ const TablaEventos = ({ eventos }) => {
     const [filtroFecha, setFiltroFecha] = useState({ desde: "", hasta: "" });
     const eventosPorPagina = 10;
 
-    // Filtrar eventos por rango de fechas
     const filtrarPorFecha = (eventos) => {
         const { desde, hasta } = filtroFecha;
         if (!desde || !hasta) return eventos;
@@ -23,7 +22,6 @@ const TablaEventos = ({ eventos }) => {
         });
     };
 
-    // Filtrar eventos por nombre
     const filtrarPorNombre = (eventos) => {
         if (!filtroNombre) return eventos;
         return eventos.filter((evento) =>
@@ -31,29 +29,11 @@ const TablaEventos = ({ eventos }) => {
         );
     };
 
-    // Ordenar eventos
     const ordenarEventos = (campo) => {
         const esAscendente = orden.campo === campo ? !orden.ascendente : true;
         setOrden({ campo, ascendente: esAscendente });
-
-        const eventosOrdenados = [...eventos].sort((a, b) => {
-            if (campo === "fecha_evento") {
-                return esAscendente
-                    ? new Date(a.fecha_evento) - new Date(b.fecha_evento)
-                    : new Date(b.fecha_evento) - new Date(a.fecha_evento);
-            } else if (campo === "nombre_evento") {
-                return esAscendente
-                    ? a.nombre_evento.localeCompare(b.nombre_evento)
-                    : b.nombre_evento.localeCompare(a.nombre_evento);
-            }
-            return 0;
-        });
-
-        setPaginaActual(1);
-        setEventosPaginados(eventosOrdenados.slice(0, eventosPorPagina));
     };
 
-    // Paginación y filtros
     useEffect(() => {
         const inicio = (paginaActual - 1) * eventosPorPagina;
         const fin = inicio + eventosPorPagina;
@@ -80,147 +60,104 @@ const TablaEventos = ({ eventos }) => {
     };
 
     const handleEliminarEvento = async (eventoId) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.')) {
-        return;
-    }
+        if (!confirm('¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.')) {
+            return;
+        }
 
-    try {
-        const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
-        alert(response.data.message || 'Evento eliminado con éxito.');
-        location.reload();
-    } catch (error) {
-        console.error('Error al eliminar el evento:', error);
-        alert(error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.');
-    }
-};
+        try {
+            const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
+            alert(response.data.message || 'Evento eliminado con éxito.');
+            location.reload();
+        } catch (error) {
+            console.error('Error al eliminar el evento:', error);
+            alert(error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.');
+        }
+    };
 
-    
     return (
-        <div className="tabla-compras-container">
+        <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-[#e5cc70] text-[#860303] rounded-lg shadow-lg">
             {/* Barra de búsqueda */}
-            <div className="filtro-nombre">
-                <label>
-                    Buscar:
-                    <input
-                        type="text"
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                        placeholder="Buscar por nombre"
-                    />
-                </label>
-            </div>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+                <input
+                    type="text"
+                    value={filtroNombre}
+                    onChange={(e) => setFiltroNombre(e.target.value)}
+                    placeholder="Buscar por nombre"
+                    className="bg-[#860303] text-[#e5cc70] px-3 py-2 rounded-md focus:outline-none w-full md:w-1/3"
+                />
 
-            {/* Filtros de fecha */}
-            <div className="filtro-fechas">
-                <label>
-                    Desde:
+                {/* Filtros de fecha */}
+                <div className="flex space-x-4 mt-2 md:mt-0">
                     <input
                         type="date"
                         value={filtroFecha.desde}
-                        onChange={(e) =>
-                            setFiltroFecha({ ...filtroFecha, desde: e.target.value })
-                        }
+                        onChange={(e) => setFiltroFecha({ ...filtroFecha, desde: e.target.value })}
+                        className="bg-[#860303] text-[#e5cc70] px-2 py-1 rounded-md focus:outline-none"
                     />
-                </label>
-                <label>
-                    Hasta:
                     <input
                         type="date"
                         value={filtroFecha.hasta}
-                        onChange={(e) =>
-                            setFiltroFecha({ ...filtroFecha, hasta: e.target.value })
-                        }
+                        onChange={(e) => setFiltroFecha({ ...filtroFecha, hasta: e.target.value })}
+                        className="bg-[#860303] text-[#e5cc70] px-2 py-1 rounded-md focus:outline-none"
                     />
-                </label>
+                </div>
             </div>
 
             {/* Tabla */}
-            <table className="tabla-compras">
-                <thead>
-                    <tr>
-                        <th
-                            onClick={() => ordenarEventos("nombre_evento")}
-                            className="tabla-compras-header"
-                        >
-                            Nombre{" "}
-                            {orden.campo === "nombre_evento"
-                                ? orden.ascendente
-                                    ? "▲"
-                                    : "▼"
-                                : ""}
-                        </th>
-                        <th
-                            onClick={() => ordenarEventos("fecha_evento")}
-                            className="tabla-compras-header"
-                        >
-                            Fecha{" "}
-                            {orden.campo === "fecha_evento"
-                                ? orden.ascendente
-                                    ? "▲"
-                                    : "▼"
-                                : ""}
-                        </th>
-                        <th className="tabla-compras-header">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {eventosPaginados.length > 0 ? (
-                        eventosPaginados.map((evento) => (
-                            <tr key={evento.id} className="tabla-compras-row">
-                                <td>{evento.nombre_evento}</td>
-                                <td>{new Date(evento.fecha_evento).toLocaleDateString()}</td>
-                                <td>
-                                    <a
-                                        href={`/mi-cuenta/eventos/${evento.id}`}
-                                        className="tabla-compras-btn"
-                                        style={{ marginRight: "10px" }}
-                                    >
-                                        Ver Detalles
-                                    </a>
-                                    <a
-  href={`/api/reservas/${evento.reserva_id}/factura`}
-  className="tabla-compras-btn"
-  style={{ marginRight: "10px" }}
->
-  Descargar Factura
-</a>
-
-<button
-    onClick={() => handleEliminarEvento(evento.id)}
-    className="tabla-compras-btn"
->
-    Eliminar Evento
-</button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="3" className="tabla-compras-vacia">
-                                No tienes eventos registrados.
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full border-2 border-[#860303] rounded-lg">
+                    <thead>
+                        <tr className="bg-[#860303] text-[#e5cc70]">
+                            <th
+                                className="px-4 py-3 text-left cursor-pointer"
+                                onClick={() => ordenarEventos("nombre_evento")}
+                            >
+                                Nombre {orden.campo === "nombre_evento" ? (orden.ascendente ? "▲" : "▼") : ""}
+                            </th>
+                            <th
+                                className="px-4 py-3 text-left cursor-pointer"
+                                onClick={() => ordenarEventos("fecha_evento")}
+                            >
+                                Fecha {orden.campo === "fecha_evento" ? (orden.ascendente ? "▲" : "▼") : ""}
+                            </th>
+                            <th className="px-4 py-3 text-left">Acciones</th>
                         </tr>
-                    )}
-                </tbody>
-            </table>
-
-            {/* Controles de paginación */}
-            <div className="tabla-compras-paginacion">
-                {Array.from({
-                    length: Math.ceil(
-                        filtrarPorNombre(filtrarPorFecha(eventos)).length / eventosPorPagina
-                    ),
-                }).map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => cambiarPagina(index + 1)}
-                        className={`paginacion-btn ${
-                            paginaActual === index + 1 ? "activo" : ""
-                        }`}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
+                    </thead>
+                    <tbody className="divide-y divide-[#860303] bg-[#e5cc70] text-[#860303]">
+                        {eventosPaginados.length > 0 ? (
+                            eventosPaginados.map((evento) => (
+                                <tr key={evento.id} className="hover:bg-[#f0d77b] transition duration-200">
+                                    <td className="px-4 py-3">{evento.nombre_evento}</td>
+                                    <td className="px-4 py-3">{new Date(evento.fecha_evento).toLocaleDateString()}</td>
+                                    <td className="px-4 py-3 flex space-x-2">
+                                        <a
+                                            href={`/mi-cuenta/eventos/${evento.id}`}
+                                            className="bg-[#860303] text-[#e5cc70] px-3 py-2 rounded-lg shadow-md hover:bg-[#a80505] transition duration-300"
+                                        >
+                                            Ver Detalles
+                                        </a>
+                                        <a
+                                            href={`/api/reservas/${evento.reserva_id}/factura`}
+                                            className="bg-[#860303] text-[#e5cc70] px-3 py-2 rounded-lg shadow-md hover:bg-[#a80505] transition duration-300"
+                                        >
+                                            Descargar Factura
+                                        </a>
+                                        <button
+                                            onClick={() => handleEliminarEvento(evento.id)}
+                                            className="bg-red-600 text-white px-3 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="3" className="text-center py-4">No tienes eventos registrados.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
