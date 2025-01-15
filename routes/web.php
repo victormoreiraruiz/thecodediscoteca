@@ -169,6 +169,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/productos/{id}', [AdminController::class, 'eliminarProducto'])->name('admin.eliminarProducto');
     Route::get('/admin/historial-ingresos', [AdminController::class, 'historialIngresos'])->name('admin.historial.ingresos');
     Route::post('/admin/reponer-stock', [AdminController::class, 'reponerStock'])->name('admin.reponerStock');
+    Route::put('admin/categorias/{id}', [CategoriaController::class, 'update'])->name('admin.categorias.update');
+    Route::delete('admin/categorias/{id}', [CategoriaController::class, 'destroy'])->name('admin.categorias.destroy');
 
 
 });

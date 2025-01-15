@@ -7,7 +7,6 @@ const TablaNotificaciones = ({ notificaciones }) => {
     const [filtroFecha, setFiltroFecha] = useState({ desde: '', hasta: '' });
     const notificacionesPorPagina = 10;
 
-    // Filtrar notificaciones por rango de fechas
     const filtrarPorFecha = (notificaciones) => {
         const { desde, hasta } = filtroFecha;
         if (!desde || !hasta) return notificaciones;
@@ -21,13 +20,11 @@ const TablaNotificaciones = ({ notificaciones }) => {
         });
     };
 
-    // Ordenar notificaciones
     const ordenarNotificaciones = (campo) => {
         const esAscendente = orden.campo === campo ? !orden.ascendente : true;
         setOrden({ campo, ascendente: esAscendente });
     };
 
-    // Actualizar las notificaciones paginadas al cambiar filtros, orden o página
     useEffect(() => {
         const inicio = (paginaActual - 1) * notificacionesPorPagina;
         const fin = inicio + notificacionesPorPagina;
@@ -52,75 +49,85 @@ const TablaNotificaciones = ({ notificaciones }) => {
     };
 
     return (
-        <div className="tabla-compras-container">
-            <table className="tabla-compras">
-                <thead>
-                    {/* Filtro de fechas en la parte superior de la tabla */}
-                    <tr>
-                        <th colSpan="3" className="tabla-compras-filtro">
-                            <div className="filtro-fechas">
-                                <label>
-                                    Desde:
-                                    <input
-                                        type="date"
-                                        value={filtroFecha.desde}
-                                        onChange={(e) => setFiltroFecha({ ...filtroFecha, desde: e.target.value })}
-                                    />
-                                </label>
-                                <label>
-                                    Hasta:
-                                    <input
-                                        type="date"
-                                        value={filtroFecha.hasta}
-                                        onChange={(e) => setFiltroFecha({ ...filtroFecha, hasta: e.target.value })}
-                                    />
-                                </label>
-                            </div>
-                        </th>
-                    </tr>
-                    {/* Encabezados de la tabla */}
-                    <tr>
-                        <th
-                            onClick={() => ordenarNotificaciones('fecha')}
-                            className="tabla-compras-header"
-                        >
-                            Fecha {orden.campo === 'fecha' ? (orden.ascendente ? '▲' : '▼') : ''}
-                        </th>
-                        <th className="tabla-compras-header">Mensaje</th>
-                        <th
-                            onClick={() => ordenarNotificaciones('leido')}
-                            className="tabla-compras-header"
-                        >
-                            Estado {orden.campo === 'leido' ? (orden.ascendente ? '▲' : '▼') : ''}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {notificacionesPaginadas.length > 0 ? (
-                        notificacionesPaginadas.map((notificacion) => (
-                            <tr key={notificacion.id} className="tabla-compras-row">
-                                <td>{new Date(notificacion.created_at).toLocaleDateString()}</td>
-                                <td>{notificacion.mensaje}</td>
-                                <td>{notificacion.leido ? 'Leído' : 'No leído'}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="3" className="tabla-compras-vacia">
-                                No tienes notificaciones registradas.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+        <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-[#e5cc70] text-[#860303] rounded-lg shadow-lg">
+            {/* Filtros de fecha */}
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex space-x-4">
+                    <label className="flex flex-col">
+                        Desde:
+                        <input
+                            type="date"
+                            value={filtroFecha.desde}
+                            onChange={(e) => setFiltroFecha({ ...filtroFecha, desde: e.target.value })}
+                            className="bg-[#860303] text-[#e5cc70] px-2 py-1 rounded-md focus:outline-none"
+                        />
+                    </label>
+                    <label className="flex flex-col">
+                        Hasta:
+                        <input
+                            type="date"
+                            value={filtroFecha.hasta}
+                            onChange={(e) => setFiltroFecha({ ...filtroFecha, hasta: e.target.value })}
+                            className="bg-[#860303] text-[#e5cc70] px-2 py-1 rounded-md focus:outline-none"
+                        />
+                    </label>
+                </div>
+            </div>
 
-            {/* Controles de paginación */}
-            <div className="tabla-compras-paginacion">
+            {/* Tabla */}
+            <div className="overflow-x-auto">
+                <table className="w-full border-2 border-[#860303] rounded-lg">
+                    <thead>
+                        <tr className="bg-[#860303] text-[#e5cc70]">
+                            <th
+                                className="px-4 py-3 text-left cursor-pointer"
+                                onClick={() => ordenarNotificaciones('fecha')}
+                            >
+                                Fecha {orden.campo === 'fecha' ? (orden.ascendente ? '▲' : '▼') : ''}
+                            </th>
+                            <th className="px-4 py-3 text-left">Mensaje</th>
+                            <th
+                                className="px-4 py-3 text-left cursor-pointer"
+                                onClick={() => ordenarNotificaciones('leido')}
+                            >
+                                Estado {orden.campo === 'leido' ? (orden.ascendente ? '▲' : '▼') : ''}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#860303] bg-[#e5cc70] text-[#860303]">
+                        {notificacionesPaginadas.length > 0 ? (
+                            notificacionesPaginadas.map((notificacion) => (
+                                <tr
+                                    key={notificacion.id}
+                                    className="hover:bg-[#f0d77b] transition duration-200"
+                                >
+                                    <td className="px-4 py-3">{new Date(notificacion.created_at).toLocaleDateString()}</td>
+                                    <td className="px-4 py-3">{notificacion.mensaje}</td>
+                                    <td className="px-4 py-3">
+                                        {notificacion.leido ? 'Leído' : 'No leído'}
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="3" className="text-center py-4">No tienes notificaciones registradas.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Paginación */}
+            <div className="mt-4 flex justify-center space-x-2">
                 {Array.from({ length: Math.ceil(filtrarPorFecha(notificaciones).length / notificacionesPorPagina) }).map((_, index) => (
                     <button
                         key={index}
                         onClick={() => cambiarPagina(index + 1)}
-                        className={`paginacion-btn ${paginaActual === index + 1 ? 'activo' : ''}`}
+                        className={`px-3 py-2 rounded-lg ${
+                            paginaActual === index + 1
+                                ? 'bg-[#860303] text-[#e5cc70] font-bold'
+                                : 'bg-[#e5cc70] text-[#860303] border border-[#860303] hover:bg-[#f0d77b] transition'
+                        }`}
                     >
                         {index + 1}
                     </button>

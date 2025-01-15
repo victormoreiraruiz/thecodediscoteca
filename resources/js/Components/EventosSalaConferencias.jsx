@@ -1,40 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
 
 const EventosSalaConferencias = () => {
   const [motivo, setMotivo] = useState('');
   const [numeroPersonas, setNumeroPersonas] = useState(30);
-  const [tipoReserva, setTipoReserva] = useState('privada'); // Estado para el tipo de reserva
-  const [precioEntrada, setPrecioEntrada] = useState(''); // Precio para entradas de concierto
-  const [nombreConcierto, setNombreConcierto] = useState(''); // Nombre del concierto
-  const [horaInicio, setHoraInicio] = useState(''); // Hora de inicio del concierto
-  const [horaFin, setHoraFin] = useState(''); // Hora de fin del concierto
-  const [cartel, setCartel] = useState(null); // Archivo del cartel
+  const [tipoReserva, setTipoReserva] = useState('privada');
+  const [precioEntrada, setPrecioEntrada] = useState('');
+  const [nombreConcierto, setNombreConcierto] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [horaFin, setHoraFin] = useState('');
+  const [cartel, setCartel] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
+  const [acceptPolicies, setAcceptPolicies] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [isCookieValidated, setIsCookieValidated] = useState(false); // Nuevo estado
 
   useEffect(() => {
-    axios.get('/api/usuario_actual').then(response => {
-        const currentUserId = response.data.id;
-        setUserId(currentUserId);
-
-        const reservaCookie = Cookies.get('formularioReserva');
-        if (reservaCookie) {
-            const cookieData = JSON.parse(reservaCookie);
-            if (cookieData.userId !== currentUserId) {
-                // Elimina la cookie si no pertenece al usuario actual
-                Cookies.remove('formularioReserva', { path: '/' });
-            }
-        }
-    }).catch(error => {
+    axios.get('/api/usuario_actual')
+      .then(response => {
+        setUserId(response.data.id);
+      })
+      .catch(error => {
         console.error('Error al obtener el usuario actual:', error);
-    });
-}, []);
+      });
+
+    fetchBookedDates();
+  }, []);
 
   const fetchBookedDates = async () => {
     try {
@@ -45,70 +40,10 @@ const EventosSalaConferencias = () => {
     }
   };
 
-  useEffect(() => {
-    const validateCookie = async () => {
-      try {
-        const response = await axios.get('/api/usuario_actual');
-        const currentUserId = response.data.id;
-        setUserId(currentUserId);
-
-        const reservaCookie = Cookies.get('formularioReserva');
-        if (reservaCookie) {
-          const cookieData = JSON.parse(reservaCookie);
-          if (cookieData.userId !== currentUserId) {
-            // Elimina la cookie si no pertenece al usuario actual
-            Cookies.remove('formularioReserva', { path: '/' });
-          }
-        }
-      } catch (error) {
-        console.error('Error al obtener el usuario actual:', error);
-      } finally {
-        setIsCookieValidated(true); // Marca que la validación ha terminado
-      }
-    };
-
-    validateCookie();
-  }, []);
-
-  useEffect(() => {
-    if (isCookieValidated) {
-      const savedFormData = Cookies.get('formularioReserva');
-      if (savedFormData) {
-        const parsedData = JSON.parse(savedFormData);
-        setMotivo(parsedData.motivo || '');
-        setNumeroPersonas(parsedData.numeroPersonas || 30);
-        setTipoReserva(parsedData.tipoReserva || 'privada');
-        setPrecioEntrada(parsedData.precioEntrada || '');
-        setNombreConcierto(parsedData.nombreConcierto || '');
-        setHoraInicio(parsedData.horaInicio || '');
-        setHoraFin(parsedData.horaFin || '');
-        setSelectedDate(parsedData.selectedDate ? new Date(parsedData.selectedDate) : null);
-      }
-    }
-  }, [isCookieValidated]);
-  // Restaurar los datos del formulario desde la cookie al cargar la página
-  useEffect(() => {
-    const savedFormData = Cookies.get('formularioReserva');
-    if (savedFormData) {
-      const parsedData = JSON.parse(savedFormData);
-      setMotivo(parsedData.motivo || '');
-      setNumeroPersonas(parsedData.numeroPersonas || 30);
-      setTipoReserva(parsedData.tipoReserva || 'privada');
-      setPrecioEntrada(parsedData.precioEntrada || '');
-      setNombreConcierto(parsedData.nombreConcierto || '');
-      setHoraInicio(parsedData.horaInicio || '');
-      setHoraFin(parsedData.horaFin || '');
-      setSelectedDate(parsedData.selectedDate ? new Date(parsedData.selectedDate) : null);
-    }
-  }, []);
-
-  // Llamada inicial para obtener las fechas reservadas
-  useEffect(() => {
-    fetchBookedDates();
-  }, []);
-
   const handleDateChange = (date) => {
-    setSelectedDate(date);
+    if (!isDateBooked(date)) {
+      setSelectedDate(date);
+    }
   };
 
   const isDateBooked = (date) => {
@@ -124,8 +59,21 @@ const EventosSalaConferencias = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!acceptPolicies) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Políticas de la sala',
+        text: 'Debes aceptar las políticas de la sala antes de continuar.',
+      });
+      return;
+    }
+
     if (!selectedDate) {
-      alert('Por favor, selecciona una fecha disponible en el calendario.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha requerida',
+        text: 'Por favor, selecciona una fecha disponible en el calendario.',
+      });
       return;
     }
 
@@ -133,36 +81,13 @@ const EventosSalaConferencias = () => {
       tipoReserva === 'concierto' &&
       (!precioEntrada || !nombreConcierto || !horaInicio || !horaFin)
     ) {
-      alert('Por favor, completa todos los campos obligatorios para el concierto.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Por favor, completa todos los campos obligatorios para el concierto.',
+      });
       return;
     }
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      setErrors({});
-  
-      const newErrors = validateForm();
-      if (Object.keys(newErrors).length > 0) {
-          setErrors(newErrors);
-          return;
-      }
-  
-      setLoading(true);
-  
-      Inertia.post(route('convertir-promotor.post'), formData, {
-          onSuccess: () => {
-              alert('¡Ahora eres promotor!');
-              Cookies.remove('formularioReserva', { path: '/' }); // Elimina la cookie aquí
-              if (onComplete) onComplete();
-              window.location.href = route('eventos.index');
-          },
-          onError: (serverErrors) => {
-              setErrors(serverErrors);
-              alert('Hubo un error al convertirte en promotor.');
-          },
-          onFinish: () => setLoading(false),
-      });
-  };
 
     const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
       .toISOString()
@@ -181,26 +106,18 @@ const EventosSalaConferencias = () => {
       formData.append('cartel', cartel);
     }
 
-    // Guardar los datos del formulario en una cookie si el usuario no tiene permisos
-    const formDataToSave = {
-      userId, // Guardar el ID del usuario junto con los datos del formulario
-      motivo,
-      numeroPersonas,
-      tipoReserva,
-      precioEntrada,
-      nombreConcierto,
-      horaInicio,
-      horaFin,
-      selectedDate,
-    };
-
     try {
+      setLoading(true);
       await axios.post('/api/salas/3/reservar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      alert('Reserva creada exitosamente');
-      Cookies.remove('formularioReserva'); // Limpiar la cookie después de confirmar la reserva
+      Swal.fire({
+        icon: 'success',
+        title: 'Reserva creada',
+        text: 'Reserva creada exitosamente. Se ha generado la factura.',
+      });
+
       setMotivo('');
       setNumeroPersonas(30);
       setTipoReserva('privada');
@@ -210,55 +127,57 @@ const EventosSalaConferencias = () => {
       setHoraFin('');
       setCartel(null);
       setSelectedDate(null);
+      setAcceptPolicies(false);
       fetchBookedDates();
     } catch (error) {
       if (error.response && error.response.status === 403) {
+        // Si el error es por falta de permisos, mostrar un alert y redirigir
         if (error.response.data.error === 'Solo los promotores o administradores pueden realizar reservas.') {
-          Cookies.set('formularioReserva', JSON.stringify(formDataToSave), { expires: 1 }); // Guardar en cookie
-          const confirmRedirect = window.confirm(
-            'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
-          );
-          if (confirmRedirect) {
-            const currentUrl = window.location.pathname;
-            window.location.href = `/convertir-promotor?redirect_to=${encodeURIComponent(currentUrl)}`;
-          }
+            const confirmRedirect = window.confirm(
+                'No tienes permisos para realizar reservas. ¿Quieres convertirte en promotor?'
+            );
+            if (confirmRedirect) {
+                window.location.href = '/convertir-promotor';
+            }
         }
-      } else {
+    } else {
         console.error('Error al crear la reserva:', error);
         alert('Hubo un error al crear la reserva. Inténtalo de nuevo.');
-      }
     }
-  };
-
-  
+}
+};
 
   return (
     <div>
       <h2>Sala de Conferencias</h2>
-      <div className="info-container">
-        <img
-          src="/imagenes/salaconferencias.jpg"
-          alt="Sala de Conferencias"
-          className="reservation-image"
-        />
-        <h3 className="reservation-description">
-          Perfecta para reuniones y eventos de carácter profesional. Con un aforo de hasta 200
-          personas, es el espacio ideal para tus conferencias.
-        </h3>
-      </div>
-
       <div className="calendar-container">
-        <Calendar
-          onChange={handleDateChange}
-          value={selectedDate}
-          minDate={new Date()}
-          tileClassName={({ date }) => (isDateBooked(date) ? 'booked-date' : null)}
-        />
+      <Calendar
+  onChange={handleDateChange}
+  value={selectedDate}
+  minDate={new Date()} // Evita que se seleccionen fechas pasadas
+  className="w-[380px] p-4 bg-[#e5cc70] rounded-lg shadow-lg border border-gray-300"
+  tileClassName={({ date }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (date < today) {
+      return 'text-gray-400 pointer-events-none'; // Días pasados en gris y no seleccionables
+    }
+    if (isDateBooked(date)) {
+      return 'bg-[#860303] text-white font-semibold rounded-md'; // Fechas ocupadas en rojo oscuro
+    }
+    if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+      return 'bg-black text-white font-semibold rounded-md'; // Fecha seleccionada en negro
+    }
+    return 'hover:bg-gray-200 rounded-md'; // Hover en días normales
+  }}
+/>
+
       </div>
 
       <form onSubmit={handleSubmit} className="event-form">
         <label>
-          Número de personas:
+          <h3>Número de personas:</h3>
           <select
             value={numeroPersonas}
             onChange={(e) => setNumeroPersonas(Number(e.target.value))}
@@ -273,7 +192,7 @@ const EventosSalaConferencias = () => {
         </label>
 
         <label>
-          Tipo de reserva:
+          <h3>Tipo de reserva:</h3>
           <select
             value={tipoReserva}
             onChange={(e) => setTipoReserva(e.target.value)}
@@ -296,7 +215,6 @@ const EventosSalaConferencias = () => {
                 required
               />
             </label>
-
             <label>
               <h3>Hora de inicio:</h3>
               <input
@@ -306,7 +224,6 @@ const EventosSalaConferencias = () => {
                 required
               />
             </label>
-
             <label>
               <h3>Hora de fin:</h3>
               <input
@@ -316,28 +233,15 @@ const EventosSalaConferencias = () => {
                 required
               />
             </label>
-
             <label>
               <h3>Cartel del concierto:</h3>
               <input type="file" onChange={handleCartelChange} accept="image/*" required />
             </label>
-
             <label>
               <h3>Precio de entrada (€):</h3>
-              <input
-                type="number"
-                value={precioEntrada}
-                onChange={(e) => setPrecioEntrada(e.target.value)}
-                placeholder="Precio por entrada"
-                min="0"
-                step="0.01"
-                required
-              />
+              <input type="number" value={precioEntrada} onChange={(e) => setPrecioEntrada(e.target.value)} min="0" step="0.01" required />
             </label>
-          </>
-        )}
-
-        <label>
+            <label>
           <h3>Describa en qué consiste el evento:</h3>
           <textarea
             value={motivo}
@@ -347,9 +251,16 @@ const EventosSalaConferencias = () => {
             className="event-textarea"
           />
         </label>
+          </>
+        )}
 
-        <button type="submit" className="event-submit-button">
-          RESERVAR
+        <label className="accept-policies">
+          <input type="checkbox" checked={acceptPolicies} onChange={(e) => setAcceptPolicies(e.target.checked)} />
+          <h3>He leído y acepto las <a href="/politica-privacidad">políticas de la sala</a></h3>
+        </label>
+
+        <button type="submit" className="event-submit-button" disabled={loading}>
+          {loading ? 'Reservando...' : 'RESERVAR'}
         </button>
       </form>
     </div>

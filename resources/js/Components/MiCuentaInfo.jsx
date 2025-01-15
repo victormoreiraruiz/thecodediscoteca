@@ -103,33 +103,53 @@ const MiCuentaInfo = () => {
         .reduce((total, ingreso) => total + ingreso, 0)
         .toFixed(2);
 
-       
+    
+    const handleAddSaldo = () => {
+        Inertia.visit('/añadir-saldo');
+    };
+   
 
     const userItems = [
         {
             label: 'Mi Perfil',
             detail: (
-                <div>
-                    <p><strong>Nombre:</strong> {user.name}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                    <p><strong>Saldo:</strong> {user.saldo} €</p>
-                    <p><strong>Puntos:</strong> {user.puntos_totales}</p>
-                    <button
-                        className="mi-cuenta-boton-password"
-                        onClick={() => handleAddSaldo()}
-                        style={{
-                            marginTop: '10px',
-                            color: '#000000',
-                            background: '#e5cc70',
-                            border: 'none',
-                            padding: '8px 16px',
-                            cursor: 'pointer',
-                            borderRadius: '5px',
-                        }}
-                    >
-                        Añadir Saldo
-                    </button>
-                </div>
+                <div className="overflow-x-auto mt-6 flex flex-col items-center">
+    <table className="w-full max-w-lg border-2 border-[#860303] rounded-lg shadow-lg overflow-hidden">
+        <thead>
+            <tr className="bg-gradient-to-r from-[#860303] to-[#b20505] text-[#e5cc70] text-lg font-semibold uppercase">
+                <th className="px-6 py-3 text-left">Detalle</th>
+                <th className="px-6 py-3 text-left">Información</th>
+            </tr>
+        </thead>
+        <tbody className="bg-[#e5cc70] text-[#860303] divide-y divide-[#860303]">
+            <tr className="hover:bg-[#f0d77b] transition duration-200">
+                <td className="px-6 py-4 font-bold">Nombre:</td>
+                <td className="px-6 py-4">{user.name}</td>
+            </tr>
+            <tr className="hover:bg-[#f0d77b] transition duration-200">
+                <td className="px-6 py-4 font-bold">Email:</td>
+                <td className="px-6 py-4">{user.email}</td>
+            </tr>
+            <tr className="hover:bg-[#f0d77b] transition duration-200">
+                <td className="px-6 py-4 font-bold">Saldo:</td>
+                <td className="px-6 py-4">{user.saldo} €</td>
+            </tr>
+            <tr className="hover:bg-[#f0d77b] transition duration-200">
+                <td className="px-6 py-4 font-bold">Puntos:</td>
+                <td className="px-6 py-4">{user.puntos_totales}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button
+        onClick={handleAddSaldo}
+        className="mt-6 bg-[#860303] text-[#e5cc70] px-6 py-3 rounded-lg font-semibold text-lg shadow-md hover:bg-[#a80505] transition duration-300"
+    >
+        Añadir Saldo
+    </button>
+</div>
+
+            
             ),
         },
         { label: 'Mis Ingresos', detail: `Los ingresos por sus eventos realizados son de ${user.ingresos || 0} €` },
@@ -158,10 +178,6 @@ const MiCuentaInfo = () => {
                 Inertia.visit('/');
             },
         });
-    };
-
-    const handleAddSaldo = () => {
-        Inertia.visit('/añadir-saldo');
     };
 
     const selectedItem = items[selectedOption] || { detail: null };
@@ -209,14 +225,6 @@ const MiCuentaInfo = () => {
                 ) : (
                     <p className="mi-cuenta-mensaje">Selecciona un elemento para ver los detalles.</p>
                 )}
-            </div>
-
-            <div className="mi-cuenta-container" style={{ position: 'relative' }}>
-                <div className="mi-cuenta-acciones">
-                    <button className="mi-cuenta-boton-logout" onClick={handleLogout}>
-                        Salir
-                    </button>
-                </div>
             </div>
         </div>
     );

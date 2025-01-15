@@ -172,7 +172,7 @@ public function eliminarEvento(Request $request, $id)
             // devuelve el 30% del precio al usuario que hizo la reserva
             $usuarioReserva = $reserva->usuario;
             $sala = $reserva->sala;
-            $reembolso = $sala->precio * 0.3;
+            $reembolso = $sala->precio;
 
             $usuarioReserva->saldo += $reembolso;
             $usuarioReserva->save();
@@ -180,7 +180,7 @@ public function eliminarEvento(Request $request, $id)
             // crear una notificación para el usuario de la reserva
             Notificacion::create([
                 'usuario_id' => $usuarioReserva->id,
-                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el 30% del importe de tu reserva. Motivo de la cancelación: {$motivoCancelacion}",
+                'mensaje' => "El evento '{$evento->nombre_evento}' ha sido cancelado. Se ha reembolsado el 100% del importe de tu reserva. Motivo de la cancelación: {$motivoCancelacion}",
                 'leido' => false,
             ]);
 

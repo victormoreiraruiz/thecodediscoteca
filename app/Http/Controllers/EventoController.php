@@ -9,8 +9,10 @@ use App\Models\Entrada;
 use App\Models\Compra;
 use App\Models\ReservaDiscoteca;
 use App\Models\Notificacion;
+use App\Models\HistorialIngresos;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Response;
 
 class EventoController extends Controller
@@ -305,20 +307,21 @@ public function obtenerDiasOcupados()
 
 public function cancelarEvento($id)
 {
-    $evento = Evento::findOrFail($id);
-
-    $admin = User::where('rol', 'admin')->firstOrFail();
-            $admin->refresh();
-    // Obtener la reserva asociada al evento
-    $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
-        ->where('fecha_reserva', $evento->fecha_evento)
-        ->first();
-
-    if (!$reserva) {
-        return response()->json(['error' => 'No se encontró la reserva asociada a este evento.'], 404);
-    }
-
+    DB::beginTransaction();
     try {
+        $evento = Evento::findOrFail($id);
+        $admin = User::where('rol', 'admin')->firstOrFail();
+        $admin->refresh();
+
+        // Obtener la reserva asociada al evento
+        $reserva = ReservaDiscoteca::where('sala_id', $evento->sala_id)
+            ->where('fecha_reserva', $evento->fecha_evento)
+            ->first();
+
+        if (!$reserva) {
+            return response()->json(['error' => 'No se encontró la reserva asociada a este evento.'], 404);
+        }
+
         // Obtener todas las compras relacionadas con este evento
         $compras = Compra::whereHas('entradas', function ($query) use ($evento) {
             $query->where('evento_id', $evento->id);
@@ -337,8 +340,7 @@ public function cancelarEvento($id)
 
             if ($totalReembolso > 0) {
                 // Realizar reembolso al usuario
-                $compra->usuario->saldo += $totalReembolso;
-                $compra->usuario->save();
+                $compra->usuario->increment('saldo', $totalReembolso);
 
                 // Notificar al comprador
                 Notificacion::create([
@@ -368,11 +370,17 @@ public function cancelarEvento($id)
         }
 
         $reembolso = $sala->precio * 0.3;
-        $usuario->saldo += $reembolso;
-        $usuario->save();
+        $usuario->increment('saldo', $reembolso);
+        $admin->decrement('ingresos', $reembolso);
 
-        $admin->ingresos -= $reembolso;
-        $admin->save();
+        // **REGISTRAR EN HISTORIAL DE INGRESOS**
+        HistorialIngresos::create([
+            'cantidad' => -$reembolso, // Se registra como negativo
+            'motivo' => "Reembolso por cancelación del evento '{$evento->nombre_evento}' en la sala '{$sala->nombre}'",
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         // Notificar al creador del evento sobre la cancelación y el reembolso
         Notificacion::create([
             'usuario_id' => $usuario->id,
@@ -384,8 +392,11 @@ public function cancelarEvento($id)
         $evento->delete();
         $reserva->delete();
 
+        DB::commit();
+
         return response()->json(['message' => 'Evento cancelado con éxito y reembolsos procesados.']);
     } catch (\Exception $e) {
+        DB::rollBack();
         \Log::error('Error al cancelar el evento: ' . $e->getMessage());
         return response()->json(['error' => 'Hubo un problema al cancelar el evento.'], 500);
     }
