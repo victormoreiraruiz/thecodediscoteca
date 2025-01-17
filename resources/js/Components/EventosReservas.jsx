@@ -22,11 +22,13 @@ const EventosReservas = () => {
             sonido e iluminación, nuestra sala privada es la ideal para desfiles, cócteles, entregas de premios…
             y cualquier evento privado que pueda imaginar.
           </p>
+          <p className="text-lg text-white mb-6">Precio: 1000€</p>
+          <p className="text-lg text-white mb-6">Capacidad: 300 personas</p>
           <button
             className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salaprivada')}
           >
-            SABER MÁS
+            RESERVAR
           </button>
         </div>
       </div>
@@ -44,11 +46,13 @@ const EventosReservas = () => {
             El espacio ideal para aquellos eventos más reducidos, pero no por ello menos importantes.
             Con nuestro sello de calidad y atención, y con un aforo de hasta 150 personas, todo tiene cabida en The Code.
           </p>
+          <p className="text-lg text-white mb-6">Precio: 700€</p>
+          <p className="text-lg text-white mb-6">Capacidad: 200 personas</p>
           <button
             className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salacelebraciones')}
           >
-            SABER MÁS
+            RESERVAR
           </button>
         </div>
       </div>
@@ -66,11 +70,13 @@ const EventosReservas = () => {
             Para los amantes de la privacidad y la discreción, The Code también cuenta con un espacio para vosotros.
             Un salón totalmente independiente a las demás zonas, servicio privado y listo para desaparecer.
           </p>
+          <p className="text-lg text-white mb-6">Precio: 300€</p>
+          <p className="text-lg text-white mb-6">Capacidad: 250 personas</p>
           <button
             className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salaconferencias')}
           >
-            SABER MÁS
+            RESERVAR
           </button>
         </div>
       </div>
