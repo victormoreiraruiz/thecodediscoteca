@@ -22,6 +22,18 @@ const FormularioPromotor = ({ onComplete }) => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const letrasDNI = "TRWAGMYFPDXBNJZSQVHLCKE";
+
+    const validarDNI = (dni) => {
+        const numero = dni.slice(0, -1); // Extrae los números
+        const letra = dni.slice(-1).toUpperCase(); // Extrae la letra y la convierte a mayúscula
+        if (!/^\d{8}[A-Z]$/.test(dni)) {
+            return false; // Validación básica de formato
+        }
+        const letraEsperada = letrasDNI[numero % 23]; // Calcula la letra esperada
+        return letra === letraEsperada; // Compara la letra ingresada con la esperada
+    };
+
     const validateForm = () => {
         const newErrors = {};
         if (!formData.nombre_completo.trim()) {
@@ -29,6 +41,8 @@ const FormularioPromotor = ({ onComplete }) => {
         }
         if (!formData.documento_fiscal.trim()) {
             newErrors.documento_fiscal = 'El documento fiscal es obligatorio.';
+        } else if (!validarDNI(formData.documento_fiscal)) {
+            newErrors.documento_fiscal = 'El documento fiscal no es válido.';
         }
         if (!formData.direccion.trim()) {
             newErrors.direccion = 'La dirección es obligatoria.';
@@ -99,6 +113,7 @@ const FormularioPromotor = ({ onComplete }) => {
                     {errors.documento_fiscal && <p className="text-[#860303] text-sm mt-1">{errors.documento_fiscal}</p>}
                 </div>
 
+                {/* Otros campos */}
                 {/* Dirección */}
                 <div>
                     <label className="block text-[#e5cc70] font-semibold">Dirección:</label>
@@ -127,7 +142,7 @@ const FormularioPromotor = ({ onComplete }) => {
                     {errors.telefono && <p className="text-[#860303] text-sm mt-1">{errors.telefono}</p>}
                 </div>
 
-                {/* Información Bancaria (Opcional) */}
+                {/* Información Bancaria */}
                 <div>
                     <label className="block text-[#e5cc70] font-semibold">Información Bancaria (Opcional):</label>
                     <input
