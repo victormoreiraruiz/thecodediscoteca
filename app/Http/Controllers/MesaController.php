@@ -82,4 +82,25 @@ class MesaController extends Controller
     {
         //
     }
+
+    public function obtenerMesasPorEvento(Request $request)
+    {
+        // Validar que se reciba un evento válido
+        $request->validate([
+            'evento_id' => 'required|exists:eventos,id',
+        ]);
+    
+        // Obtener las mesas disponibles asociadas a la sala del evento
+        $mesas = Mesa::where('sala_id', function ($query) use ($request) {
+            $query->select('sala_id')
+                  ->from('eventos')
+                  ->where('id', $request->evento_id)
+                  ->limit(1);
+        })->get();
+    
+        // Devolver las mesas como respuesta JSON
+        return response()->json($mesas);
+    }
+    
+
 }
