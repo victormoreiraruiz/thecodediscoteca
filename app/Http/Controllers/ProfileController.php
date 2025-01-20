@@ -267,5 +267,19 @@ public function login(Request $request)
     ]);
 }
 
+public function verificarRolUsuario()
+{
+    $usuario = auth()->user();
+
+    if (!$usuario) {
+        return response()->json(['error' => 'Usuario no autenticado'], 401);
+    }
+
+    return response()->json([
+        'rol' => $usuario->rol,
+        'message' => 'Rol del usuario obtenido correctamente',
+    ]);
+}
+
 
 }

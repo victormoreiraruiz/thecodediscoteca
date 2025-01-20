@@ -20,17 +20,18 @@ export default function Concierto({ concierto }) {
             console.log("Datos del concierto:", concierto);
 
             const ahora = dayjs(); // Fecha y hora actual
-            const fechaEvento = concierto.fecha_evento ? dayjs(concierto.fecha_evento, "YYYY-MM-DD") : null;
-            const horaInicio = concierto.hora_inicio ? dayjs(`${concierto.fecha_evento} ${concierto.hora_inicio}`, "YYYY-MM-DD HH:mm:ss") : null;
-            const horaFinal = concierto.hora_final ? dayjs(`${concierto.fecha_evento} ${concierto.hora_final}`, "YYYY-MM-DD HH:mm:ss") : null;
+            const horaInicio = dayjs(`${concierto.fecha_evento} ${concierto.hora_inicio}`, "YYYY-MM-DD HH:mm:ss");
+            const horaFinal = dayjs(`${concierto.fecha_evento} ${concierto.hora_final}`, "YYYY-MM-DD HH:mm:ss");
 
-            if (!fechaEvento || !horaInicio || !horaFinal || !horaInicio.isValid() || !horaFinal.isValid()) {
-                console.log("Error: La fecha u horas del evento no son válidas.");
-                return;
+            console.log("Hora actual:", ahora.format());
+            console.log("Hora de inicio:", horaInicio.format());
+            console.log("Hora final:", horaFinal.format());
+
+            if (horaInicio.isValid() && horaFinal.isValid()) {
+                setEventoActivo(ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
+            } else {
+                console.error("Las horas no son válidas.");
             }
-
-            // Comprobar si la hora actual está dentro del rango del evento
-            setEventoActivo(ahora.isAfter(horaInicio) && ahora.isBefore(horaFinal));
         }
     }, [concierto]);
 

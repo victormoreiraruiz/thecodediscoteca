@@ -3,14 +3,25 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 const HacerComanda = ({ eventoId }) => {
-    const [mesa, setMesa] = useState("");
+    const [mesa, setMesa] = useState(""); // Mesa seleccionada
+    const [mesas, setMesas] = useState([]); // Lista de mesas disponibles
     const [categorias, setCategorias] = useState([]);
     const [productos, setProductos] = useState([]);
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
     const [carrito, setCarrito] = useState([]);
-    const [paso, setPaso] = useState(1); // 1: Ingresar mesa, 2: Seleccionar categoría, 3: Agregar productos
+    const [paso, setPaso] = useState(1); // 1: Seleccionar mesa, 2: Seleccionar categoría, 3: Agregar productos
 
     useEffect(() => {
+        // Obtener mesas disponibles para el evento
+        axios.get(`/mesas?evento_id=${eventoId}`)
+        .then((response) => {
+            setMesas(response.data); // Actualizar el estado con las mesas disponibles
+        })
+        .catch((error) => {
+            console.error("Error al obtener las mesas:", error);
+        });
+
+        // Obtener categorías
         axios.get("/categorias")
             .then((response) => {
                 setCategorias(response.data);
@@ -18,7 +29,7 @@ const HacerComanda = ({ eventoId }) => {
             .catch((error) => {
                 console.error("Error al obtener las categorías:", error);
             });
-    }, []);
+    }, [eventoId]);
 
     const seleccionarCategoria = async (categoriaId) => {
         setCategoriaSeleccionada(categoriaId);
@@ -44,14 +55,13 @@ const HacerComanda = ({ eventoId }) => {
         });
     };
 
-    // **Función para eliminar productos del carrito**
     const eliminarDelCarrito = (id) => {
         setCarrito((prev) => prev.filter((p) => p.id !== id));
     };
 
     const enviarComanda = async () => {
         if (!mesa) {
-            Swal.fire("Error", "Por favor ingresa tu número de mesa.", "error");
+            Swal.fire("Error", "Por favor selecciona tu mesa.", "error");
             return;
         }
 
@@ -61,7 +71,7 @@ const HacerComanda = ({ eventoId }) => {
             productos: carrito.map((p) => ({ id: p.id, cantidad: p.cantidad })),
         };
 
-        console.log("Enviando comanda:", datosComanda); // Ver qué se está enviando
+        console.log("Enviando comanda:", datosComanda);
 
         try {
             await axios.post("/comandas", datosComanda);
@@ -84,19 +94,25 @@ const HacerComanda = ({ eventoId }) => {
         <div className="container mx-auto p-6">
             <h2 className="text-3xl font-bold text-center mb-6 text-[#860303]">🍹 Comienza tu pedido 🍹</h2>
 
-            {/* Paso 1: Ingresar número de mesa */}
+            {/* Paso 1: Seleccionar mesa */}
             {paso === 1 && (
                 <div className="bg-[#e5cc70] p-6 shadow-md rounded-md text-center">
-                    <h3 className="text-xl font-semibold mb-4 text-[#860303]">Indica tu número de mesa</h3>
-                    <input
-                        type="number"
+                    <h3 className="text-xl font-semibold mb-4 text-[#860303]">Selecciona tu mesa</h3>
+                    <select
                         value={mesa}
                         onChange={(e) => setMesa(e.target.value)}
                         className="border p-2 w-full mb-4 text-center rounded-md"
-                        placeholder="Ejemplo: 12"
-                    />
+                    >
+                        <option value="">Selecciona una mesa</option>
+                        {mesas.map((m) => (
+                            <option key={m.id} value={m.id}>
+                                Mesa {m.numero}
+                            </option>
+                        ))}
+                    </select>
                     <button
                         onClick={() => setPaso(2)}
+                        disabled={!mesa} // Desactiva el botón si no hay mesa seleccionada
                         className="bg-[#860303] text-white px-4 py-2 rounded w-full hover:bg-red-800 font-bold"
                     >
                         Confirmar
@@ -122,7 +138,7 @@ const HacerComanda = ({ eventoId }) => {
                 </div>
             )}
 
-            {/* Paso 3: Mostrar productos */}
+            {/* Paso 3: Seleccionar productos */}
             {paso === 3 && (
                 <div className="bg-[#e5cc70] p-6 shadow-md rounded-md">
                     <h3 className="text-xl font-semibold mb-4 text-[#860303]">Selecciona productos</h3>
@@ -148,7 +164,7 @@ const HacerComanda = ({ eventoId }) => {
                 </div>
             )}
 
-            {/* Carrito con resumen antes de confirmar */}
+            {/* Resumen del carrito */}
             {carrito.length > 0 && (
                 <div className="bg-[#e5cc70] p-6 shadow-md rounded-md mt-6">
                     <h3 className="text-xl font-semibold mb-4 text-[#860303]">🛒 Tu pedido</h3>

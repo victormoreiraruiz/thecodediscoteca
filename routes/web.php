@@ -12,6 +12,7 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CamareroController;
 use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\MesaController;
 
 
 
@@ -138,14 +139,7 @@ Route::get('/index', function () {
     return Inertia::render('Index');
 })->name('index');
 
-Route::get('/api/mesas', function () {
-    return response()->json([
-        ['id' => 1, 'reservada' => false],
-        ['id' => 2, 'reservada' => true],
-        ['id' => 3, 'reservada' => false],
-        ['id' => 4, 'reservada' => true],
-    ]);
-});
+
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -192,6 +186,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/comandas/{id}', [ComandaController::class, 'eliminarComanda']); // Eliminar comanda
     Route::get('/productos', [ProductoController::class, 'listarProductos']);
     Route::get('/categorias', [CategoriaController::class, 'listarCategorias']);
+    Route::get('/verificar-rol-usuario', [ProfileController::class, 'verificarRolUsuario'])
+    ->name('usuario.verificarRol')
+    ->middleware('auth');
+    
 
 });
 
@@ -206,6 +204,7 @@ Route::post('/eventos/{id}/editar', [EventoController::class, 'update'])->name('
 Route::get('/eventos/{id}/ventas', [EventoController::class, 'obtenerDatosVentas']);
 Route::get('eventos/{id}/estadisticas-ventas', [EventoController::class, 'obtenerEstadisticasVentas']);
 Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
+Route::get('/mesas', [MesaController::class, 'obtenerMesasPorEvento'])->name('mesas.porEvento');
 
 
 

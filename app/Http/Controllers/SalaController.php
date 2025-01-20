@@ -39,6 +39,7 @@ class SalaController extends Controller
 public function crearReserva(Request $request, $id)
 {
     $usuario = auth()->user();
+    
 
     if (!$usuario || !in_array($usuario->rol, ['promotor', 'admin'])) {
         // Redirigir al formulario de conversión con la página anterior como parámetro
@@ -74,6 +75,12 @@ public function crearReserva(Request $request, $id)
     if ($usuario->saldo < $sala->precio) {
         return response()->json(['error' => 'Saldo insuficiente para realizar la reserva.'], 403);
     }
+    if (!auth()->check()) {
+        return response()->json([
+            'error' => 'Debes estar registrado para realizar una reserva.'
+        ], 403);
+    }
+    
 
     DB::beginTransaction();
     try {
