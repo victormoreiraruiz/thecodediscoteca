@@ -88,7 +88,6 @@
         <!-- Header -->
         <div class="header">
             <h1>Factura</h1>
-            <img src="logo.png" alt="Logo">
         </div>
 
         <!-- Details -->

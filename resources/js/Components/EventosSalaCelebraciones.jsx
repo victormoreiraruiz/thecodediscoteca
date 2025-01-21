@@ -28,7 +28,7 @@ const EventosSalaCelebraciones = () => {
       const response = await axios.get("/verificar-rol-usuario");
       const { rol } = response.data;
 
-      if (rol !== "promotor") {
+      if (rol !== "promotor" && rol !== "admin") {
         Swal.fire({
           icon: "warning",
           title: "Acceso restringido",
