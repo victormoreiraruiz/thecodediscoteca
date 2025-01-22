@@ -291,15 +291,15 @@ public function obtenerEventosUsuario(Request $request)
 public function eventosProximos(): Response
 {
     $eventos = Evento::where('estado', 'apto')
+        ->where('fecha_evento', '>=', now()) // Solo eventos futuros o actuales
         ->orderBy('fecha_evento', 'asc')
-        ->take(10)
+        ->take(10) // Opcional: limitar a 10 eventos
         ->get();
 
     return Inertia::render('Index', [
         'eventos' => $eventos
     ]);
 }
-
 public function obtenerDiasOcupados()
 {
     $diasOcupados = Evento::pluck('fecha_evento')->toArray(); 
