@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "../Components/Header";
+import HeaderSinFoto from "../Components/HeaderSinFoto";
 import Footer from "../Components/Footer";
 import Navigation from "../Components/Navigation";
 import CompraEntradaConcierto from "../Components/CompraEntradaConcierto";
@@ -38,7 +38,7 @@ export default function Concierto({ concierto }) {
     return (
         <div>
             <Navigation />
-            <Header />
+            <HeaderSinFoto />
 
             {/* Contenedor con cartel e información */}
             <div className="container mx-auto px-6 py-8 flex flex-col md:flex-row items-center gap-8">

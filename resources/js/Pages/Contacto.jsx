@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../Components/Header';
+import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import Carrito from '../Components/Carrito';
 import ContactoInformación from '../Components/ContactoInformación';
@@ -14,7 +14,7 @@ export default function Welcome() {
         <div>
             <Navigation />
             <Carrito carrito={carrito} setCarrito={setCarrito} mostrarCarrito={mostrarCarrito} setMostrarCarrito={setMostrarCarrito} />
-            <Header />
+            <HeaderSinFoto />
             <ContactoInformación />
             <ContactoCuadrados />
             <ContactoFormulario />

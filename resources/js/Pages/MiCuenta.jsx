@@ -1,6 +1,6 @@
 MiCuenta.jsx
 import React, { useEffect, useState } from 'react';
-import Header from '../Components/Header';
+import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
 import Carrito from '../Components/Carrito';
@@ -18,7 +18,7 @@ export default function MiCuenta() {
     return (
         <div>
             <Navigation />
-            <Header />
+            <HeaderSinFoto />
             <Carrito carrito={carrito} setCarrito={setCarrito} mostrarCarrito={mostrarCarrito} setMostrarCarrito={setMostrarCarrito} />
             <div className="container mx-auto p-4">
                 <MiCuentaInfo />
