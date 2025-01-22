@@ -306,6 +306,34 @@ public function obtenerDiasOcupados()
     return response()->json($diasOcupados);
 }
 
+public function misEventos(Request $request)
+{
+    $user = $request->user();
+
+    $eventos = Evento::whereHas('sala.reservas', function ($query) use ($user) {
+            // Filtrar reservas que pertenecen al usuario actual
+            $query->where('usuario_id', $user->id);
+        })
+        ->whereHas('sala.reservas', function ($query) {
+            // Verificar que la fecha de la reserva coincida con la fecha del evento
+            $query->whereColumn('fecha_reserva', 'eventos.fecha_evento');
+        })
+        ->with(['sala.reservas' => function ($query) use ($user) {
+            $query->where('usuario_id', $user->id);
+        }])
+        ->get()
+        ->map(function ($evento) {
+            // Agregar reserva_id al array del evento
+            $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
+            return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
+        });
+
+    return Inertia::render('MiCuentaEventos', [
+        'eventos' => $eventos,
+    ]);
+}
+
+
 public function cancelarEvento($id)
 {
     DB::beginTransaction();

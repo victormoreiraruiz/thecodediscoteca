@@ -204,6 +204,7 @@ Route::get('/eventos/{id}/ventas', [EventoController::class, 'obtenerDatosVentas
 Route::get('eventos/{id}/estadisticas-ventas', [EventoController::class, 'obtenerEstadisticasVentas']);
 Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
 Route::get('/mesas', [MesaController::class, 'obtenerMesasPorEvento'])->name('mesas.porEvento');
+Route::get('/mi-cuenta/mis-eventos', [ProfileController::class, 'misEventos'])->name('miCuenta.misEventos');
 
 
 
