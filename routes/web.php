@@ -56,7 +56,6 @@ Route::get('/contacto', function () {
 })->name('contacto');
 
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntradas'])->name('eventos.entradas');
-Route::get('/api/conciertos', [EventoController::class, 'obtenerConciertos']);
 Route::get('/api/eventos/{eventoId}/entradas', [EntradaController::class, 'obtenerEntradasPorConcierto']);
 Route::post('/api/conciertos/{eventoId}/comprar-entradas', [CompraController::class, 'comprarEntradasConcierto']);
 Route::get('/conciertos/{id}', [EventoController::class, 'mostrarConcierto'])->name('conciertos.mostrar');

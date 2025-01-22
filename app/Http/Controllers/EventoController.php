@@ -131,7 +131,8 @@ public function listarConciertos()
     $conciertos = Evento::whereHas('reservas', function ($query) {
         $query->where('tipo_reserva', 'concierto');
     })
-    ->with(['sala', 'entradas']) // incluye sala y entradas relacionadas
+    ->where('fecha_evento', '>=', now()) // Filtrar eventos futuros o actuales
+    ->with(['sala', 'entradas']) // Incluye sala y entradas relacionadas
     ->get();
 
     return Inertia::render('Conciertos', [
