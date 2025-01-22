@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../Components/Header';
+import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import NuestraHistoria from '../Components/NuestraHistoria';
 import RedesSociales from '../Components/RedesSociales';
@@ -13,7 +13,7 @@ export default function Welcome() {
     return (
         <div>
             <Navigation />
-            <Header />
+            <HeaderSinFoto />
             <Carrito carrito={carrito} setCarrito={setCarrito} mostrarCarrito={mostrarCarrito} setMostrarCarrito={setMostrarCarrito} />
             <NuestraHistoria />
             <RedesSociales />

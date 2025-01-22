@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '../Components/Header';
+import HeaderSinFoto from '../Components/HeaderSinFoto';
 import Footer from '../Components/Footer';
 import Navigation from '../Components/Navigation';
 import Carrito from '../Components/Carrito';
@@ -15,7 +15,7 @@ export default function Conciertos({ conciertos }) {
    return (
       <div>
          <Navigation />
-         <Header />
+         <HeaderSinFoto />
          <h2>Conciertos Disponibles</h2>
          <div className="concerts-container">
             {conciertosAprobados.length > 0 ? (

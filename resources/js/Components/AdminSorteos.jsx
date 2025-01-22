@@ -25,7 +25,7 @@ const AdminSorteos = ({ usuarios = [] }) => {
     // Selecciona un ganador aleatorio
     const ganador = usuariosFiltrados[Math.floor(Math.random() * usuariosFiltrados.length)];
 
-    // Crear la ruleta con CSS + JavaScript
+
     const ruletaHTML = `
       <style>
         .ruleta-container {
