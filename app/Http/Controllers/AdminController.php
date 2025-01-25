@@ -63,12 +63,35 @@ class AdminController extends Controller
 
 public function eliminarUsuario($id)
 {
-    $usuario = User::findOrFail($id);
-    
-    $usuario->delete();
+    try {
+        $usuario = User::findOrFail($id);
 
-    return response()->json(['message' => 'Usuario eliminado con éxito.']);
+        // Verificar si el usuario tiene eventos futuros
+        $tieneEventosFuturos = Evento::where('user_id', $usuario->id)
+            ->where('hora_inicio', '>', now())
+            ->exists();
+
+        if ($tieneEventosFuturos) {
+            return redirect()->route('admin.usuarios')->with([
+                'error' => 'No se puede eliminar al usuario porque tiene eventos futuros programados.',
+            ]);
+        }
+
+        // Eliminar el usuario si no tiene eventos futuros
+        $usuario->delete();
+
+        return redirect()->route('admin.usuarios')->with([
+            'success' => 'Usuario eliminado con éxito.',
+        ]);
+    } catch (\Exception $e) {
+        return redirect()->route('admin.usuarios')->with([
+            'error' => 'Ocurrió un error al intentar eliminar al usuario.',
+        ]);
+    }
 }
+
+
+
 
 public function crearEvento(Request $request)
 {
