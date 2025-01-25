@@ -185,7 +185,7 @@ const AdminGestionEventos = ({ eventos }) => {
                                     </select>
                                 </td>
                                 <td className="p-3">
-                                    <button onClick={() => setEventoAEliminar(evento)} className="btn-eliminar bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
+                                    <button onClick={() => setEventoAEliminar(evento)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded-md min-w-[80px] transition duration-300">
                                         Eliminar
                                     </button>
                                 </td>

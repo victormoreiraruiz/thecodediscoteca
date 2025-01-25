@@ -6,7 +6,7 @@ import "../../css/app.css"; // Asegúrate de cargar los estilos correctos
 
 const EventosSalaCelebraciones = () => {
   const [motivo, setMotivo] = useState("");
-  const [numeroPersonas, setNumeroPersonas] = useState(40);
+  const [numeroPersonas, setNumeroPersonas] = useState(200);
   const [precioEntrada, setPrecioEntrada] = useState("");
   const [nombreConcierto, setNombreConcierto] = useState("");
   const [horaInicio, setHoraInicio] = useState("");
@@ -169,7 +169,6 @@ const EventosSalaCelebraciones = () => {
       });
 
       setMotivo("");
-      setNumeroPersonas(40);
       setPrecioEntrada("");
       setNombreConcierto("");
       setHoraInicio("");
@@ -214,20 +213,6 @@ const EventosSalaCelebraciones = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="event-form">
-        <label>
-          <h3>Número de personas:</h3>
-          <select
-            value={numeroPersonas}
-            onChange={(e) => setNumeroPersonas(Number(e.target.value))}
-            className="event-select"
-          >
-            {[...Array(5)].map((_, index) => (
-              <option key={index} value={(index + 1) * 40}>
-                {(index + 1) * 40}
-              </option>
-            ))}
-          </select>
-        </label>
         <label>
           <h3>Nombre del concierto:</h3>
           <input

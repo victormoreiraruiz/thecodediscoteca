@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 const EventosSalaPrivada = () => {
   const [motivo, setMotivo] = useState("");
-  const [numeroPersonas, setNumeroPersonas] = useState(30);
+  const [numeroPersonas, setNumeroPersonas] = useState(300);
   const [precioEntrada, setPrecioEntrada] = useState("");
   const [nombreConcierto, setNombreConcierto] = useState("");
   const [horaInicio, setHoraInicio] = useState("");
@@ -141,8 +141,8 @@ const EventosSalaPrivada = () => {
 
     const formData = new FormData();
     formData.append("fecha_reserva", adjustedDate);
-    formData.append("descripcion", motivo);
     formData.append("asistentes", numeroPersonas);
+    formData.append("descripcion", motivo);
     formData.append("tipo_reserva", "concierto");
     formData.append("precio_entrada", precioEntrada);
     formData.append("nombre_concierto", nombreConcierto);
@@ -165,7 +165,6 @@ const EventosSalaPrivada = () => {
       });
 
       setMotivo("");
-      setNumeroPersonas(30);
       setPrecioEntrada("");
       setNombreConcierto("");
       setHoraInicio("");
@@ -228,20 +227,6 @@ const EventosSalaPrivada = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="event-form">
-        <label>
-          <h3>Número de personas:</h3>
-          <select
-            value={numeroPersonas}
-            onChange={(e) => setNumeroPersonas(Number(e.target.value))}
-            className="event-select"
-          >
-            {[...Array(6)].map((_, index) => (
-              <option key={index} value={(index + 1) * 50}>
-                {(index + 1) * 50}
-              </option>
-            ))}
-          </select>
-        </label>
         <label>
           <h3>Nombre del concierto:</h3>
           <input

@@ -169,7 +169,7 @@ public function eliminarEvento(Request $request, $id)
                 return response()->json(['error' => 'No se puede eliminar un evento para el mismo día.'], 403);
             }
 
-
+            // devuelve el 30% del precio al usuario que hizo la reserva
             $usuarioReserva = $reserva->usuario;
             $sala = $reserva->sala;
             $reembolso = $sala->precio;
@@ -178,11 +178,11 @@ public function eliminarEvento(Request $request, $id)
             $usuarioReserva->save();
 
             HistorialIngresos::create([
-                'cantidad' => -$reembolso, // Se registra como negativo
-                'motivo' => "Reembolso por cancelación del evento '{$evento->nombre_evento}' ",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            'cantidad' => -$reembolso, // Se registra como negativo
+            'motivo' => "Reembolso por cancelación del evento '{$evento->nombre_evento}' en la sala '{$sala->nombre}'",
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
             // crear una notificación para el usuario de la reserva
             Notificacion::create([
                 'usuario_id' => $usuarioReserva->id,
