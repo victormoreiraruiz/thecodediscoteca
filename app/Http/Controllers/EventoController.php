@@ -131,7 +131,8 @@ public function listarConciertos()
     $conciertos = Evento::whereHas('reservas', function ($query) {
         $query->where('tipo_reserva', 'concierto');
     })
-    ->with(['sala', 'entradas']) // incluye sala y entradas relacionadas
+    ->where('fecha_evento', '>=', now()) // Filtrar eventos futuros o actuales
+    ->with(['sala', 'entradas']) // Incluye sala y entradas relacionadas
     ->get();
 
     return Inertia::render('Conciertos', [
@@ -290,20 +291,48 @@ public function obtenerEventosUsuario(Request $request)
 public function eventosProximos(): Response
 {
     $eventos = Evento::where('estado', 'apto')
+        ->where('fecha_evento', '>=', now()) // Solo eventos futuros o actuales
         ->orderBy('fecha_evento', 'asc')
-        ->take(10)
+        ->take(10) // Opcional: limitar a 10 eventos
         ->get();
 
     return Inertia::render('Index', [
         'eventos' => $eventos
     ]);
 }
-
 public function obtenerDiasOcupados()
 {
     $diasOcupados = Evento::pluck('fecha_evento')->toArray(); 
     return response()->json($diasOcupados);
 }
+
+public function misEventos(Request $request)
+{
+    $user = $request->user();
+
+    $eventos = Evento::whereHas('sala.reservas', function ($query) use ($user) {
+            // Filtrar reservas que pertenecen al usuario actual
+            $query->where('usuario_id', $user->id);
+        })
+        ->whereHas('sala.reservas', function ($query) {
+            // Verificar que la fecha de la reserva coincida con la fecha del evento
+            $query->whereColumn('fecha_reserva', 'eventos.fecha_evento');
+        })
+        ->with(['sala.reservas' => function ($query) use ($user) {
+            $query->where('usuario_id', $user->id);
+        }])
+        ->get()
+        ->map(function ($evento) {
+            // Agregar reserva_id al array del evento
+            $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
+            return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
+        });
+
+    return Inertia::render('MiCuentaEventos', [
+        'eventos' => $eventos,
+    ]);
+}
+
 
 public function cancelarEvento($id)
 {

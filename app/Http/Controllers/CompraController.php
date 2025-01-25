@@ -55,6 +55,11 @@ class CompraController extends Controller
     
 public function confirmarCompra(Request $request)
 {
+
+    if (!$request->user()) {
+        return redirect()->route('login')->with('error', 'Debes iniciar sesión para confirmar tu compra.');
+    }
+
     $user = $request->user();
     $carrito = session('carrito', []);
     $total = collect($carrito)->reduce(fn($sum, $item) => $sum + ($item['precio'] * $item['cantidad']), 0);
@@ -118,6 +123,19 @@ public function confirmarCompra(Request $request)
                 $creador->ingresos += $ingresoTotal;
                 $creador->save();
             }
+
+            $entradasVendidas = \DB::table('compra_entradas')
+                ->join('entradas', 'compra_entradas.entrada_id', '=', 'entradas.id')
+                ->join('eventos', 'entradas.evento_id', '=', 'eventos.id')
+                ->where('eventos.id', $evento->id)
+                ->sum('compra_entradas.cantidad');
+
+            $capacidadRestante = $sala->capacidad - $entradasVendidas;
+
+        // Validar si la cantidad que se intenta comprar supera la capacidad restante
+        if ($item['cantidad'] > $capacidadRestante) {
+            throw new \Exception("No hay suficientes entradas disponibles para el evento: " . $evento->nombre_evento);
+        }
 
             // Registrar la compra de entradas
             $compra->entradas()->attach($entrada->id, ['cantidad' => $item['cantidad']]);

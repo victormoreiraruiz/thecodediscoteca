@@ -64,31 +64,58 @@ const HacerComanda = ({ eventoId }) => {
             Swal.fire("Error", "Por favor selecciona tu mesa.", "error");
             return;
         }
-
+    
         const datosComanda = {
             evento_id: eventoId,
             mesa_id: parseInt(mesa),
             productos: carrito.map((p) => ({ id: p.id, cantidad: p.cantidad })),
         };
-
+    
         console.log("Enviando comanda:", datosComanda);
-
+    
         try {
-            await axios.post("/comandas", datosComanda);
-
+            const response = await axios.post("/comandas", datosComanda);
+    
             Swal.fire("Éxito", "Comanda enviada con éxito", "success");
             setCarrito([]);
             setPaso(1);
             setMesa("");
         } catch (error) {
             if (error.response) {
-                console.error("Error en la comanda:", error.response.data);
-                Swal.fire("Error", error.response.data.message || "No se pudo enviar la comanda", "error");
+                const { status, data } = error.response;
+    
+                // Manejo específico de errores
+                if (status === 403 && data.error === "Saldo insuficiente para realizar el pedido") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Saldo insuficiente",
+                        text: "No tienes suficiente saldo para completar este pedido.",
+                    });
+                } else if (status === 400 && data.error.includes("Stock insuficiente")) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Stock insuficiente",
+                        text: data.error, // Mensaje proporcionado por el backend
+                    });
+                } else {
+                    // Otros errores
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: data.error || "No se pudo completar la solicitud.",
+                    });
+                }
             } else {
-                Swal.fire("Error", "Error de conexión con el servidor", "error");
+                // Error de conexión o sin respuesta
+                Swal.fire({
+                    icon: "error",
+                    title: "Error de conexión",
+                    text: "No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.",
+                });
             }
         }
     };
+    
 
     return (
         <div className="container mx-auto p-6">

@@ -88,19 +88,32 @@ class ProfileController extends Controller
 
     public function miCuenta(Request $request)
     {
+        \Log::info('Método miCuenta ejecutado');
         $user = $request->user();
     
+        // Filtrar eventos según las reservas hechas por el usuario
+        $eventos = Evento::whereHas('sala.reservas', function ($query) use ($user) {
+            $query->where('usuario_id', $user->id)
+                  ->whereColumn('fecha_reserva', 'eventos.fecha_evento'); // Coincidencia con la fecha del evento
+        })
+        ->with(['sala.reservas' => function ($query) use ($user) {
+            $query->where('usuario_id', $user->id);
+        }])
+        ->get()
+        ->map(function ($evento) {
+            $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
+            return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
+        });
+    
+        // Enviar datos al componente de Inertia
         return Inertia::render('MiCuenta', [
             'user' => $user,
             'compras' => $user->compras()->with('entradas')->get(),
-            'eventos' => Evento::whereHas('sala.reservas', function ($query) use ($user) {
-                $query->where('usuario_id', $user->id);
-            })->with('sala.reservas')->get()->map(function ($evento) {
-                $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
-                return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
-            }),
+            'eventos' => $eventos,
         ]);
     }
+    
+
     
     
 

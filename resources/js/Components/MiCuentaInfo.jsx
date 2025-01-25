@@ -138,6 +138,10 @@ const MiCuentaInfo = () => {
                 <td className="px-6 py-4 font-bold">Puntos:</td>
                 <td className="px-6 py-4">{user.puntos_totales}</td>
             </tr>
+            <tr className="hover:bg-[#f0d77b] transition duration-200">
+                <td className="px-6 py-4 font-bold">Membresía:</td>
+                <td className="px-6 py-4">{user.membresia}</td>
+            </tr>
         </tbody>
     </table>
 

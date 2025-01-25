@@ -36,36 +36,52 @@ const FormularioPromotor = ({ onComplete }) => {
 
     const validateForm = () => {
         const newErrors = {};
+        
+        // Validar nombre completo
         if (!formData.nombre_completo.trim()) {
             newErrors.nombre_completo = 'El nombre completo es obligatorio.';
         }
+        
+        // Validar documento fiscal
         if (!formData.documento_fiscal.trim()) {
             newErrors.documento_fiscal = 'El documento fiscal es obligatorio.';
         } else if (!validarDNI(formData.documento_fiscal)) {
             newErrors.documento_fiscal = 'El documento fiscal no es válido.';
         }
+        
+        // Validar dirección
         if (!formData.direccion.trim()) {
             newErrors.direccion = 'La dirección es obligatoria.';
         }
+        
+        // Validar teléfono
         if (!formData.telefono.trim()) {
             newErrors.telefono = 'El teléfono es obligatorio.';
         } else if (!/^\d{9}$/.test(formData.telefono)) {
             newErrors.telefono = 'El teléfono debe tener 9 dígitos numéricos.';
         }
+        
+        // Validar información bancaria (opcional)
+        if (formData.informacion_bancaria.trim()) {
+            if (!/^[A-Z]{2}\d{30}$/.test(formData.informacion_bancaria)) {
+                newErrors.informacion_bancaria = 'La información bancaria debe contener 2 letras seguidas de 30 números.';
+            }
+        }
+    
         return newErrors;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setErrors({});
+        setErrors({}); // Limpiar errores existentes
 
-        const newErrors = validateForm();
+        const newErrors = validateForm(); // Validar formulario
         if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+            setErrors(newErrors); // Mostrar errores en la interfaz
             return;
         }
 
-        setLoading(true);
+        setLoading(true); // Mostrar estado de carga
 
         Inertia.post(route('convertir-promotor.post'), formData, {
             onSuccess: () => {
@@ -74,10 +90,10 @@ const FormularioPromotor = ({ onComplete }) => {
                 window.location.href = route('eventos.index');
             },
             onError: (serverErrors) => {
-                setErrors(serverErrors);
+                setErrors(serverErrors); // Manejar errores del servidor
                 alert('Hubo un error al convertirte en promotor.');
             },
-            onFinish: () => setLoading(false),
+            onFinish: () => setLoading(false), // Detener estado de carga
         });
     };
 
@@ -113,7 +129,6 @@ const FormularioPromotor = ({ onComplete }) => {
                     {errors.documento_fiscal && <p className="text-[#860303] text-sm mt-1">{errors.documento_fiscal}</p>}
                 </div>
 
-                {/* Otros campos */}
                 {/* Dirección */}
                 <div>
                     <label className="block text-[#e5cc70] font-semibold">Dirección:</label>
@@ -150,8 +165,9 @@ const FormularioPromotor = ({ onComplete }) => {
                         name="informacion_bancaria"
                         value={formData.informacion_bancaria}
                         onChange={handleChange}
-                        className="w-full p-2 rounded-md border border-[#e5cc70] bg-gray-800 text-white"
+                        className={`w-full p-2 rounded-md border ${errors.informacion_bancaria ? 'border-[#860303]' : 'border-[#e5cc70]'} bg-gray-800 text-white`}
                     />
+                    {errors.informacion_bancaria && <p className="text-[#860303] text-sm mt-1">{errors.informacion_bancaria}</p>}
                 </div>
 
                 {/* Botones */}

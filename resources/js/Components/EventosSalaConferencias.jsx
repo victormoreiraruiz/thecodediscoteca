@@ -103,14 +103,6 @@ const EventosSalaConferencias = () => {
       return false;
     }
 
-    if (horaFinH > 7 || (horaFinH === 7 && horaFinM > 0)) {
-      Swal.fire({
-        icon: "warning",
-        title: "Hora de fin inválida",
-        text: "La hora de fin no puede ser más tarde de las 07:00.",
-      });
-      return false;
-    }
 
     return true;
   };

@@ -1,66 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# The Code NightClub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Breve descripción
+Esta aplicación permite la compra y venta de entradas para eventos, así como la creación de nuevos eventos. Los usuarios pueden reservar salas, realizar compras de entradas con QRs y realizar pedidos en eventos indicando su mesa. Además, cuenta con herramientas para la gestión empresarial, incluyendo control de usuarios, eventos, stocks y análisis de ingresos.
 
-## About Laravel
+## Funcionalidades
+- **Gestión de salas**: Reservar y cancelar.
+- **Compra de entradas**: Generación de códigos QR.
+- **Devolución en caso de cancelación**: Con notificaciones al usuario.
+- **Sistema de fidelidad**: Fomenta la compra mediante sorteos.
+- **Sistema de roles**: Cliente, administrador, promotor y camarero.
+- **Pedidos durante eventos activos**: Indicación de la mesa correspondiente.
+- **Pagos en línea**: Integración con PayPal.
+- **Panel de control**:
+  - Estadísticas de los eventos (promotor).
+  - Gestión empresarial (administrador).
+  - Estadísticas de comandas (camarero).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tecnologías Utilizadas
+- **Frontend**: React.js, CSS, Tailwind.
+- **Backend**: Laravel.
+- **Comunicación**: Inertia.js.
+- **Lenguajes**: PHP, JavaScript, HTML5.
+- **Base de Datos**: PostgreSQL.
+- **Otros**: SweetAlert2, Calendar.js, Day.js.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalación
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Requisitos previos
+#### PHP :
 
-## Learning Laravel
+sudo apt install -y software-properties-common apt-transport-https ca-certificates lsb-release
+sudo add-apt-repository ppa:ondrej/php
+sudo apt update
+sudo apt install -y php php-{bcmath,bz2,intl,gd,mbstring,mysql,zip,xml,curl}
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+#### Composer :
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+#### Node.js y npm :
 
-### Premium Partners
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
 
-## Contributing
+#### Git :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+sudo apt update
+sudo apt install git -y
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Postgresql :
 
-## Security Vulnerabilities
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt update
+sudo apt install -y postgresql
+sudo -u postgres psql
+CREATE USER thecodediscoteca WITH PASSWORD 'thecodediscoteca';
+CREATE DATABASE thecodediscoteca;
+ALTER DATABASE thecodediscoteca OWNER TO thecodediscoteca;
+GRANT ALL PRIVILEGES ON DATABASE thecodediscoteca TO thecodediscoteca;
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+### Configuración del Proyecto
+#### Clonar el repositorio :
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+git clone https://github.com/victormoreiraruiz/thecodediscoteca.git
+cd thecodediscoteca
+Renombra el archivo "copia" como .env
+
+
+#### Instalar dependencias :
+
+composer install
+composer dump-autoload
+npm install
+
+
+#### Configurar base de datos :
+
+sudo apt install php-pgsql -y
+php artisan migrate
+php artisan storage:link
+
+
+#### Iniciar el proyecto :
+
+npm run dev
+php artisan serve
+Accede a la URL proporcionada por el comando php artisan serve.
+
+### Autor: 
+
+Desarrollado por Víctor Manuel Moreira Ruiz.
+GitHub: victormoreiraruiz
+Para IES Doñana 2024/25.
+### Licencia: 
+
+Este proyecto está bajo la licencia MIT.

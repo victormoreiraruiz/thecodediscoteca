@@ -57,7 +57,8 @@ export default function Login({ status, canResetPassword }) {
                         <h2 className="text-2xl font-bold text-center mb-6">INICIAR SESIÓN</h2>
 
                         <div>
-                            <InputLabel htmlFor="email" value="Email" className="text-black" />
+                            <InputLabel htmlFor="email" value="Email"  className="text-white text-xl font-bold" />
+                            
                             <TextInput
                                 id="email"
                                 type="email"
@@ -72,7 +73,7 @@ export default function Login({ status, canResetPassword }) {
                         </div>
 
                         <div className="mt-4">
-                            <InputLabel htmlFor="password" value="Contraseña" className="text-black" />
+                            <InputLabel htmlFor="password" value="Contraseña"  className="text-white text-xl font-bold" />
                             <TextInput
                                 id="password"
                                 type="password"
@@ -83,13 +84,6 @@ export default function Login({ status, canResetPassword }) {
                                 onChange={handleOnChange}
                             />
                             <InputError message={errors.password} className="mt-2" />
-                        </div>
-
-                        <div className="block mt-4">
-                            <label className="flex items-center text-black">
-                                <Checkbox name="remember" value={data.remember} onChange={handleOnChange} />
-                                <span className="ml-2 text-sm">Recuérdame</span>
-                            </label>
                         </div>
 
                         <div>

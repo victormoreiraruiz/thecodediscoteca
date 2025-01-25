@@ -56,7 +56,6 @@ Route::get('/contacto', function () {
 })->name('contacto');
 
 Route::get('/eventos/{eventoId}/entradas', [EventoController::class, 'showEntradas'])->name('eventos.entradas');
-Route::get('/api/conciertos', [EventoController::class, 'obtenerConciertos']);
 Route::get('/api/eventos/{eventoId}/entradas', [EntradaController::class, 'obtenerEntradasPorConcierto']);
 Route::post('/api/conciertos/{eventoId}/comprar-entradas', [CompraController::class, 'comprarEntradasConcierto']);
 Route::get('/conciertos/{id}', [EventoController::class, 'mostrarConcierto'])->name('conciertos.mostrar');
@@ -205,6 +204,7 @@ Route::get('/eventos/{id}/ventas', [EventoController::class, 'obtenerDatosVentas
 Route::get('eventos/{id}/estadisticas-ventas', [EventoController::class, 'obtenerEstadisticasVentas']);
 Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
 Route::get('/mesas', [MesaController::class, 'obtenerMesasPorEvento'])->name('mesas.porEvento');
+Route::get('/mi-cuenta/mis-eventos', [ProfileController::class, 'misEventos'])->name('miCuenta.misEventos');
 
 
 

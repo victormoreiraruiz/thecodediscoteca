@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 
 const ResumenCompra = () => {
     const props = usePage().props;
-    const { carrito = [], total = 0, user = null, errors = {} } = props;
+    const { carrito = [], total = 0, user = null, errors = {}, eventos = [] } = props; // Añadido `eventos` a las props
     const [pagarConSaldo, setPagarConSaldo] = useState(false);
     const [pagoRealizado, setPagoRealizado] = useState(false);
 
@@ -17,6 +17,27 @@ const ResumenCompra = () => {
         Cookies.remove("carrito", { path: "/" });
     };
 
+    const validarDisponibilidad = () => {
+        for (const item of carrito) {
+            const evento = eventos.find((e) => e.id === item.evento_id);
+            if (!evento) continue;
+
+            const entradasVendidas = evento.entradas_vendidas || 0;
+            const capacidadRestante = evento.capacidad_total - entradasVendidas;
+
+            if (item.cantidad > capacidadRestante) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Entradas agotadas",
+                    text: `No hay suficientes entradas disponibles para el evento "${evento.nombre}". Quedan ${capacidadRestante} entradas disponibles.`,
+                    confirmButtonColor: "#860303",
+                });
+                return false;
+            }
+        }
+        return true;
+    };
+
     const handleConfirmarCompra = () => {
         if (!user) {
             Swal.fire({
@@ -25,10 +46,9 @@ const ResumenCompra = () => {
                 text: "Debes iniciar sesión para confirmar tu compra.",
                 confirmButtonColor: "#860303",
             });
-            Inertia.visit("/login");
             return;
         }
-
+    
         if (!pagarConSaldo && !pagoRealizado) {
             Swal.fire({
                 icon: "warning",
@@ -38,7 +58,7 @@ const ResumenCompra = () => {
             });
             return;
         }
-
+    
         Inertia.post(
             "/confirmar-compra",
             { carrito, total, pagarConSaldo },
@@ -53,16 +73,19 @@ const ResumenCompra = () => {
                     eliminarCarrito();
                 },
                 onError: (errors) => {
+                    // Capturar el mensaje de error del backend y mostrarlo en SweetAlert
+                    const errorMessage = errors?.response?.data?.error || "Ocurrió un problema al procesar la compra.";
                     Swal.fire({
                         icon: "error",
                         title: "Error en la compra",
-                        text: errors.saldo || errors.error || "Ocurrió un problema al procesar la compra.",
+                        text: errorMessage,
                         confirmButtonColor: "#860303",
                     });
                 },
             }
         );
     };
+    
 
     useEffect(() => {
         if (errors.error) {
@@ -83,6 +106,20 @@ const ResumenCompra = () => {
             if (window.paypal) {
                 window.paypal.Buttons({
                     createOrder: (data, actions) => {
+                        if (!user) {
+                            Swal.fire({
+                                icon: "warning",
+                                title: "¡Inicia sesión!",
+                                text: "Debes iniciar sesión para proceder con PayPal.",
+                                confirmButtonColor: "#860303",
+                            });
+                            return Promise.reject();
+                        }
+
+                        if (!validarDisponibilidad()) {
+                            return Promise.reject();
+                        }
+
                         return actions.order.create({
                             purchase_units: [{ amount: { value: total.toFixed(2) } }],
                         });
@@ -103,14 +140,6 @@ const ResumenCompra = () => {
                             });
                         });
                     },
-                    onError: (err) => {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Error en PayPal",
-                            text: "Hubo un problema al procesar el pago.",
-                            confirmButtonColor: "#860303",
-                        });
-                    },
                 }).render("#paypal-button-container");
             }
         };
@@ -118,7 +147,7 @@ const ResumenCompra = () => {
         return () => {
             document.body.removeChild(script);
         };
-    }, [total, carrito]);
+    }, [total, carrito, user]);
 
     return (
         <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6 mt-6 border-4 border-[#e5cc70]">
