@@ -69,13 +69,13 @@ const CamareroComandasActivas = ({ onComandaEntregada }) => {
                         <div className="mt-4 flex justify-between">
                             <button
                                 onClick={() => actualizarEstado(comanda.id, "preparando")}
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                className="bg-blue-500 text-white px-1 py-2 rounded hover:bg-blue-700"
                             >
                                 Preparando
                             </button>
                             <button
                                 onClick={() => actualizarEstado(comanda.id, "entregado")}
-                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                                className="bg-green-500 text-white px-1 py-2 rounded hover:bg-green-700"
                             >
                                 Entregado
                             </button>

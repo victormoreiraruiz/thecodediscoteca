@@ -37,7 +37,14 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
                 icon: 'error',
                 title: 'Evento pasado',
                 text: 'Este evento ya ha pasado. No es posible comprar entradas.',
+                confirmButtonText: 'OK',
+                buttonsStyling: false, // Desactiva los estilos por defecto de SweetAlert
+                customClass: {
+                    confirmButton:
+                        'bg-red-600 text-white font-bold py-2 px-9 rounded-md text-lg hover:bg-red-700 flex items-center justify-center', // Asegura centrado vertical y horizontal
+                },
             });
+            
             return;
         }
 

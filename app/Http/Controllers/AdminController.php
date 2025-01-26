@@ -64,11 +64,23 @@ class AdminController extends Controller
 public function eliminarUsuario($id)
 {
     $usuario = User::findOrFail($id);
-    
+
+    // Verificar si el usuario tiene eventos futuros
+    $tieneEventosFuturos = DB::table('reserva_discotecas')
+        ->join('eventos', 'reserva_discotecas.sala_id', '=', 'eventos.sala_id')
+        ->where('reserva_discotecas.usuario_id', $id)
+        ->where('eventos.fecha_evento', '>=', now())
+        ->exists();
+
+    if ($tieneEventosFuturos) {
+        return response()->json(['message' => 'El usuario no puede ser eliminado porque tiene eventos futuros.'], 403);
+    }
+
     $usuario->delete();
 
     return response()->json(['message' => 'Usuario eliminado con éxito.']);
 }
+
 
 public function crearEvento(Request $request)
 {

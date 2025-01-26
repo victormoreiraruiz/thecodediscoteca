@@ -29,8 +29,12 @@ const AdminGestionCategorias = () => {
       showCancelButton: true,
       confirmButtonColor: "#e5cc70",
       cancelButtonColor: "#860303",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+      customClass: {
+        confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+        cancelButton: 'bg-[#e5cc70] text-[#ffffff] px-10 py-2 rounded-lg hover:bg-yellow-600',
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -41,6 +45,9 @@ const AdminGestionCategorias = () => {
             text: "La categoría ha sido eliminada correctamente.",
             icon: "success",
             confirmButtonColor: "#e5cc70",
+            customClass: {
+              confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+            }
           });
   
           cargarCategorias();

@@ -55,8 +55,12 @@ const AdminReponerStock = () => {
             `,
             icon: "question",
             showCancelButton: true,
-            confirmButtonText: "Sí, confirmar",
-            cancelButtonText: "Cancelar",
+            confirmButtonText: "Sí",
+            cancelButtonText: "No",
+            customClass: {
+                confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                cancelButton: 'bg-[#e5cc70] text-[#ffffff] px-10 py-2 rounded-lg hover:bg-yellow-600',
+              },
         }).then(async (result) => {
             if (result.isConfirmed) {
                 setLoading(true);

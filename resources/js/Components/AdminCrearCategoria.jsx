@@ -15,7 +15,10 @@ const AdminCrearCategoria = () => {
         text: "Categoría creada correctamente",
         icon: "success",
         confirmButtonColor: "#e5cc70",
-        confirmButtonText: "Aceptar",
+        confirmButtonText: "Ok",
+        customClass: {
+          confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+        },
       });
 
       setNombre("");

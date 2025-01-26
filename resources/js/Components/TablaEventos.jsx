@@ -144,9 +144,9 @@ const TablaEventos = ({ eventos }) => {
                                         </a>
                                         <button
                                             onClick={() => handleEliminarEvento(evento.id)}
-                                            className="bg-red-600 text-white px-3 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+                                            className="bg-red-600 text-white px-1 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-300"
                                         >
-                                            Eliminar
+                                            Borrar
                                         </button>
                                     </td>
                                 </tr>

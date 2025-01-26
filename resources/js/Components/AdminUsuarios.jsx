@@ -78,13 +78,18 @@ const AdminUsuarios = ({ usuarios }) => {
       text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#860303',
-      cancelButtonColor: '#e5cc70',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No',
+      customClass: {
+        confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+        cancelButton: 'bg-[#e5cc70] text-[#860303] px-10 py-2 rounded-lg hover:bg-yellow-600',
+      },
+      buttonsStyling: false, // Desactiva los estilos predeterminados de SweetAlert2
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
+    
+  
       setLoading(true);
       setError(null);
       try {
@@ -95,11 +100,14 @@ const AdminUsuarios = ({ usuarios }) => {
             'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
           },
         });
-
-        if (!response.ok) throw new Error('Error al eliminar el usuario');
-
+  
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Error al eliminar el usuario');
+        }
+  
         setUsuarios(usuariosList.filter(user => user.id !== userId));
-
+  
         Swal.fire({
           icon: 'success',
           title: 'Usuario eliminado',
@@ -107,12 +115,19 @@ const AdminUsuarios = ({ usuarios }) => {
           confirmButtonColor: '#e5cc70',
         });
       } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+          confirmButtonColor: '#860303',
+        });
         setError(error.message);
       } finally {
         setLoading(false);
       }
     });
   };
+  
 
   return (
     <div className="container mx-auto px-6 py-8">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
+import Swal from 'sweetalert2';
 
 const AdminGestionEventos = ({ eventos }) => {
     const [loading, setLoading] = useState(null);
@@ -18,7 +19,7 @@ const AdminGestionEventos = ({ eventos }) => {
     const actualizarEstadoEvento = async (id, nuevoEstado) => {
         setLoading((prevLoading) => ({ ...prevLoading, [id]: true }));
         setError(null);
-
+    
         try {
             const response = await fetch(route('admin.actualizarEstadoEvento', { id }), {
                 method: 'PUT',
@@ -28,20 +29,36 @@ const AdminGestionEventos = ({ eventos }) => {
                 },
                 body: JSON.stringify({ estado: nuevoEstado }),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error al actualizar el estado del evento.');
             }
-
+    
             const updatedEventos = eventosList.map(evento =>
                 evento.id === id ? { ...evento, estado: nuevoEstado } : evento
             );
             setEventos(updatedEventos);
-
-            alert('Estado del evento actualizado exitosamente!');
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Estado actualizado',
+                text: 'El estado del evento se ha actualizado exitosamente.',
+                confirmButtonColor: '#e5cc70',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
+            });
         } catch (error) {
             console.error(error);
-            alert('Hubo un error al intentar actualizar el estado del evento.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al intentar actualizar el estado del evento.',
+                confirmButtonColor: '#860303',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
+            });
         } finally {
             setLoading((prevLoading) => ({ ...prevLoading, [id]: false }));
         }
@@ -49,13 +66,21 @@ const AdminGestionEventos = ({ eventos }) => {
 
     const eliminarEvento = async () => {
         if (!motivoCancelacion) {
-            alert('Por favor, ingrese un motivo para cancelar el evento.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Motivo requerido',
+                text: 'Por favor, ingrese un motivo para cancelar el evento.',
+                confirmButtonColor: '#860303',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
+            });
             return;
         }
-
+    
         setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: true }));
         setError(null);
-
+    
         try {
             const response = await fetch(route('admin.eliminarEvento', { id: eventoAEliminar.id }), {
                 method: 'DELETE',
@@ -65,24 +90,41 @@ const AdminGestionEventos = ({ eventos }) => {
                 },
                 body: JSON.stringify({ motivo_cancelacion: motivoCancelacion }),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error al eliminar el evento.');
             }
-
+    
             const updatedEventos = eventosList.filter(evento => evento.id !== eventoAEliminar.id);
             setEventos(updatedEventos);
             setMotivoCancelacion("");
             setEventoAEliminar(null);
-
-            alert('Evento eliminado exitosamente!');
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Evento eliminado',
+                text: 'El evento ha sido eliminado exitosamente.',
+                confirmButtonColor: '#e5cc70',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
+            });
         } catch (error) {
             console.error(error);
-            alert('Hubo un error al intentar eliminar el evento.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al intentar eliminar el evento.',
+                confirmButtonColor: '#860303',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
+            });
         } finally {
             setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: false }));
         }
     };
+    
 
     const cancelarEliminacion = () => {
         setEventoAEliminar(null);
