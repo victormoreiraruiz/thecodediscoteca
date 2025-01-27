@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import Swal from "sweetalert2";
 
 const AdminCrearEvento = () => {
     const [nombreEvento, setNombreEvento] = useState('');
@@ -54,13 +55,20 @@ const AdminCrearEvento = () => {
                 },
                 body: formData,
             });
-
+        
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error al crear el evento');
             }
-
-            alert('Evento creado exitosamente');
+        
+            // SweetAlert para éxito
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Evento creado exitosamente',
+            });
+        
+            // Resetear los campos del formulario
             setNombreEvento('');
             setDescripcion('');
             setFechaEvento('');
@@ -71,10 +79,18 @@ const AdminCrearEvento = () => {
             setPrecioVip('');
             setPrecioPremium('');
         } catch (error) {
+            // SweetAlert para error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Hubo un problema al crear el evento.',
+            });
+        
             setError(error.message);
         } finally {
             setLoading(false);
         }
+        
     };
 
     const resaltarDias = ({ date }) => {

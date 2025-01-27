@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const TablaEventos = ({ eventos }) => {
     const [paginaActual, setPaginaActual] = useState(1);
@@ -60,19 +61,49 @@ const TablaEventos = ({ eventos }) => {
     };
 
     const handleEliminarEvento = async (eventoId) => {
-        if (!confirm('¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        try {
-            const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
-            alert(response.data.message || 'Evento eliminado con éxito.');
-            location.reload();
-        } catch (error) {
-            console.error('Error al eliminar el evento:', error);
-            alert(error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.');
-        }
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción no se puede deshacer. ¿Deseas continuar?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'No',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'bg-red-600 text-white font-bold py-2 px-8 rounded-md hover:bg-red-700',
+                cancelButton: 'bg-gray-300 text-black font-bold py-2 px-8 rounded-md hover:bg-gray-400',
+            },
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
+                    Swal.fire({
+                        title: 'Evento eliminado',
+                        text: response.data.message || 'Evento eliminado con éxito.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-green-600 text-white font-bold py-2 px-8 rounded-md hover:bg-green-700',
+                        },
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-red-600 text-white font-bold py-2 px-8 rounded-md hover:bg-red-700',
+                        },
+                    });
+                }
+            }
+        });
     };
+    
+    
 
     return (
         <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-[#e5cc70] text-[#860303] rounded-lg shadow-lg">
