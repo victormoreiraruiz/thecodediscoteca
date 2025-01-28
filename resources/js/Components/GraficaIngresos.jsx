@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2'; // componente que hace la grafica
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -15,12 +15,13 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const GraficaIngresos = ({ ingresos }) => {
+       // Datos para la gráfica
     const data = {
-        labels: ingresos.map((ingreso) => ingreso.fecha), 
+        labels: ingresos.map((ingreso) => ingreso.fecha),  // Mapea las fechas de los ingresos como etiquetas del eje X
         datasets: [
             {
                 label: 'Ingresos por Fecha',
-                data: ingresos.map((ingreso) => ingreso.total), 
+                data: ingresos.map((ingreso) => ingreso.total),  // Datos del eje Y, total de ingresos
                 borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderWidth: 2,
@@ -31,7 +32,7 @@ const GraficaIngresos = ({ ingresos }) => {
     const options = {
         responsive: true,
         plugins: {
-            legend: {
+            legend: { // muestra la leyenda 
                 position: 'top',
             },
             title: {
@@ -39,7 +40,7 @@ const GraficaIngresos = ({ ingresos }) => {
                 text: 'Gráfica de Ingresos',
             },
         },
-        scales: {
+        scales: {  // muestra titulo de eje x e y
             x: {
                 title: {
                     display: true,
@@ -51,7 +52,7 @@ const GraficaIngresos = ({ ingresos }) => {
                     display: true,
                     text: 'Ingresos (€)',
                 },
-                beginAtZero: true,
+                beginAtZero: true, // Comienza el eje Y en 0
             },
         },
     };

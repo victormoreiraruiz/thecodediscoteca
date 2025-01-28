@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 
 const AñadirSaldoComponente = () => {
-    const [saldo, setSaldo] = useState('');
-    const [paypalLoaded, setPaypalLoaded] = useState(false);
+    const [saldo, setSaldo] = useState(''); // maneja la cantidad ingresada
+    const [paypalLoaded, setPaypalLoaded] = useState(false);   // verifica si el script de paypal se carga
 
-    const handlePayPalScriptLoad = () => {
-        if (window.paypal) {
-            window.paypal.Buttons({
-                createOrder: (data, actions) => {
+    const handlePayPalScriptLoad = () => {  // Función que se ejecuta cuando el script de PayPal se carga
+        if (window.paypal) { // Comprueba si la biblioteca de PayPal está disponible
+            window.paypal.Buttons({ // Configura y renderiza los botones de PayPal
+                createOrder: (data, actions) => {      // Función para crear la orden de compra
                     if (!saldo || parseFloat(saldo) <= 0) {
                         alert('Por favor, introduce un monto válido.');
                         return;
                     }
-                    return actions.order.create({
+                    return actions.order.create({  // Crea una orden de PayPal con la cantidad ingresada
                         purchase_units: [
                             {
                                 amount: {
@@ -23,7 +23,7 @@ const AñadirSaldoComponente = () => {
                         ],
                     });
                 },
-                onApprove: (data, actions) => {
+                onApprove: (data, actions) => {  // Función que se ejecuta cuando el pago es aprobado
                     return actions.order.capture().then(() => {
                         // Llamada al servidor para añadir el saldo
                         Inertia.post(route('añadir-saldo'), { saldo }, {
@@ -46,17 +46,17 @@ const AñadirSaldoComponente = () => {
         }
     };
 
-    useEffect(() => {
-        const script = document.createElement('script');
+    useEffect(() => {  // useEffect para cargar el script de PayPal dinámicamente al cargar el componente
+        const script = document.createElement('script');  // Crea un script para cargar el SDK de PayPal
         script.src = `https://www.paypal.com/sdk/js?client-id=AYd5L69B51NLRWuwIDbxKLgC4eQy84SSb_7OSQwBxOBo_gRYowPqkBX5aNtjGxPqsa8Q4Y3ApHXEE2DK&currency=EUR&disable-funding=card`;
-        script.async = true;
+        script.async = true; // Carga el script de manera asíncrona
         script.onload = () => {
-            setPaypalLoaded(true);
-            handlePayPalScriptLoad();
+            setPaypalLoaded(true);  // Marca que el script se ha cargado correctamente
+            handlePayPalScriptLoad(); // Configura los botones de PayPal
         };
-        document.body.appendChild(script);
+        document.body.appendChild(script); // Añade el script al cuerpo del documento
 
-        return () => {
+        return () => { // Limpia el script al desmontar el componente
             document.body.removeChild(script);
         };
     }, [saldo]);

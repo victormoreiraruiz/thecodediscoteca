@@ -42,6 +42,7 @@ class ComandaController extends Controller
             'productos.*.cantidad' => 'required|integer|min:1',
         ]);
     
+        // busca el evento y comprueba que la hora actual se encuentre entre la inicial y final
         $evento = Evento::findOrFail($request->evento_id);
         $hora_actual = Carbon::now();
         $hora_inicio = Carbon::parse($evento->hora_inicio);
@@ -57,8 +58,8 @@ class ComandaController extends Controller
     
         $total = 0;
         foreach ($request->productos as $producto) {
-            $item = Producto::findOrFail($producto['id']);
-            $total += $item->precio * $producto['cantidad'];
+            $item = Producto::findOrFail($producto['id']); // producto seleccionado
+            $total += $item->precio * $producto['cantidad']; 
         }
     
         if ($usuario->saldo < $total) {
@@ -68,7 +69,7 @@ class ComandaController extends Controller
         DB::beginTransaction();
     
         try {
-            // 🔹 Obtener al administrador
+            //  Obtener al administrador
             $admin = User::where('rol', 'admin')->first();
     
             if (!$admin) {
@@ -77,10 +78,10 @@ class ComandaController extends Controller
                 return response()->json(['error' => 'No se encontró un administrador para procesar la transacción'], 500);
             }
     
-            // 🔹 Restar saldo al usuario comprador
+            //  Restar saldo al usuario comprador
             $usuario->decrement('saldo', $total);
     
-            // 🔹 Sumar la cantidad al campo `ingresos` del administrador
+            //  Sumar la cantidad al campo `ingresos` del administrador
             $admin->increment('ingresos', $total);
 
             DB::table('historial_ingresos')->insert([
@@ -90,10 +91,10 @@ class ComandaController extends Controller
                 'updated_at' => now(),
             ]);
     
-            // 🔹 Registrar la transacción en el log
+            //  Registrar la transacción en el log
             \Log::info("Transacción realizada: Usuario {$usuario->id} pagó {$total}€, ahora el ingreso total del admin ({$admin->id}) es {$admin->ingresos}€");
     
-            // 🔹 Crear la comanda
+            //  Crear la comanda
             $comanda = Comanda::create([
                 'user_id' => $usuario->id,
                 'evento_id' => $request->evento_id,
@@ -104,14 +105,17 @@ class ComandaController extends Controller
             foreach ($request->productos as $producto) {
                 $item = Producto::findOrFail($producto['id']);
     
+                // pa comprobar si se resta el stock
                 \Log::info("Stock antes de reducir ({$item->nombre}): {$item->stock}");
     
+                // valida la cantidad antes de hacer el pedido
                 if ($item->stock < $producto['cantidad']) {
                     DB::rollBack();
                     \Log::error("Stock insuficiente para {$item->nombre}. Cantidad solicitada: {$producto['cantidad']}, stock disponible: {$item->stock}");
                     return response()->json(['error' => "Stock insuficiente para {$item->nombre}"], 400);
                 }
     
+                // resta la cantidad del pedido al stick total
                 $item->decrement('stock', $producto['cantidad']);
                 \Log::info("Stock después de reducir ({$item->nombre}): {$item->stock}");
     
@@ -142,13 +146,7 @@ class ComandaController extends Controller
         return response()->json($comandas);
     }
 
-    /**
-     * Actualizar el estado de una comanda.
-     */
 
-    /**
-     * Eliminar una comanda.
-     */
     public function eliminarComanda($id)
     {
         Comanda::destroy($id);

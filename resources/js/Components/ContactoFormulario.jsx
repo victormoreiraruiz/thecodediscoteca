@@ -21,19 +21,48 @@ const ContactoFormulario = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio.';
-    if (!formData.apellidos.trim()) newErrors.apellidos = 'Los apellidos son obligatorios.';
-    if (!formData.email.trim()) {
-      newErrors.email = 'El email es obligatorio.';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'El email no es válido.';
+    
+    // Validar nombre
+    if (!formData.nombre.trim()) {
+        newErrors.nombre = 'El nombre es obligatorio.';
     }
-    if (!formData.telefono.trim()) newErrors.telefono = 'El teléfono es obligatorio.';
-    if (!formData.asunto.trim()) newErrors.asunto = 'El asunto es obligatorio.';
-    if (!formData.mensaje.trim()) newErrors.mensaje = 'El mensaje es obligatorio.';
+    
+    // Validar apellidos
+    if (!formData.apellidos.trim()) {
+        newErrors.apellidos = 'Los apellidos son obligatorios.';
+    }
+    
+    // Validar email
+    if (!formData.email.trim()) {
+        newErrors.email = 'El email es obligatorio.';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = 'El email no es válido.';
+    }
+    
+    // Validar teléfono
+    if (!formData.telefono.trim()) {
+        newErrors.telefono = 'El teléfono es obligatorio.';
+    } else if (!/^\d{9}$/.test(formData.telefono)) { // Teléfono debe tener 9 dígitos numéricos
+        newErrors.telefono = 'El teléfono debe tener 9 dígitos.';
+    }
+
+    // Validar asunto
+    if (!formData.asunto.trim()) {
+        newErrors.asunto = 'El asunto es obligatorio.';
+    } else if (formData.asunto.length < 5) { // Longitud mínima de 5 caracteres
+        newErrors.asunto = 'El asunto debe tener al menos 5 caracteres.';
+    }
+
+    // Validar mensaje
+    if (!formData.mensaje.trim()) {
+        newErrors.mensaje = 'El mensaje es obligatorio.';
+    } else if (formData.mensaje.length < 10) { // Longitud mínima de 10 caracteres
+        newErrors.mensaje = 'El mensaje debe tener al menos 10 caracteres.';
+    }
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    return Object.keys(newErrors).length === 0; // Si no hay errores, el formulario es válido
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

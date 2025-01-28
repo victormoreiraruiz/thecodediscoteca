@@ -37,9 +37,12 @@ class CompraController extends Controller
     ]);
 
     $carrito = session('carrito', []); // obtiene el carrito desde la sesión
+        
+    // calcula el total sumando precio por cantidad de cada producto
     $total = collect($carrito)->reduce(function ($sum, $item) {
         return $sum + ($item['precio'] * $item['cantidad']);
     }, 0);
+
 
     return Inertia::render('ResumenCompra', [
         'carrito' => $carrito,
@@ -60,10 +63,11 @@ public function confirmarCompra(Request $request)
         return redirect()->route('login')->with('error', 'Debes iniciar sesión para confirmar tu compra.');
     }
 
+
     $user = $request->user();
-    $carrito = session('carrito', []);
+    $carrito = session('carrito', []); //obtiene el carrito de la sesion o lo crea
     $total = collect($carrito)->reduce(fn($sum, $item) => $sum + ($item['precio'] * $item['cantidad']), 0);
-    $pagarConSaldo = $request->input('pagarConSaldo');
+    $pagarConSaldo = $request->input('pagarConSaldo'); // obtiene el pagar con saldo si ha sido marcado
 
     \Log::info('Confirmando compra para usuario:', ['id' => $user->id, 'total' => $total]);
 
@@ -180,7 +184,7 @@ public function confirmarCompra(Request $request)
 
         // Otorgar puntos al usuario por la compra
         $puntosGanados = round($total * 0.10);
-        $user->puntos_totales += intval($puntosGanados);
+        $user->puntos_totales += intval($puntosGanados); // esto es pq puse que los puntos sea integer y tiene q redondear
         $user->actualizarMembresia();
         $user->save();
 
@@ -202,10 +206,12 @@ public function confirmarCompra(Request $request)
     private function generarQr($compra, $entradaId, $indice)
     {
         try {
+             // Prepara los datos que se incluirán en el QR
             $qrData = "Compra ID: {$compra->id}\nEntrada ID: {$entradaId}\nNúmero: {$indice}\nUsuario ID: {$compra->usuario_id}\nTotal Compra: {$compra->total}";
+             // Define la ruta donde se guardará el archivo del QR
             $qrPath = "qrcodes/compra_{$compra->id}_entrada_{$entradaId}_n{$indice}.png";
     
-          
+           // Verifica si el directorio 'public/qrcodes' existe; si no, lo crea
             if (!Storage::exists('public/qrcodes')) {
                 Storage::makeDirectory('public/qrcodes');
             }
@@ -304,14 +310,16 @@ public function confirmarCompra(Request $request)
     
     public function descargarQrsPdf($compraId)
 {
+    // Obtiene la compra con sus entradas y eventos relacionados, o lanza un error si no se encuentra
     $compra = Compra::with(['entradas.evento'])->findOrFail($compraId);
-    $qrPaths = [];
+    $qrPaths = []; // Inicializa un array vacío para almacenar las rutas de los códigos QR generados
 
-    foreach ($compra->entradas as $entrada) {
-        for ($i = 1; $i <= $entrada->pivot->cantidad; $i++) {
+
+    foreach ($compra->entradas as $entrada)  { // Recorre todas las entradas de la compra
+        for ($i = 1; $i <= $entrada->pivot->cantidad; $i++) {  // Genera un QR por cada cantidad de entrada comprada
             $qrPath = storage_path("app/public/qrcodes/compra_{$compra->id}_entrada_{$entrada->id}_n{$i}.png");
 
-            try {
+            try { // Genera el QR y lo guarda en la ruta especificada
                 \QrCode::format('png')->size(150)->generate("compra_{$compra->id}_entrada_{$entrada->id}_n{$i}", $qrPath);
 
                 if (is_file($qrPath)) {
@@ -331,11 +339,13 @@ public function confirmarCompra(Request $request)
 
     \Log::info("Rutas finales de QR:", $qrPaths);
 
+    // general el odf
     $pdf = new \Mpdf\Mpdf();
-    $html = view('qrs', compact('compra', 'qrPaths'))->render();
+    // Genera el contenido HTML a partir de una vista (qrs.blade.php) con las rutas de los QRs
+    $html = view('qrs', compact('compra', 'qrPaths'))->render(); 
     $pdf->WriteHTML($html);
 
-    return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');
+    return $pdf->Output("Compra_{$compra->id}_QRs.pdf", 'D');// devuelve el pdf para descargar con el nombre del id de compra
 }
 
 }

@@ -3,17 +3,17 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 const SeleccionarMesaPedido = ({ evento }) => {
-  const [mesas, setMesas] = useState([]);
-  const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
+  const [mesas, setMesas] = useState([]); // Estado para almacenar la lista de mesas disponibles
+  const [mesaSeleccionada, setMesaSeleccionada] = useState(null); // estado mesa seleccionada
 
   useEffect(() => {
     axios.get("/api/mesas").then((response) => {
-      setMesas(response.data);
+      setMesas(response.data); // Actualizar el estado con la lista de mesas obtenida
     });
   }, []);
 
   const hacerPedido = async () => {
-    if (!mesaSeleccionada) {
+    if (!mesaSeleccionada) {  // Validar si se ha seleccionado una mesa
       Swal.fire("Error", "Debes seleccionar una mesa", "error");
       return;
     }

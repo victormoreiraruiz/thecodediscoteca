@@ -20,15 +20,15 @@ const AdminCrearEvento = () => {
     useEffect(() => {
         const fetchDiasOcupados = async () => {
             try {
-                const response = await fetch(route('eventos.diasOcupados'));
-                const data = await response.json();
-                setDiasOcupados(data);
+                const response = await fetch(route('eventos.diasOcupados'));   // Realiza una solicitud GET a la ruta 'eventos.diasOcupados'.
+                const data = await response.json();  // Convierte la respuesta a formato JSON.
+                setDiasOcupados(data); // Almacena los días ocupados en el estado correspondiente.
             } catch (err) {
                 console.error('Error al obtener los días ocupados:', err);
             }
         };
-        fetchDiasOcupados();
-    }, []);
+        fetchDiasOcupados(); //llama a la función
+    }, []); // El array vacío asegura que este efecto solo se ejecute una vez al montar el componente.
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -94,16 +94,16 @@ const AdminCrearEvento = () => {
     };
 
     const resaltarDias = ({ date }) => {
-        const fecha = date.toISOString().split('T')[0];
-        if (diasOcupados.includes(fecha)) return 'dia-ocupado';
-        if (fecha === fechaEvento) return 'dia-seleccionado';
+        const fecha = date.toISOString().split('T')[0]; // convierte la fecha actual del calendario en formato iso.
+        if (diasOcupados.includes(fecha)) return 'dia-ocupado';  // si esta ocupado devuelve la clase dia ocupado resaltada
+        if (fecha === fechaEvento) return 'dia-seleccionado'; // lo mismo pero con seleccionado
         return null;
     };
 
     const deshabilitarDiasPasados = ({ date }) => {
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        return date < hoy || diasOcupados.includes(date.toISOString().split('T')[0]);
+        const hoy = new Date(); // Obtiene la fecha de hoy y ajusta las horas pa comparar
+        hoy.setHours(0, 0, 0, 0); 
+        return date < hoy || diasOcupados.includes(date.toISOString().split('T')[0]);  // lla fecha es anterior a hoy o está en la lista de días ocupados.
     };
 
     return (

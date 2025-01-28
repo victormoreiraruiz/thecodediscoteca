@@ -6,47 +6,59 @@ const CamareroHistorialComandas = ({ nuevaComanda }) => {
     const [loading, setLoading] = useState(true);
     const [eventosVisibles, setEventosVisibles] = useState({}); // Control de visibilidad por evento
 
-    useEffect(() => {
-        obtenerHistorialComandas();
-    }, []);
+        //  llama a la función para obtener el historial de comandas
+        useEffect(() => {
+            obtenerHistorialComandas(); // Carga inicial del historial de comandas
+        }, []);
 
-    useEffect(() => {
-        if (nuevaComanda) {
-            setComandas((prevComandas) => [...prevComandas, nuevaComanda]);
-        }
-    }, [nuevaComanda]);
 
-    const obtenerHistorialComandas = async () => {
-        try {
-            const response = await axios.get("/comandas/historial");
-            setComandas(response.data);
-        } catch (error) {
-            console.error("Error al obtener el historial de comandas:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Si hay una nueva comanda, se agrega a la lista de comandas existentes
+        useEffect(() => {
+            if (nuevaComanda) {
+                setComandas((prevComandas) => [...prevComandas, nuevaComanda]); // Agrega la nueva comanda al estado
+            }
+        }, [nuevaComanda]);
 
-    // Agrupar comandas por evento
-    const comandasPorEvento = comandas.reduce((acc, comanda) => {
-        const eventoId = comanda.evento_id;
-        const eventoNombre = comanda.evento?.nombre || `Evento ID ${eventoId}`;
-        if (!acc[eventoId]) {
-            acc[eventoId] = {
-                nombre: eventoNombre,
-                comandas: [],
-            };
-        }
-        acc[eventoId].comandas.push(comanda);
-        return acc;
-    }, {});
+        // Función para obtener el historial de comandas desde el servidor
+        const obtenerHistorialComandas = async () => {
+            try {
+                // Realiza una petición GET para obtener las comandas
+                const response = await axios.get("/comandas/historial");
+                setComandas(response.data); // Actualiza el estado con los datos recibidos
+            } catch (error) {
+              
+                console.error("Error al obtener el historial de comandas:", error);
+            } finally {
+                setLoading(false); // Indica que ya se terminó de cargar el historial
+            }
+        };
 
-    const toggleEvento = (eventoId) => {
-        setEventosVisibles((prev) => ({
-            ...prev,
-            [eventoId]: !prev[eventoId],
-        }));
-    };
+        // Agrupar las comandas por evento
+        const comandasPorEvento = comandas.reduce((acc, comanda) => {
+            const eventoId = comanda.evento_id; // ID del evento asociado a la comanda
+            const eventoNombre = comanda.evento?.nombre || `Evento ID ${eventoId}`; // Obtiene el nombre del evento o usa un texto por defecto si no está disponible
+            
+            if (!acc[eventoId]) {
+                // Si aún no existe este evento en el acumulador, lo inicializa con un nombre y un array vacío de comandas
+                acc[eventoId] = {
+                    nombre: eventoNombre,
+                    comandas: [],
+                };
+            }
+
+            // Agrega la comanda actual al array de comandas del evento correspondiente
+            acc[eventoId].comandas.push(comanda);
+            return acc; // Devuelve el acumulador actualizado
+        }, {}); // Inicia con un objeto vacío como acumulador
+
+        // Función para alternar la visibilidad de las comandas de un evento
+        const toggleEvento = (eventoId) => {
+            setEventosVisibles((prev) => ({
+                ...prev, // Mantiene los valores existentes
+                [eventoId]: !prev[eventoId], // Cambia la visibilidad del evento actual (true <-> false)
+            }));
+        };
+
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-lg mt-6">

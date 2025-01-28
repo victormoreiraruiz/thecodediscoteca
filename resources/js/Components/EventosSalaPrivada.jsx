@@ -17,10 +17,11 @@ const EventosSalaPrivada = () => {
   const [loading, setLoading] = useState(false);
   const [mostrarBotonConvertir, setMostrarBotonConvertir] = useState(false);
 
+   // Función para obtener las fechas reservadas de la sala
   const fetchBookedDates = async () => {
     try {
-      const response = await axios.get("/api/salas/1/reservas");
-      setBookedDates(response.data);
+      const response = await axios.get("/api/salas/1/reservas"); // realiza la solicitud para obtener las reservas
+      setBookedDates(response.data); // almacena la info
     } catch (error) {
       console.error("Error al cargar las fechas de reservas:", error);
     }
@@ -53,7 +54,10 @@ const EventosSalaPrivada = () => {
           icon: "error",
           title: "No autenticado",
           text: "Debes iniciar sesión para acceder a esta página.",
-          confirmButtonText: "Iniciar sesión",
+          confirmButtonText: "Ir",
+          customClass: {
+            confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+          },
         }).then(() => {
           window.location.href = "/login";
         });
@@ -68,22 +72,26 @@ const EventosSalaPrivada = () => {
     fetchBookedDates(); // Cargar las fechas reservadas
   }, []);
 
+   // Maneja el cambio de fecha seleccionada en el calendario
   const handleDateChange = (date) => {
     if (!isDateBooked(date)) {
       setSelectedDate(date);
     }
   };
 
+   // Función para verificar si una fecha está reservada
   const isDateBooked = (date) => {
     return bookedDates.some(
       (bookedDate) => new Date(bookedDate).toDateString() === date.toDateString()
     );
   };
 
+  // Maneja el cambio del archivo del cartel
   const handleCartelChange = (e) => {
     setCartel(e.target.files[0]);
   };
 
+  // Valida las horas de inicio y fin ingresadas por el usuario
   const validateTimes = () => {
     const [horaInicioH] = horaInicio.split(":").map(Number);
 

@@ -6,8 +6,9 @@ const AdminCrearCategoria = () => {
   const [nombre, setNombre] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
+    e.preventDefault(); // Previene el comportamiento por defecto del formulario (recargar la página).
+    try {    // Realiza una solicitud POST a la URL '/admin/categorias' para crear una nueva categoría.
+      // Envía el nombre de la categoría en el cuerpo de la solicitud y usa credenciales de sesión.
       await axios.post("/admin/categorias", { nombre }, { withCredentials: true });
 
       Swal.fire({

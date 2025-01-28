@@ -50,6 +50,7 @@ public function crearReserva(Request $request, $id)
         ], 403);
     }
 
+    // busca a alguien con rol admin para añadirle los ingresos
     $admin = User::where('rol', 'admin')->first();
     if (!$admin) {
         return response()->json(['error' => 'No se encontró un administrador para recibir el pago.'], 500);
@@ -158,8 +159,10 @@ public function crearReserva(Request $request, $id)
                 'total' => $sala->precio,
             ];
 
+            // Carga la vista 'factura' con los datos de la factura y genera un PDF
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('factura', $facturaData);
-            $fileName = "facturas/factura_reserva_{$reserva->id}.pdf";
+            $fileName = "facturas/factura_reserva_{$reserva->id}.pdf"; // Define el nombre del archivo PDF, incluyendo la carpeta 
+            // Guarda el archivo PDF generado en el disco 'public' usando la ruta definida
             \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $pdf->output());
         } catch (\Exception $e) {
             \Log::error('Error al generar la factura: ' . $e->getMessage());

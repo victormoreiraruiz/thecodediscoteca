@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { Inertia } from '@inertiajs/inertia';
 
 const FormularioPromotor = ({ onComplete }) => {
@@ -71,29 +72,45 @@ const FormularioPromotor = ({ onComplete }) => {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrors({}); // Limpiar errores existentes
+        setErrors({});
 
-        const newErrors = validateForm(); // Validar formulario
+        const newErrors = validateForm();
         if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors); // Mostrar errores en la interfaz
+            setErrors(newErrors);
             return;
         }
 
-        setLoading(true); // Mostrar estado de carga
+        setLoading(true);
 
         Inertia.post(route('convertir-promotor.post'), formData, {
             onSuccess: () => {
-                alert('¡Ahora eres promotor!');
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: '¡Has conseguido cambiar tu rol a promotor!',
+                    icon: 'success',
+                    confirmButtonText: 'Volver',
+                    confirmButtonColor: '#e5cc70',
+                    customClass: {
+                        confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                    },
+                }).then(() => {
+                    window.location.href = '/eventos';
+                });
                 if (onComplete) onComplete();
-                window.location.href = route('eventos.index');
             },
             onError: (serverErrors) => {
-                setErrors(serverErrors); // Manejar errores del servidor
-                alert('Hubo un error al convertirte en promotor.');
+                setErrors(serverErrors);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al convertirte en promotor. Por favor, inténtalo de nuevo.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#860303',
+                });
             },
-            onFinish: () => setLoading(false), // Detener estado de carga
+            onFinish: () => setLoading(false),
         });
     };
 

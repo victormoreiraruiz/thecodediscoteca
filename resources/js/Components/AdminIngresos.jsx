@@ -4,26 +4,26 @@ import { Line } from "react-chartjs-2";
 import "chart.js/auto";
 
 const AdminIngresos = () => {
-    const [historial, setHistorial] = useState([]);
+    const [historial, setHistorial] = useState([]); // Estado para almacenar el historial de ingresos.
     const [totalIngresos, setTotalIngresos] = useState(0); // Estado para almacenar la cantidad total
 
-    useEffect(() => {
+    useEffect(() => { // useEffect para cargar el historial de ingresos al montar el componente.
         const obtenerHistorialIngresos = async () => {
             try {
                 const response = await axios.get("/admin/historial-ingresos");
                 const data = response.data;
 
-                let acumulado = 0;
-                const historialAcumulado = data.map((ingreso) => {
-                    acumulado += parseFloat(ingreso.cantidad);
+                let acumulado = 0; // Variable para calcular el total acumulado.
+                const historialAcumulado = data.map((ingreso) => {  // Mapea el historial para agregar el acumulado y formatear la fecha.
+                    acumulado += parseFloat(ingreso.cantidad); // Suma el ingreso actual al acumulado.
                     return { 
-                        ...ingreso, 
-                        acumulado, 
+                        ...ingreso,  // Copia los datos originales.
+                        acumulado, // Agrega el total acumulado
                         fecha: new Date(ingreso.created_at).toLocaleString() 
                     };
                 });
 
-                setHistorial(historialAcumulado);
+                setHistorial(historialAcumulado); // Almacena el historial formateado en el estado.
                 setTotalIngresos(acumulado); // Guardamos la cantidad total
             } catch (error) {
                 console.error("Error al obtener el historial de ingresos:", error);
@@ -37,7 +37,7 @@ const AdminIngresos = () => {
 
     // Datos para la gráfica
     const data = {
-        labels: historial.map((ingreso) => ingreso.fecha),
+        labels: historial.map((ingreso) => ingreso.fecha), // Usa las fechas de los ingresos como etiquetas.
         datasets: [
             {
                 label: "Ingresos Totales (€)",

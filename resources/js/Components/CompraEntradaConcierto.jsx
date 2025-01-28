@@ -11,11 +11,11 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
     useEffect(() => {
         const fetchEntradas = async () => {
             try {
-                const response = await axios.get(`/eventos/${eventoId}/entradas`);
-                setEntradas(response.data);
+                const response = await axios.get(`/eventos/${eventoId}/entradas`); // consulta para obtener entradas del evento
+                setEntradas(response.data); // guarda las entradas obtenidas
                 if (response.data.length > 0) {
-                    const eventoData = response.data[0].evento;
-                    setEvento(eventoData);
+                    const eventoData = response.data[0].evento; // obtiene la informacion del evento
+                    setEvento(eventoData); // la almacena
 
                     // Verificar si la fecha del evento ya pasó
                     const fechaEvento = dayjs(eventoData.fecha_evento);
@@ -28,8 +28,8 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
             }
         };
 
-        fetchEntradas();
-    }, [eventoId]);
+        fetchEntradas(); // llama a la funcion para obtener las entradas
+    }, [eventoId]); // Se ejecuta cada vez que cambia el `eventoId`.
 
     const agregarAlCarrito = (entrada) => {
         if (eventoPasado) {
@@ -48,12 +48,12 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
             return;
         }
 
-        // Lógica normal para agregar al carrito
+        // busca si la entrada ya existe 
         const entradaExistente = carrito.find(
             (item) => item.tipo === entrada.tipo && item.eventoId === eventoId
         );
 
-        if (entradaExistente) {
+        if (entradaExistente) { // en caso de existir incrementa la cantidad
             setCarrito(
                 carrito.map((item) =>
                     item.tipo === entrada.tipo && item.eventoId === eventoId
@@ -61,7 +61,7 @@ const CompraEntradaConcierto = ({ eventoId, carrito, setCarrito }) => {
                         : item
                 )
             );
-        } else {
+        } else { // eb ncaso contrario se añade al carrito
             setCarrito([
                 ...carrito,
                 {

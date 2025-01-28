@@ -65,7 +65,7 @@ public function eliminarUsuario($id)
 {
     $usuario = User::findOrFail($id);
 
-    // Verificar si el usuario tiene eventos futuros
+    // mira si el usuario tiene eventos futuros
     $tieneEventosFuturos = DB::table('reserva_discotecas')
         ->join('eventos', 'reserva_discotecas.sala_id', '=', 'eventos.sala_id')
         ->where('reserva_discotecas.usuario_id', $id)
@@ -118,6 +118,7 @@ public function crearEvento(Request $request)
     $evento->hora_final = $request->hora_final;
     $evento->sala_id = $sala->id;
 
+    // sube el cartel y lo guarda en la carpeta /carteles
     if ($request->hasFile('cartel')) {
         $cartelPath = $request->file('cartel')->store('carteles', 'public');
         $evento->cartel = $cartelPath;
@@ -173,7 +174,7 @@ public function eliminarEvento(Request $request, $id)
             ->first();
 
         if ($reserva) {
-            // verifica si es el mismo día y no permite eliminar si aplica
+            // verifica si es el mismo día y no permite eliminar si es para el mismo dia
             $hoy = now()->startOfDay();
             $fechaReserva = Carbon::parse($reserva->fecha_reserva);
 
@@ -181,14 +182,15 @@ public function eliminarEvento(Request $request, $id)
                 return response()->json(['error' => 'No se puede eliminar un evento para el mismo día.'], 403);
             }
 
-            // devuelve el 30% del precio al usuario que hizo la reserva
-            $usuarioReserva = $reserva->usuario;
+            // devuelve el 100% del precio al usuario que hizo la reserva
+            $usuarioReserva = $reserva->usuario; //busca al usuario que hizo la reserva
             $sala = $reserva->sala;
-            $reembolso = $sala->precio;
+            $reembolso = $sala->precio; // el reembolso es de lo que vale la sala
 
-            $usuarioReserva->saldo += $reembolso;
+            $usuarioReserva->saldo += $reembolso; // se le añade al saldo 
             $usuarioReserva->save();
 
+            //marca en el histotial de admin la devolucion del reembolso
             HistorialIngresos::create([
             'cantidad' => -$reembolso, // Se registra como negativo
             'motivo' => "Reembolso por cancelación del evento '{$evento->nombre_evento}' en la sala '{$sala->nombre}'",
@@ -399,6 +401,7 @@ public function reponerStock(Request $request)
 {
     $admin = auth()->user();
 
+    // comprueba qe lo hace un admin
     if (!$admin || $admin->rol !== 'admin') {
         return response()->json(['error' => 'No autorizado'], 403);
     }
@@ -410,9 +413,9 @@ public function reponerStock(Request $request)
 
         foreach ($request->compras as $compra) {
             $producto = Producto::findOrFail($compra['id']);
-            $costoCompra = $producto->precio * 0.3 * $compra['cantidad'];
+            $costoCompra = $producto->precio * 0.3 * $compra['cantidad']; // el precio de compra será un 30% del precio de venta
 
-            // Verificar si el admin tiene suficiente saldo antes de continuar
+            // Verifica si el admin tiene suficiente saldo antes de continuar
             if ($admin->ingresos < $costoCompra) {
                 DB::rollBack();
                 return response()->json(['error' => 'Fondos insuficientes para la reposición'], 400);

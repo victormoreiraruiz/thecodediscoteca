@@ -4,43 +4,44 @@ import Swal from "sweetalert2";
 
 const TablaEventos = ({ eventos }) => {
     const [paginaActual, setPaginaActual] = useState(1);
-    const [eventosPaginados, setEventosPaginados] = useState([]);
+    const [eventosPaginados, setEventosPaginados] = useState([]); // almacena los eventos que se mostrarán en la página actual
     const [orden, setOrden] = useState({ campo: "fecha_evento", ascendente: true });
     const [filtroNombre, setFiltroNombre] = useState("");
     const [filtroFecha, setFiltroFecha] = useState({ desde: "", hasta: "" });
     const eventosPorPagina = 10;
 
+      // Función para filtrar eventos por el rango de fechas especificado
     const filtrarPorFecha = (eventos) => {
         const { desde, hasta } = filtroFecha;
-        if (!desde || !hasta) return eventos;
-
+        if (!desde || !hasta) return eventos; // Si no se han especificado fechas en el filtro, devolver todos los eventos
+         // Convertir las fechas del filtro a valores numéricos para comparación
         const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);
         const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);
 
-        return eventos.filter((evento) => {
+        return eventos.filter((evento) => { // Filtrar eventos dentro del rango de fechas
             const fechaEvento = new Date(evento.fecha_evento).getTime();
             return fechaEvento >= fechaDesde && fechaEvento <= fechaHasta;
         });
     };
 
-    const filtrarPorNombre = (eventos) => {
-        if (!filtroNombre) return eventos;
-        return eventos.filter((evento) =>
+    const filtrarPorNombre = (eventos) => {  // Función para filtrar eventos por nombre
+        if (!filtroNombre) return eventos;  // Si no hay filtro por nombre, devolver todos los eventos
+        return eventos.filter((evento) => // buscar por nombre
             evento.nombre_evento.toLowerCase().includes(filtroNombre.toLowerCase())
         );
     };
-
+    // Función para cambiar el campo o la dirección del orden
     const ordenarEventos = (campo) => {
         const esAscendente = orden.campo === campo ? !orden.ascendente : true;
         setOrden({ campo, ascendente: esAscendente });
     };
 
-    useEffect(() => {
+    useEffect(() => {  // Calcular el índice de inicio y fin para la paginación
         const inicio = (paginaActual - 1) * eventosPorPagina;
         const fin = inicio + eventosPorPagina;
 
-        const eventosFiltrados = filtrarPorNombre(filtrarPorFecha(eventos));
-        const eventosOrdenados = [...eventosFiltrados].sort((a, b) => {
+        const eventosFiltrados = filtrarPorNombre(filtrarPorFecha(eventos));  // Aplicar los filtros por fecha y nombre
+        const eventosOrdenados = [...eventosFiltrados].sort((a, b) => {     // Ordenar los eventos filtrados según el campo y la dirección especificados
             if (orden.campo === "fecha_evento") {
                 return orden.ascendente
                     ? new Date(a.fecha_evento) - new Date(b.fecha_evento)
@@ -50,12 +51,12 @@ const TablaEventos = ({ eventos }) => {
                     ? a.nombre_evento.localeCompare(b.nombre_evento)
                     : b.nombre_evento.localeCompare(a.nombre_evento);
             }
-            return 0;
+            return 0; // Si el campo no coincide, no cambiar el orden
         });
-
+         // Establecer los eventos que se mostrarán en la página actual
         setEventosPaginados(eventosOrdenados.slice(inicio, fin));
-    }, [eventos, paginaActual, orden, filtroNombre, filtroFecha]);
-
+    }, [eventos, paginaActual, orden, filtroNombre, filtroFecha]); // Recalcular cuando cambien estos valores
+     // Función para cambiar a una nueva página
     const cambiarPagina = (nuevaPagina) => {
         setPaginaActual(nuevaPagina);
     };

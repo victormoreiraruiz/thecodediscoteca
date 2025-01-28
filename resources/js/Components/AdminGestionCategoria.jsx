@@ -8,14 +8,14 @@ const AdminGestionCategorias = () => {
   const [nombreEditado, setNombreEditado] = useState("");
   const [orden, setOrden] = useState({ campo: "nombre", ascendente: true });
 
-  useEffect(() => {
-    cargarCategorias();
+  useEffect(() => { // Se ejecuta una vez cuando el componente se monta.
+    cargarCategorias();  // Llama a la función para cargar las categorías desde el servidor.
   }, []);
 
-  const cargarCategorias = async () => {
+  const cargarCategorias = async () => { // Función asíncrona para obtener las categorías desde el servidor.
     try {
-      const response = await axios.get("/admin/categorias");
-      setCategorias(response.data);
+      const response = await axios.get("/admin/categorias"); // Realiza una solicitud GET a '/admin/categorias'.
+      setCategorias(response.data); // Almacena las categorías obtenidas en el estado correspondiente
     } catch (error) {
       console.error("Error al obtener las categorías:", error);
     }
@@ -36,8 +36,9 @@ const AdminGestionCategorias = () => {
         cancelButton: 'bg-[#e5cc70] text-[#ffffff] px-10 py-2 rounded-lg hover:bg-yellow-600',
       },
     }).then(async (result) => {
-      if (result.isConfirmed) {
+      if (result.isConfirmed) {  // Si el usuario confirma la acción, lo borra
         try {
+          // Realiza una solicitud DELETE al servidor para eliminar la categoría.
           const response = await axios.delete(`/admin/categorias/${id}`);
   
           Swal.fire({
@@ -50,7 +51,7 @@ const AdminGestionCategorias = () => {
             }
           });
   
-          cargarCategorias();
+          cargarCategorias();      // Recarga la lista de categorías actualizando el estado.
         } catch (error) {
           if (error.response && error.response.status === 400) {
             // Mensaje específico si la categoría tiene productos asociados
@@ -99,13 +100,14 @@ const AdminGestionCategorias = () => {
   };
 
   const ordenarPor = (campo) => {
-    const esAscendente = orden.campo === campo ? !orden.ascendente : true;
-    setOrden({ campo, ascendente: esAscendente });
+    const esAscendente = orden.campo === campo ? !orden.ascendente : true;  // Determina si el orden será ascendente o descendente.
+    setOrden({ campo, ascendente: esAscendente });   // Actualiza el estado de orden con el nuevo campo y la dirección.
 
-    const categoriasOrdenadas = [...categorias].sort((a, b) => {
-      if (a[campo] < b[campo]) return esAscendente ? -1 : 1;
+    // copia del array para no cambiar el original
+    const categoriasOrdenadas = [...categorias].sort((a, b) => { 
+      if (a[campo] < b[campo]) return esAscendente ? -1 : 1; // compara los valores
       if (a[campo] > b[campo]) return esAscendente ? 1 : -1;
-      return 0;
+      return 0; // si es igual no cambia nada
     });
 
     setCategorias(categoriasOrdenadas);

@@ -15,8 +15,8 @@ const MiCuentaInfo = () => {
     const [notificaciones, setNotificaciones] = useState([]);
     const [nuevasNotificaciones, setNuevasNotificaciones] = useState(0);
 
-
-    const sortedEventos = eventos.slice().sort((a, b) => {
+     // Ordena los eventos según la opción seleccionada (por fecha o por fecha de creación).
+    const sortedEventos = eventos.slice().sort((a, b) => { 
         if (sortOption === 'fecha') {
             return new Date(a.fecha_evento) - new Date(b.fecha_evento);
         } else if (sortOption === 'creacion') {
@@ -25,10 +25,11 @@ const MiCuentaInfo = () => {
         return 0;
     });
    
+     // Maneja la cancelación de eventos
     const handleCancelEvent = async (evento) => {
-        const fechaEvento = new Date(evento.fecha_evento);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+        const fechaEvento = new Date(evento.fecha_evento);// Convertimos la fecha del evento a un objeto Date.
+        const hoy = new Date(); // Obtenemos la fecha actual
+        hoy.setHours(0, 0, 0, 0); // Ajustamos la hora para comparar solo las fechas
     
         if (fechaEvento <= hoy) {
             alert('No se puede cancelar un evento para el mismo día o días pasados.');
@@ -51,8 +52,10 @@ const MiCuentaInfo = () => {
     };
 
     if (!user) return <p style={{ color: '#fff' }}>Cargando datos del usuario...</p>;
+    // Filtra las compras que tienen entradas asociadas
     const comprasFiltradas = compras.filter(compra => compra.entradas && compra.entradas.length > 0);
 
+     // Efecto para cargar las notificaciones del usuario al montar el componente.
     useEffect(() => {
         const fetchNotificaciones = async () => {
             try {
@@ -65,7 +68,7 @@ const MiCuentaInfo = () => {
             }
         };
 
-        fetchNotificaciones();
+        fetchNotificaciones(); // Llama a la función para obtener las notificaciones.
     }, []);
 
     useEffect(() => {
