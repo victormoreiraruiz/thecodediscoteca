@@ -155,6 +155,8 @@ public function show($id)
         return redirect()->route('admin.eventos.index')->with('error', 'No tienes permiso para ver este evento.');
     }
 
+    // Calcula el total de entradas vendidas para el evento.
+    // Recorre todas las entradas asociadas al evento y  suma las cantidades compradas en todas las compras asociadas.
     $entradasVendidas = $evento->entradas->sum(function ($entrada) {
         return $entrada->compras->sum(function ($compra) {
             return $compra->pivot->cantidad;
@@ -241,9 +243,9 @@ public function obtenerEstadisticasVentas($id)
         return response()->json([], 200);
     }
 
-    
+    // Genera un listado de ventas por día para un evento, incluyendo fecha, ingresos y cantidad.
     $ventasPorDia = $evento->entradas->flatMap(function ($entrada) {
-        return $entrada->compras->map(function ($compra) use ($entrada) {
+        return $entrada->compras->map(function ($compra) use ($entrada) { // Recorre las compras asociadas a cada entrada.
             return [
                 'fecha' => $compra->fecha_compra->toDateString(),
                 'ingreso' => $compra->pivot->cantidad * $entrada->precio,
@@ -267,9 +269,10 @@ public function obtenerEstadisticasVentas($id)
 
     // calcular los ingresos acumulados
     $ingresosAcumulados = 0;
-    $estadisticasConAcumulados = $estadisticas->map(function ($dia) use (&$ingresosAcumulados) {
-        $ingresosAcumulados += $dia['total_ingresos'];
-        return array_merge($dia, ['ingresos_acumulados' => $ingresosAcumulados]);
+    // Añade una columna de ingresos acumulados a las estadísticas diarias.
+    $estadisticasConAcumulados = $estadisticas->map(function ($dia) use (&$ingresosAcumulados) {  
+        $ingresosAcumulados += $dia['total_ingresos']; // Suma los ingresos del día actual al total acumulado.
+        return array_merge($dia, ['ingresos_acumulados' => $ingresosAcumulados]); // Combina los datos del día con los ingresos acumulados y los devuelve.
     });
 
     return response()->json($estadisticasConAcumulados);
@@ -398,9 +401,9 @@ public function cancelarEvento($id)
             return response()->json(['error' => 'No se puede cancelar un evento el mismo día.'], 403);
         }
 
-        $reembolso = $sala->precio * 0.3;
+        $reembolso = $sala->precio * 0.3; // se le devolverá un 30% al creador del evento por cancelarlo
         $usuario->increment('saldo', $reembolso);
-        $admin->decrement('ingresos', $reembolso);
+        $admin->decrement('ingresos', $reembolso); // esa devolucion se le resta al admin
 
         // **REGISTRAR EN HISTORIAL DE INGRESOS**
         HistorialIngresos::create([

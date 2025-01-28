@@ -45,7 +45,7 @@ class Evento extends Model
 }
 public function usuario()
 {
-    return $this->belongsTo(User::class, 'usuario_id'); // Asegúrate de que 'usuario_id' es la columna correcta
+    return $this->belongsTo(User::class, 'usuario_id'); 
 }
 
 public function eventosActivos($query)

@@ -13,23 +13,23 @@ const AdminCrearProducto = () => {
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("/admin/categorias", { withCredentials: true })
-      .then((response) => {
-        setCategorias(response.data);
+    axios .get("/admin/categorias", { withCredentials: true }) // Realiza una solicitud GET para obtener las categorías 
+    .then((response) => {
+        setCategorias(response.data);   // Guarda las categorías obtenidas en el estado correspondiente
       })
       .catch((error) => {
         console.error("Error al obtener categorías:", error);
       });
   }, []);
 
-  const handleChange = (e) => {
+  // Manejador de cambios en los campos del formulario
+  const handleChange = (e) => { // Actualiza el estado del producto con el valor del campo modificado
     setProducto({ ...producto, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
+    e.preventDefault(); // Previene el comportamiento por defecto del formulario (recargar la página)
+    try {    // Realiza una solicitud POST para crear un nuevo producto
       await axios.post("/admin/productos", producto, { withCredentials: true });
 
       Swal.fire({
@@ -37,9 +37,12 @@ const AdminCrearProducto = () => {
         text: "Producto creado correctamente",
         icon: "success",
         confirmButtonColor: "#e5cc70",
-        confirmButtonText: "Aceptar",
+        confirmButtonText: "Ok",
+        customClass: {
+          confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+        }
       });
-
+       // Limpia el formulario estableciendo los campos del producto a valores iniciales
       setProducto({ nombre: "", precio: "", descripcion: "", stock: "", categoria_id: "" });
     } catch (error) {
       Swal.fire({

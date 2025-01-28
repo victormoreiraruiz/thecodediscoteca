@@ -8,9 +8,9 @@ export default function Proximos() {
         <div>
             <h2>Próximos Eventos</h2>
             <ul>
-                {eventos.map(evento => (
+                {eventos.map(evento => ( // itera los eventos
                     <li key={evento.id}>
-                        {evento.nombre_evento} - {new Date(evento.fecha_evento).toLocaleDateString()}
+                        {evento.nombre_evento} - {new Date(evento.fecha_evento).toLocaleDateString()} // muestra nombre y fecha formateada
                     </li>
                 ))}
             </ul>

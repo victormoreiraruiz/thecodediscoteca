@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TablaCompras = ({ compras }) => {
+const TablaCompras = ({ compras }) => { // solo aparece las compras de entradas
     const comprasValidas = compras.filter(compra => compra.entradas && compra.entradas.length > 0);
 
     const [paginaActual, setPaginaActual] = useState(1);
@@ -9,31 +9,33 @@ const TablaCompras = ({ compras }) => {
     const [filtroFecha, setFiltroFecha] = useState({ desde: '', hasta: '' });
     const comprasPorPagina = 10;
 
+     // Función para filtrar las compras según el rango de fechas especificado
     const filtrarPorFecha = (compras) => {
         const { desde, hasta } = filtroFecha;
-        if (!desde || !hasta) return compras;
-
+        if (!desde || !hasta) return compras; // Si no hay fechas en el filtro, devolver todas las compras
+    // Convertir las fechas del filtro a valores numéricos para comparación
         const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);
         const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);
-
+          // Filtrar las compras que se encuentran dentro del rango de fechas
         return compras.filter(compra => {
-            const fechaCompra = new Date(compra.fecha_compra).getTime();
-            return fechaCompra >= fechaDesde && fechaCompra <= fechaHasta;
+            const fechaCompra = new Date(compra.fecha_compra).getTime(); // Convertir fecha de compra a número
+            return fechaCompra >= fechaDesde && fechaCompra <= fechaHasta;  // Verificar si está dentro del rango
         });
     };
 
+       // Función para cambiar el campo o la dirección del orden
     const ordenarCompras = (campo) => {
         const esAscendente = orden.campo === campo ? !orden.ascendente : true;
         setOrden({ campo, ascendente: esAscendente });
     };
 
-    useEffect(() => {
+    useEffect(() => {   // Calcular el índice de inicio y fin para la paginación
         const inicio = (paginaActual - 1) * comprasPorPagina;
         const fin = inicio + comprasPorPagina;
 
-        const comprasFiltradas = filtrarPorFecha(comprasValidas);
+        const comprasFiltradas = filtrarPorFecha(comprasValidas);  // Aplicar filtros de fecha
         const comprasOrdenadas = [...comprasFiltradas].sort((a, b) => {
-            if (orden.campo === 'fecha_compra') {
+            if (orden.campo === 'fecha_compra') { 
                 return orden.ascendente
                     ? new Date(a.fecha_compra) - new Date(b.fecha_compra)
                     : new Date(b.fecha_compra) - new Date(a.fecha_compra);
@@ -43,11 +45,13 @@ const TablaCompras = ({ compras }) => {
             return 0;
         });
 
+         // Establecer las compras para mostrar en la página actual
         setComprasPaginadas(comprasOrdenadas.slice(inicio, fin));
     }, [comprasValidas, paginaActual, orden, filtroFecha]);
 
+    // Función para cambiar a una nueva página
     const cambiarPagina = (nuevaPagina) => {
-        setPaginaActual(nuevaPagina);
+        setPaginaActual(nuevaPagina); // Actualizar el estado de la página actual
     };
 
     return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import dayjs from "dayjs"; // 📅 Para formatear la fecha
+import dayjs from "dayjs"; //  Para formatear la fecha
 import "dayjs/locale/es"; // Configura el idioma español
 
 dayjs.locale("es");

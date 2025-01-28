@@ -25,7 +25,7 @@ const EventosReservas = () => {
           <p className="text-lg text-white mb-6">Precio: 1000€</p>
           <p className="text-lg text-white mb-6">Capacidad: 300 personas</p>
           <button
-            className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
+            className="bg-[#e5cc70] text-black font-semibold py-2 px-0.1 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salaprivada')}
           >
             RESERVAR
@@ -49,7 +49,7 @@ const EventosReservas = () => {
           <p className="text-lg text-white mb-6">Precio: 700€</p>
           <p className="text-lg text-white mb-6">Capacidad: 200 personas</p>
           <button
-            className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
+            className="bg-[#e5cc70] text-black font-semibold py-2 px-0.1 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salacelebraciones')}
           >
             RESERVAR
@@ -73,7 +73,7 @@ const EventosReservas = () => {
           <p className="text-lg text-white mb-6">Precio: 300€</p>
           <p className="text-lg text-white mb-6">Capacidad: 250 personas</p>
           <button
-            className="bg-[#e5cc70] text-black font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
+            className="bg-[#e5cc70] text-black font-semibold py-2 px-0.1 rounded-lg hover:bg-yellow-500 transition-transform hover:scale-105"
             onClick={() => handleReservar('/salaconferencias')}
           >
             RESERVAR

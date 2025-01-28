@@ -1,45 +1,47 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const TablaEventos = ({ eventos }) => {
     const [paginaActual, setPaginaActual] = useState(1);
-    const [eventosPaginados, setEventosPaginados] = useState([]);
+    const [eventosPaginados, setEventosPaginados] = useState([]); // almacena los eventos que se mostrarán en la página actual
     const [orden, setOrden] = useState({ campo: "fecha_evento", ascendente: true });
     const [filtroNombre, setFiltroNombre] = useState("");
     const [filtroFecha, setFiltroFecha] = useState({ desde: "", hasta: "" });
     const eventosPorPagina = 10;
 
+      // Función para filtrar eventos por el rango de fechas especificado
     const filtrarPorFecha = (eventos) => {
         const { desde, hasta } = filtroFecha;
-        if (!desde || !hasta) return eventos;
-
+        if (!desde || !hasta) return eventos; // Si no se han especificado fechas en el filtro, devolver todos los eventos
+         // Convertir las fechas del filtro a valores numéricos para comparación
         const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);
         const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);
 
-        return eventos.filter((evento) => {
+        return eventos.filter((evento) => { // Filtrar eventos dentro del rango de fechas
             const fechaEvento = new Date(evento.fecha_evento).getTime();
             return fechaEvento >= fechaDesde && fechaEvento <= fechaHasta;
         });
     };
 
-    const filtrarPorNombre = (eventos) => {
-        if (!filtroNombre) return eventos;
-        return eventos.filter((evento) =>
+    const filtrarPorNombre = (eventos) => {  // Función para filtrar eventos por nombre
+        if (!filtroNombre) return eventos;  // Si no hay filtro por nombre, devolver todos los eventos
+        return eventos.filter((evento) => // buscar por nombre
             evento.nombre_evento.toLowerCase().includes(filtroNombre.toLowerCase())
         );
     };
-
+    // Función para cambiar el campo o la dirección del orden
     const ordenarEventos = (campo) => {
         const esAscendente = orden.campo === campo ? !orden.ascendente : true;
         setOrden({ campo, ascendente: esAscendente });
     };
 
-    useEffect(() => {
+    useEffect(() => {  // Calcular el índice de inicio y fin para la paginación
         const inicio = (paginaActual - 1) * eventosPorPagina;
         const fin = inicio + eventosPorPagina;
 
-        const eventosFiltrados = filtrarPorNombre(filtrarPorFecha(eventos));
-        const eventosOrdenados = [...eventosFiltrados].sort((a, b) => {
+        const eventosFiltrados = filtrarPorNombre(filtrarPorFecha(eventos));  // Aplicar los filtros por fecha y nombre
+        const eventosOrdenados = [...eventosFiltrados].sort((a, b) => {     // Ordenar los eventos filtrados según el campo y la dirección especificados
             if (orden.campo === "fecha_evento") {
                 return orden.ascendente
                     ? new Date(a.fecha_evento) - new Date(b.fecha_evento)
@@ -49,30 +51,60 @@ const TablaEventos = ({ eventos }) => {
                     ? a.nombre_evento.localeCompare(b.nombre_evento)
                     : b.nombre_evento.localeCompare(a.nombre_evento);
             }
-            return 0;
+            return 0; // Si el campo no coincide, no cambiar el orden
         });
-
+         // Establecer los eventos que se mostrarán en la página actual
         setEventosPaginados(eventosOrdenados.slice(inicio, fin));
-    }, [eventos, paginaActual, orden, filtroNombre, filtroFecha]);
-
+    }, [eventos, paginaActual, orden, filtroNombre, filtroFecha]); // Recalcular cuando cambien estos valores
+     // Función para cambiar a una nueva página
     const cambiarPagina = (nuevaPagina) => {
         setPaginaActual(nuevaPagina);
     };
 
     const handleEliminarEvento = async (eventoId) => {
-        if (!confirm('¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        try {
-            const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
-            alert(response.data.message || 'Evento eliminado con éxito.');
-            location.reload();
-        } catch (error) {
-            console.error('Error al eliminar el evento:', error);
-            alert(error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.');
-        }
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción no se puede deshacer. ¿Deseas continuar?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'No',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'bg-red-600 text-white font-bold py-2 px-8 rounded-md hover:bg-red-700',
+                cancelButton: 'bg-gray-300 text-black font-bold py-2 px-8 rounded-md hover:bg-gray-400',
+            },
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.delete(`/eventos/${eventoId}/cancelar`);
+                    Swal.fire({
+                        title: 'Evento eliminado',
+                        text: response.data.message || 'Evento eliminado con éxito.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-green-600 text-white font-bold py-2 px-8 rounded-md hover:bg-green-700',
+                        },
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.response?.data?.error || 'Hubo un problema al eliminar el evento. Inténtalo nuevamente.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-red-600 text-white font-bold py-2 px-8 rounded-md hover:bg-red-700',
+                        },
+                    });
+                }
+            }
+        });
     };
+    
+    
 
     return (
         <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-[#e5cc70] text-[#860303] rounded-lg shadow-lg">
@@ -144,9 +176,9 @@ const TablaEventos = ({ eventos }) => {
                                         </a>
                                         <button
                                             onClick={() => handleEliminarEvento(evento.id)}
-                                            className="bg-red-600 text-white px-3 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+                                            className="bg-red-600 text-white px-1 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-300"
                                         >
-                                            Eliminar
+                                            Borrar
                                         </button>
                                     </td>
                                 </tr>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaUsers, FaClipboardList, FaCalendarPlus, FaTrophy, FaBoxOpen, FaPlusCircle, FaClipboardCheck, FaBox, FaTools, FaEnvelope } from "react-icons/fa"; 
 import AdministradorIndex from '../Components/AdministradorIndex';
+import HeaderSinFoto from '../Components/HeaderSinFoto';
 import AdminUsuarios from '../Components/AdminUsuarios';
 import AdminCrearEvento from '../Components/AdminCrearEvento';
 import AdminGestionEventos from '../Components/AdminGestionEventos';  
@@ -38,6 +39,7 @@ const AdminIndex = ({ usuarios, salas, eventos }) => {
 
     return (
         <div className="container mx-auto px-6 py-8">
+            <HeaderSinFoto/>
             <Navigation />
             <AdministradorIndex />
 

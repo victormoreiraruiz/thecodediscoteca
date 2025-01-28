@@ -96,13 +96,12 @@ class ProfileController extends Controller
             $query->where('usuario_id', $user->id)
                   ->whereColumn('fecha_reserva', 'eventos.fecha_evento'); // Coincidencia con la fecha del evento
         })
-        ->with(['sala.reservas' => function ($query) use ($user) {
+          // Incluye las relaciones de la sala y reservas del usuario autenticado.
+        ->with(['sala.reservas' => function ($query) use ($user) { 
             $query->where('usuario_id', $user->id);
-        }])
-        ->get()
-        ->map(function ($evento) {
-            $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento);
-            return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);
+        }])->get()->map(function ($evento) {  // Obtiene los resultados de los eventos filtrados y mapea para añadir la info
+            $reserva = $evento->sala->reservas->firstWhere('fecha_reserva', $evento->fecha_evento); // Encuentra la reserva relacionada con la fecha del evento
+            return array_merge($evento->toArray(), ['reserva_id' => $reserva->id ?? null]);    // Combina los datos del evento con el ID de la reserva (si existe).
         });
     
         // Enviar datos al componente de Inertia
@@ -154,6 +153,7 @@ public function obtenerIngresos(Request $request)
             // obtener los ingresos de la compra de entradas para ese evento
             $ventas = $evento->entradas()->with('compras')->get(); 
 
+            // Inicializa los detalles e ingresos totales para el evento
             $detalleIngresos = [];
             $totalIngresos = 0;
 
@@ -167,7 +167,7 @@ public function obtenerIngresos(Request $request)
                         'fecha_compra' => Carbon::parse($compra->fecha_compra)->toIso8601String(), 
                     ];
 
-                   
+                    // Incrementa el total de ingresos para el evento
                     $totalIngresos += $compra->pivot->cantidad * $entrada->precio;
                 }
             }

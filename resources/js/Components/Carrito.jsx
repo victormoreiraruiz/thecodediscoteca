@@ -4,13 +4,13 @@ import Cookies from 'js-cookie';
 import { usePage } from '@inertiajs/react';
 
 const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props; // Obtiene la información del usuario autenticado desde las props de Inertia.
 
-    useEffect(() => {
-        const carritoGuardado = Cookies.get('carrito');
+    useEffect(() => { // carga el carrito de las cookies
+        const carritoGuardado = Cookies.get('carrito'); // intenta obtener el carrito de las cookies
         if (carritoGuardado) {
             const parsedCarrito = JSON.parse(carritoGuardado);
-            if (parsedCarrito.userId !== auth.user?.id) {
+            if (parsedCarrito.userId !== auth.user?.id) {  // Si el carrito pertenece a otro usuario, lo eliminamos.
                 Cookies.remove('carrito', { path: '/' });
                 setCarrito([]);
             } else {
@@ -19,22 +19,25 @@ const Carrito = ({ carrito, setCarrito, mostrarCarrito, setMostrarCarrito }) => 
         }
     }, [auth.user?.id, setCarrito]);
 
+     // useEffect para guardar el carrito en las cookies cada vez que cambia
     useEffect(() => {
         if (carrito.length > 0) {
-            Cookies.set(
+            Cookies.set(  // Guarda el carrito en las cookies si contiene elementos.
                 'carrito',
                 JSON.stringify({ userId: auth.user?.id, items: carrito }),
-                { expires: 7, path: '/' }
+                { expires: 7, path: '/' } // Configura las cookies con una duración de 7 días.
             );
         } else {
             Cookies.remove('carrito', { path: '/' });
         }
-    }, [carrito, auth.user?.id]);
+    }, [carrito, auth.user?.id]); // Se ejecuta cada vez que cambian `carrito` o el usuario autenticado.
 
+    // Función para eliminar un elemento específico del carrito
     const eliminarDelCarrito = (tipo, eventoId) => {
         setCarrito(carrito.filter(item => !(item.tipo === tipo && item.eventoId === eventoId)));
     };
 
+     // Función para actualizar la cantidad de un elemento específico
     const actualizarCantidad = (tipo, eventoId, cantidad) => {
         setCarrito(
             carrito.map(item =>

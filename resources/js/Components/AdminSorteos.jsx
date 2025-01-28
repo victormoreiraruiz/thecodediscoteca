@@ -35,14 +35,14 @@ const AdminSorteos = ({ usuarios = [] }) => {
           height: 200px;
         }
         .ruleta {
-          width: 120px;
+          width: 120px; /* misma anchura y altura para q sea circular , radius al 50% para que sea redonda */
           height: 120px;
           border-radius: 50%;
           border: 8px solid #860303;
           position: relative;
-          background: conic-gradient(
+          background: conic-gradient( /* alternacion de colores */
             #e5cc70 0deg 45deg,
-            #860303 45deg 90deg,
+            #860303 45deg 90deg, 
             #e5cc70 90deg 135deg,
             #860303 135deg 180deg,
             #e5cc70 180deg 225deg,
@@ -52,10 +52,10 @@ const AdminSorteos = ({ usuarios = [] }) => {
           );
           animation: girar 3s ease-out forwards;
         }
-        @keyframes girar {
-          0% { transform: rotate(0deg); }
+        @keyframes girar {  /* Animación de giro de la ruleta */
+          0% { transform: rotate(0deg); } /* Comienza sin girar */
           100% { transform: rotate(${Math.floor(Math.random() * 360) + 1080}deg); }
-        }
+        }  /* Rota entre 1080 grados (3 vueltas completas) más un ángulo aleatorio entre 0 y 360 */
       </style>
       <div class="ruleta-container">
         <div class="ruleta"></div>
@@ -64,11 +64,11 @@ const AdminSorteos = ({ usuarios = [] }) => {
 
     await Swal.fire({
       title: "Girando la ruleta...",
-      html: ruletaHTML,
+      html: ruletaHTML, // Contenido del HTML 
       timer: 3000,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
+      showConfirmButton: false, // Oculta el botón de confirmación
+      allowOutsideClick: false, // Evita que el usuario cierre el modal al hacer clic fuera
+      allowEscapeKey: false, // Lo mismo pero con scape
       didOpen: () => {
         Swal.showLoading();
       }
@@ -99,7 +99,10 @@ const AdminSorteos = ({ usuarios = [] }) => {
         title: "¡Ganador seleccionado!",
         html: `<p class="text-lg"><strong>${ganador.name}</strong> (${ganador.email}) ha ganado <strong>${premio}€</strong>!</p>`,
         icon: "success",
-        confirmButtonColor: "#e5cc70",
+        customClass: {
+          confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+        
+        },
       });
     } catch (err) {
       console.error("Error al realizar el sorteo:", err);

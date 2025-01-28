@@ -35,7 +35,7 @@ const HacerComanda = ({ eventoId }) => {
         setCategoriaSeleccionada(categoriaId);
         setPaso(3); // Pasar a la selección de productos
 
-        try {
+        try { // obtiene los productos de una categoria
             const response = await axios.get(`/productos?categoria_id=${categoriaId}`);
             setProductos(response.data);
         } catch (error) {
@@ -44,14 +44,14 @@ const HacerComanda = ({ eventoId }) => {
     };
 
     const agregarAlCarrito = (producto) => {
-        setCarrito((prev) => {
+        setCarrito((prev) => {  // Verifica si el producto ya está en el carrito
             const existe = prev.find((p) => p.id === producto.id);
-            if (existe) {
+            if (existe) {  // Si el producto ya existe, incrementa la cantidad
                 return prev.map((p) =>
                     p.id === producto.id ? { ...p, cantidad: p.cantidad + 1 } : p
                 );
             }
-            return [...prev, { ...producto, cantidad: 1 }];
+            return [...prev, { ...producto, cantidad: 1 }];  // Si no existe, lo añade al carrito con una cantidad inicial de 1
         });
     };
 
@@ -74,10 +74,10 @@ const HacerComanda = ({ eventoId }) => {
         console.log("Enviando comanda:", datosComanda);
     
         try {
-            const response = await axios.post("/comandas", datosComanda);
+            const response = await axios.post("/comandas", datosComanda);  // Envía la comanda al servidor
     
             Swal.fire("Éxito", "Comanda enviada con éxito", "success");
-            setCarrito([]);
+            setCarrito([]);   // Resetea el estado del formulario
             setPaso(1);
             setMesa("");
         } catch (error) {

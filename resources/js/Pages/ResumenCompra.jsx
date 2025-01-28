@@ -31,6 +31,9 @@ const ResumenCompra = () => {
                     title: "Entradas agotadas",
                     text: `No hay suficientes entradas disponibles para el evento "${evento.nombre}". Quedan ${capacidadRestante} entradas disponibles.`,
                     confirmButtonColor: "#860303",
+                    customClass: {
+                        confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                      },
                 });
                 return false;
             }
@@ -44,6 +47,9 @@ const ResumenCompra = () => {
                 icon: "warning",
                 title: "¡Inicia sesión!",
                 text: "Debes iniciar sesión para confirmar tu compra.",
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
                 confirmButtonColor: "#860303",
             });
             return;
@@ -55,6 +61,9 @@ const ResumenCompra = () => {
                 title: "Selecciona un método de pago",
                 text: "Debes seleccionar un método de pago antes de continuar.",
                 confirmButtonColor: "#860303",
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                  },
             });
             return;
         }
@@ -111,6 +120,9 @@ const ResumenCompra = () => {
                                 icon: "warning",
                                 title: "¡Inicia sesión!",
                                 text: "Debes iniciar sesión para proceder con PayPal.",
+                                customClass: {
+                                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                                  },
                                 confirmButtonColor: "#860303",
                             });
                             return Promise.reject();

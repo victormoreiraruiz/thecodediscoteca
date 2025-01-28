@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
+import Swal from 'sweetalert2';
 
 const AdminGestionEventos = ({ eventos }) => {
     const [loading, setLoading] = useState(null);
@@ -16,73 +17,133 @@ const AdminGestionEventos = ({ eventos }) => {
     };
 
     const actualizarEstadoEvento = async (id, nuevoEstado) => {
+        // Establece el estado de carga en `true` para el evento con el ID proporcionado.
         setLoading((prevLoading) => ({ ...prevLoading, [id]: true }));
+        // Reinicia el estado de error a `null` para limpiar errores previos.
         setError(null);
-
+    
         try {
+            // Realiza una solicitud `PUT` al servidor para actualizar el estado del evento.
             const response = await fetch(route('admin.actualizarEstadoEvento', { id }), {
-                method: 'PUT',
+                method: 'PUT', // Especifica que es una actualización (PUT).
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json', // Define el tipo de contenido como JSON.
+                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content, // Incluye el token CSRF para la protección.
                 },
-                body: JSON.stringify({ estado: nuevoEstado }),
+                body: JSON.stringify({ estado: nuevoEstado }), // Envía el nuevo estado como cuerpo de la solicitud.
             });
-
+    
+            // Si la respuesta no es exitosa, lanza un error.
             if (!response.ok) {
                 throw new Error('Error al actualizar el estado del evento.');
             }
-
+    
+            // Actualiza la lista de eventos con el nuevo estado del evento correspondiente.
             const updatedEventos = eventosList.map(evento =>
                 evento.id === id ? { ...evento, estado: nuevoEstado } : evento
             );
-            setEventos(updatedEventos);
-
-            alert('Estado del evento actualizado exitosamente!');
+            setEventos(updatedEventos); // Establece la lista actualizada en el estado.
+    
+            
+            Swal.fire({
+                icon: 'success', 
+                title: 'Estado actualizado', 
+                text: 'El estado del evento se ha actualizado exitosamente.', 
+                confirmButtonColor: '#e5cc70', 
+                customClass: {
+                   
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                },
+            });
         } catch (error) {
+            // Maneja los errores y muestra un SweetAlert con el mensaje de error.
             console.error(error);
-            alert('Hubo un error al intentar actualizar el estado del evento.');
+            Swal.fire({
+                icon: 'error', 
+                title: 'Error', 
+                text: 'Hubo un error al intentar actualizar el estado del evento.', 
+                confirmButtonColor: '#860303', 
+                customClass: {
+                    
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                },
+            });
         } finally {
+            // Establece el estado de carga en `false` para el evento con el ID proporcionado.
             setLoading((prevLoading) => ({ ...prevLoading, [id]: false }));
         }
     };
+    
 
     const eliminarEvento = async () => {
+        // Verifica si se ha proporcionado un motivo para la cancelación.
         if (!motivoCancelacion) {
-            alert('Por favor, ingrese un motivo para cancelar el evento.');
-            return;
-        }
-
-        setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: true }));
-        setError(null);
-
-        try {
-            const response = await fetch(route('admin.eliminarEvento', { id: eventoAEliminar.id }), {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
+            Swal.fire({
+                icon: 'warning',
+                title: 'Motivo requerido',
+                text: 'Por favor, ingrese un motivo para cancelar el evento.',
+                confirmButtonColor: '#860303',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
                 },
-                body: JSON.stringify({ motivo_cancelacion: motivoCancelacion }),
             });
-
+            return; // Detiene la ejecución si no se ha proporcionado un motivo.
+        }
+    
+        // Establece el estado de carga en `true` para el evento que se está eliminando.
+        setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: true }));
+        setError(null); // Reinicia el estado de error.
+    
+        try {
+            // Realiza una solicitud DELETE al servidor para eliminar el evento.
+            const response = await fetch(route('admin.eliminarEvento', { id: eventoAEliminar.id }), {
+                method: 'DELETE', // Método HTTP DELETE.
+                headers: {
+                    'Content-Type': 'application/json', // Define el tipo de contenido como JSON.
+                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content, // Incluye el token CSRF para la protección.
+                },
+                body: JSON.stringify({ motivo_cancelacion: motivoCancelacion }), // Envía el motivo de cancelación como cuerpo de la solicitud.
+            });
+    
+            // Si la respuesta no es exitosa, lanza un error.
             if (!response.ok) {
                 throw new Error('Error al eliminar el evento.');
             }
-
+    
+            // Filtra el evento eliminado de la lista de eventos.
             const updatedEventos = eventosList.filter(evento => evento.id !== eventoAEliminar.id);
-            setEventos(updatedEventos);
-            setMotivoCancelacion("");
-            setEventoAEliminar(null);
-
-            alert('Evento eliminado exitosamente!');
+            setEventos(updatedEventos); // Actualiza la lista de eventos en el estado.
+            setMotivoCancelacion(""); // Reinicia el motivo de cancelación.
+            setEventoAEliminar(null); // Limpia el evento seleccionado para eliminar.
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Evento eliminado',
+                text: 'El evento ha sido eliminado exitosamente.',
+                confirmButtonColor: '#e5cc70',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                },
+            });
         } catch (error) {
+            
             console.error(error);
-            alert('Hubo un error al intentar eliminar el evento.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al intentar eliminar el evento.',
+                confirmButtonColor: '#860303',
+                customClass: {
+                    confirmButton: 'bg-[#860303] text-white px-10 py-2 rounded-lg hover:bg-red-700',
+                },
+            });
         } finally {
+            // Establece el estado de carga en `false` para el evento eliminado.
             setLoading((prevLoading) => ({ ...prevLoading, [eventoAEliminar.id]: false }));
         }
     };
+    
+    
 
     const cancelarEliminacion = () => {
         setEventoAEliminar(null);
@@ -101,24 +162,26 @@ const AdminGestionEventos = ({ eventos }) => {
     };
 
     const filtrarPorFecha = (eventos) => {
-        const { desde, hasta } = filtroFecha;
-        if (!desde || !hasta) return eventos;
-
-        const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);
-        const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);
-
+       
+        const { desde, hasta } = filtroFecha; // Extrae las fechas "desde" y "hasta" del filtro de fecha.
+        if (!desde || !hasta) return eventos;// Si no se han seleccionado ambas fechas, devuelve la lista completa de eventos sin filtrar.
+        const fechaDesde = new Date(desde).setHours(0, 0, 0, 0);  // Convierte la fecha "desde" al inicio del día (00:00:00).
+        const fechaHasta = new Date(hasta).setHours(23, 59, 59, 999);  // Convierte la fecha "hasta" al final del día (23:59:59).
+    
+        // Filtra los eventos según las fechas seleccionadas.
         return eventos.filter(evento => {
-            const fechaEvento = new Date(evento.fecha_evento).getTime();
-            return fechaEvento >= fechaDesde && fechaEvento <= fechaHasta;
+            const fechaEvento = new Date(evento.fecha_evento).getTime(); // Convierte la fecha del evento a un timestamp 
+            return fechaEvento >= fechaDesde && fechaEvento <= fechaHasta; // Devuelve los eventos cuya fecha esté dentro del rango "desde" y "hasta".
         });
     };
-
+    
+    // buscar por nombre, sala y estado
     const eventosFiltrados = filtrarPorFecha(eventosList).filter(evento =>
-        evento.nombre_evento.toLowerCase().includes(search.toLowerCase()) ||
-        (evento.sala?.tipo_sala.toLowerCase().includes(search.toLowerCase()) || '') ||
-        evento.estado.toLowerCase().includes(search.toLowerCase())
+        evento.nombre_evento.toLowerCase().includes(search.toLowerCase()) || // filtra nombre
+        (evento.sala?.tipo_sala.toLowerCase().includes(search.toLowerCase()) || '') ||  // filtra sala
+        evento.estado.toLowerCase().includes(search.toLowerCase())  // filtra estado
     );
-
+    
     return (
         <div className="admin-gestion-eventos">
             {error && <div className="mensaje-error">{error}</div>}
@@ -185,7 +248,7 @@ const AdminGestionEventos = ({ eventos }) => {
                                     </select>
                                 </td>
                                 <td className="p-3">
-                                    <button onClick={() => setEventoAEliminar(evento)} className="btn-eliminar bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
+                                    <button onClick={() => setEventoAEliminar(evento)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded-md min-w-[80px] transition duration-300">
                                         Eliminar
                                     </button>
                                 </td>
