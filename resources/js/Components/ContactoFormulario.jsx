@@ -76,6 +76,8 @@ const ContactoFormulario = () => {
         });
 
         Swal.fire('Mensaje enviado', 'Tu mensaje ha sido enviado con éxito.', 'success');
+        
+        
         setFormData({ nombre: '', apellidos: '', email: '', telefono: '', asunto: '', mensaje: '' });
 
     } catch (error) {
@@ -91,42 +93,104 @@ const ContactoFormulario = () => {
 
   return (
     <div className="container mx-auto px-6 py-8">
-      <h2 className="text-3xl font-bold text-center text-[#e5cc70] mb-6">Escríbenos</h2>
-      <form onSubmit={handleSubmit} className="bg-[#860303] p-6 rounded-lg shadow-lg max-w-lg mx-auto">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Nombre:</label>
-            <input type="text" name="nombre" value={formData.nombre} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
-            {errors.nombre && <p className="text-red-500">{errors.nombre}</p>}
-          </div>
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Apellidos:</label>
-            <input type="text" name="apellidos" value={formData.apellidos} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
-            {errors.apellidos && <p className="text-red-500">{errors.apellidos}</p>}
-          </div>
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Email:</label>
-            <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
-            {errors.email && <p className="text-red-500">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Teléfono:</label>
-            <input type="tel" name="telefono" value={formData.telefono} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
-            {errors.telefono && <p className="text-red-500">{errors.telefono}</p>}
-          </div>
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Asunto:</label>
-            <input type="text" name="asunto" value={formData.asunto} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" />
-            {errors.asunto && <p className="text-red-500">{errors.asunto}</p>}
-          </div>
-          <div>
-            <label className="block text-[#e5cc70] font-semibold">Mensaje:</label>
-            <textarea name="mensaje" value={formData.mensaje} onChange={handleInputChange} className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white" rows="4"></textarea>
-            {errors.mensaje && <p className="text-red-500">{errors.mensaje}</p>}
-          </div>
-          <button type="submit" className="w-full bg-[#e5cc70] text-[#860303] font-semibold py-2 rounded-lg hover:bg-yellow-500">ENVIAR</button>
-        </div>
-      </form>
+  <h2 className="text-3xl font-bold text-center text-[#e5cc70] mb-6">Escríbenos</h2>
+  <form onSubmit={handleSubmit} className="bg-[#860303] p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+    <div className="space-y-4">
+      {/* Campo Nombre */}
+      <div>
+        <label htmlFor="nombre" className="block text-[#e5cc70] font-semibold">Nombre:</label>
+        <input
+          id="nombre"
+          type="text"
+          name="nombre"
+          value={formData.nombre}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+        />
+        {errors.nombre && <p className="text-red-500">{errors.nombre}</p>}
+      </div>
+
+      {/* Campo Apellidos */}
+      <div>
+        <label htmlFor="apellidos" className="block text-[#e5cc70] font-semibold">Apellidos:</label>
+        <input
+          id="apellidos"
+          type="text"
+          name="apellidos"
+          value={formData.apellidos}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+        />
+        {errors.apellidos && <p className="text-red-500">{errors.apellidos}</p>}
+      </div>
+
+      {/* Campo Email */}
+      <div>
+        <label htmlFor="email" className="block text-[#e5cc70] font-semibold">Email:</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+        />
+        {errors.email && <p className="text-red-500">{errors.email}</p>}
+      </div>
+
+      {/* Campo Teléfono */}
+      <div>
+        <label htmlFor="telefono" className="block text-[#e5cc70] font-semibold">Teléfono:</label>
+        <input
+          id="telefono"
+          type="tel"
+          name="telefono"
+          value={formData.telefono}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+        />
+        {errors.telefono && <p className="text-red-500">{errors.telefono}</p>}
+      </div>
+
+      {/* Campo Asunto */}
+      <div>
+        <label htmlFor="asunto" className="block text-[#e5cc70] font-semibold">Asunto:</label>
+        <input
+          id="asunto"
+          type="text"
+          name="asunto"
+          value={formData.asunto}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+        />
+        {errors.asunto && <p className="text-red-500">{errors.asunto}</p>}
+      </div>
+
+      {/* Campo Mensaje */}
+      <div>
+        <label htmlFor="mensaje" className="block text-[#e5cc70] font-semibold">Mensaje:</label>
+        <textarea
+          id="mensaje"
+          name="mensaje"
+          value={formData.mensaje}
+          onChange={handleInputChange}
+          className="w-full px-4 py-2 border border-[#e5cc70] rounded-lg bg-gray-900 text-white"
+          rows="4"
+        ></textarea>
+        {errors.mensaje && <p className="text-red-500">{errors.mensaje}</p>}
+      </div>
+
+      {/* Botón de envío */}
+      <button
+        type="submit"
+        className="w-full bg-[#e5cc70] text-[#860303] font-semibold py-2 rounded-lg hover:bg-yellow-500"
+      >
+        ENVIAR
+      </button>
+    </div>
+  </form>
+
+
     </div>
   );
 };
